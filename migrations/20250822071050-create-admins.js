@@ -10,7 +10,7 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
 
-    await queryInterface.createTable("Admins", {
+    await queryInterface.createTable("admins", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -25,14 +25,34 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      phone: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       password: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      role: {
+      emp_id: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: "admin",
+        unique: true,
+      },
+      address: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      city: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      status: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+      },
+      remember_token: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -45,6 +65,10 @@ module.exports = {
         defaultValue: Sequelize.literal(
           "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         ),
+      },
+      deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
       },
     });
   },
