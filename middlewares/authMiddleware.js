@@ -12,7 +12,7 @@ const authenticate = async (req, res, next) => {
     const token = authHeader.trim().split(" ")[1]; //Bearer token
 
     if (!token) {
-      return res.status(401).json({ message: "Invalid token format" });
+      return res.status(401).json({ message: "Invalid token format", });
     }
 
     //verify token
@@ -24,9 +24,9 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token expired" });
+      return res.status(401).json({ message: "Token expired",error });
     } else {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized",error });
     }
   }
 };
