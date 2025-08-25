@@ -1,39 +1,18 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Admin, Role, Permission } = require("../models");
+require("dotenv").config({ path: "../.env" });
 
-//Register
-exports.register = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+const generateAccessToken = (user) => {
+  return jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    expiresIn: "1m",
+  });
+};
 
-    //Check if the email exists
-    const existing = await Admin.findOne({ where: { email } });
-    if (existing) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    //hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    //create user
-    const admin = await Admin.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    res.status(201).json({
-      message: "Admin registered successfully",
-      admin: {
-        id: admin.id,
-        username: admin.username,
-        email: admin.email,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+const generateRefreshToken = (user) => {
+  return jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
 //LOGIN
@@ -58,6 +37,7 @@ exports.login = async (req, res) => {
         },
       ],
     });
+
     if (!admin)
       return res.status(400).json({ message: "Invalid email or password" });
 
@@ -65,24 +45,29 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    // sign token
-    const token = jwt.sign(
-      {
-        id: admin.id,
-        email: admin.email,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: rememberMe ? "7d" : "1d" }
-    );
+    // Tokens
+    const accessToken = generateAccessToken(admin);
+    const refreshToken = rememberMe ? generateRefreshToken(admin) : null;
 
-    res.cookie("token", token, {
+    // Set Access Token Cookie (15 min)
+    res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+      secure: true, // ⚠️ set to false for local dev without HTTPS
+      sameSite: "strict",
+      maxAge: 60 * 1000,
     });
 
-    res.json({ message: "Login successful", token });
+    // Set Refresh Token Cookie (7 days) only if rememberMe
+    if (rememberMe) {
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    }
+
+    res.json({ message: "Login successful", accessToken, refreshToken });
   } catch (error) {
     res
       .status(500)
@@ -90,7 +75,35 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.refresh = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(403).json({ message: "Refresh token required" });
+    }
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      if (err)
+        return res.status(403).json({ message: "Invalid refresh token" });
+
+      const newAccessToken = generateAccessToken({
+        id: decoded.id,
+        email: decoded.email,
+      });
+
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 1000,
+      });
+
+      return res.json({ message: "Access token refreshed" });
+    });
+  } catch (error) {}
+};
+
 exports.logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
   res.json({ message: "Logout successful" });
 };
