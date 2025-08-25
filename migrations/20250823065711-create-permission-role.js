@@ -60,23 +60,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    //Remove indexes explicitly
-    await queryInterface.removeIndex(
-      "permission_roles",
-      "idx_permission_roles_roleId"
-    );
-
-    await queryInterface.removeIndex(
-      "permission_roles",
-      "idx_permission_roles_permissionId"
-    );
-
-    //Remove unique constraints explicitly
-    await queryInterface.removeConstraint(
-      "permission_roles",
-      "uniq_permission_roles_roleId_permissionId"
-    );
-
     await queryInterface.dropTable("permission_roles");
   },
 };

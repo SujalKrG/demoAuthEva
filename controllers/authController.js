@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
 //LOGIN
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     const admin = await Admin.findOne({ where: { email } });
     if (!admin)
@@ -51,13 +51,24 @@ exports.login = async (req, res) => {
 
     // sign token
     const token = jwt.sign(
-      { id: admin.id, role: "admin" },
+      { id: admin.id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: rememberMe ? "7d" : "1d" }
     );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    });
 
     res.json({ message: "Login successful", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+exports.logout = (req, res) => {
+  res.clearCookie("token");
+  res.json({ message: "Logout successful" });
 };
