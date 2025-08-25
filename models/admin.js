@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      username: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "admins",
+      tableName: "admin",
       timestamps: true,
       paranoid: true,
     }

@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("permission_roles", {
+    await queryInterface.createTable("permission_role", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "roles",
+          model: "role",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -23,7 +23,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "permissions",
+          model: "permission",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -43,23 +43,23 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint("permission_roles", {
+    await queryInterface.addConstraint("permission_role", {
       fields: ["roleId", "permissionId"],
       type: "unique",
-      name: "uniq_permission_roles_roleId_permissionId",
+      name: "uniq_permission_role_roleId_permissionId",
     });
 
     //Adding indexes
-    await queryInterface.addIndex("permission_roles", ["roleId"], {
-      name: "idx_permission_roles_roleId",
+    await queryInterface.addIndex("permission_role", ["roleId"], {
+      name: "idx_permission_role_roleId",
     });
 
-    await queryInterface.addIndex("permission_roles", ["permissionId"], {
-      name: "idx_permission_roles_permissionId",
+    await queryInterface.addIndex("permission_role", ["permissionId"], {
+      name: "idx_permission_role_permissionId",
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("permission_roles");
+    await queryInterface.dropTable("permission_role");
   },
 };
