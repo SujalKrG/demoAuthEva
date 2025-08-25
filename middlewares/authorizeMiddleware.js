@@ -41,7 +41,7 @@ const authorize = (permissionsToCheck = []) => {
       );
       if (isSuper) return next();
 
-      //Collect unique permissionIds accross all roles
+      //Collect unique permissionIds across all roles
       const userPermissionIds = new Set();
       (admin.roles || []).forEach((role) => {
         (role.permissions || []).forEach((perm) => {
