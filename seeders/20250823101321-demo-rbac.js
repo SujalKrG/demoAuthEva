@@ -24,7 +24,7 @@ module.exports = {
         updatedAt: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("roles", roles, {});
+    await queryInterface.bulkInsert("role", roles, {});
 
     // 2️⃣ Insert Permissions
     const permissions = [
@@ -33,13 +33,13 @@ module.exports = {
       { name: "delete_post", createdAt: new Date(), updatedAt: new Date() },
       { name: "view_post", createdAt: new Date(), updatedAt: new Date() },
     ];
-    await queryInterface.bulkInsert("permissions", permissions, {});
+    await queryInterface.bulkInsert("permission", permissions, {});
 
     // 3️⃣ Insert Admins (with all required fields)
     const passwordHash = await bcrypt.hash("dummy123", 10); // hashed password
     const admins = [
       {
-        username: "Alice",
+        name: "Alice",
         email: "alice@test.com",
         phone: "1234567890",
         password: passwordHash,
@@ -49,7 +49,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        username: "Bob",
+        name: "Bob",
         email: "bob@test.com",
         phone: "0987654321",
         password: passwordHash,
@@ -59,17 +59,17 @@ module.exports = {
         updatedAt: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("admins", admins, {});
+    await queryInterface.bulkInsert("admin", admins, {});
 
     // 4️⃣ Get inserted roles, permissions, admins IDs
     const insertedRoles = await queryInterface.sequelize.query(
-      `SELECT id, code FROM roles;`
+      `SELECT id, code FROM role;`
     );
     const insertedPermissions = await queryInterface.sequelize.query(
-      `SELECT id, name FROM permissions;`
+      `SELECT id, name FROM permission;`
     );
     const insertedAdmins = await queryInterface.sequelize.query(
-      `SELECT id, username FROM admins;`
+      `SELECT id, name FROM admin;`
     );
 
     const rolesMap = insertedRoles[0].reduce((acc, r) => {
@@ -81,7 +81,7 @@ module.exports = {
       return acc;
     }, {});
     const adminsMap = insertedAdmins[0].reduce((acc, a) => {
-      acc[a.username] = a.id;
+      acc[a.name] = a.id;
       return acc;
     }, {});
 
@@ -132,7 +132,7 @@ module.exports = {
         updatedAt: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("permission_roles", permissionRoles, {});
+    await queryInterface.bulkInsert("permission_role", permissionRoles, {});
 
     // 6️⃣ Assign Roles to Admins (pivot table)
     const roleAdmins = [
@@ -149,14 +149,14 @@ module.exports = {
         updatedAt: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("role_admins", roleAdmins, {});
+    await queryInterface.bulkInsert("role_admin", roleAdmins, {});
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("role_admins", null, {});
-    await queryInterface.bulkDelete("permission_roles", null, {});
-    await queryInterface.bulkDelete("admins", null, {});
-    await queryInterface.bulkDelete("permissions", null, {});
-    await queryInterface.bulkDelete("roles", null, {});
+    await queryInterface.bulkDelete("role_admin", null, {});
+    await queryInterface.bulkDelete("permission_role", null, {});
+    await queryInterface.bulkDelete("admin", null, {});
+    await queryInterface.bulkDelete("permission", null, {});
+    await queryInterface.bulkDelete("role", null, {});
   },
 };
