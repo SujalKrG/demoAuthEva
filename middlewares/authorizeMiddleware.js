@@ -5,34 +5,56 @@ const authorize = (permissionsToCheck = []) => {
   return async (req, res, next) => {
     try {
       // get logged in user from req (set by authenticate middleware)
-      const userId = req.user.id;
-      const user = await Admin.findByPk(userId, {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const admin = await Admin.findByPk(userId, {
+        attributes: ["id", "email"],
         include: [
           {
             model: Role,
-            include: [Permission],
+            as: "roles",
+            attributes: ["id", "code"],
+            through: { attributes: [] },
+            include: [
+              {
+                model: Permission,
+                as: "permissions",
+                attributes: ["id"],
+                through: { attributes: [] },
+              },
+            ],
           },
         ],
       });
 
-      if (!user) {
+      if (!admin) {
         return res.status(403).json({ message: "User not found" });
       }
 
-      // collect all permissions of this user’s role
-      const userPermissionIds = user.Role?.Permissions?.map((p) => p.id) || [];
-
       // superAdmin bypass → has all permissions
-      if (user.Role.code.toUpperCase() === "SUPER") {
-        return next();
-      }
+      const isSuper = (admin.roles || []).some(
+        (r) => r.code.toUpperCase() === "SUPER_ADMIN"
+      );
+      if (isSuper) return next();
+
+      //Collect unique permissionIds accross all roles
+      const userPermissionIds = new Set();
+      (admin.roles || []).forEach((role) => {
+        (role.permissions || []).forEach((perm) => {
+          userPermissionIds.add(Number(perm.id));
+        });
+      });
 
       //check required permissions
-      const hasPermission = permissionsToCheck.every((id) =>
-        userPermissionIds.includes(id)
+      const hasAllRequired = (permissionsToCheck || []).every((id) =>
+        userPermissionIds.has(Number(id))
       );
 
-      if (!hasPermission) {
+      if (!hasAllRequired) {
         return res
           .status(403)
           .json({ message: "Access denied: insufficient permissions" });

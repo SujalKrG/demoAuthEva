@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Admin } = require("../models");
+const { Admin, Role, Permission } = require("../models");
 
 //Register
 exports.register = async (req, res) => {
@@ -41,7 +41,23 @@ exports.login = async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
 
-    const admin = await Admin.findOne({ where: { email } });
+    const admin = await Admin.findOne({
+      where: { email },
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          include: [
+            {
+              model: Permission,
+              as: "permissions",
+              attributes: ["id"],
+              through: { attributes: [] },
+            },
+          ],
+        },
+      ],
+    });
     if (!admin)
       return res.status(400).json({ message: "Invalid email or password" });
 
@@ -51,20 +67,26 @@ exports.login = async (req, res) => {
 
     // sign token
     const token = jwt.sign(
-      { id: admin.id, email: admin.email, role: admin.role },
+      {
+        id: admin.id,
+        email: admin.email,
+      },
       process.env.JWT_SECRET,
       { expiresIn: rememberMe ? "7d" : "1d" }
     );
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
       maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
     });
 
     res.json({ message: "Login successful", token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({ error: "Something went wrong. Please try again later." });
   }
 };
 

@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Admin.prototype.getPermissions = async function () {
     const roles = await this.getRoles({
-      include: { model: sequelize.models.Permission, as: "permissions" },
+      include: [{ model: sequelize.models.Permission, as: "permissions" }],
     });
 
     const permissions = [];
