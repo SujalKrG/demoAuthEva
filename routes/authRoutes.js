@@ -16,7 +16,7 @@ router.get("/protected", authenticate, (req, res) => {
 });
 router.post("/refresh", refresh);
 
-router.get("/admin-only", authenticate, authorize([1]), (req, res) => {
+router.get("/dashboard", authenticate, authorize([2]), (req, res) => {
   res.json({ message: "This is an admin-only route", user: req.user });
 });
 

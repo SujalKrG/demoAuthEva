@@ -3,12 +3,38 @@ const db = require("../models");
 
 exports.addAdmin = async (req, res) => {
   try {
-    const { username, email, phone, password, address, city, emp_id, status } =
-      req.body;
+    const { password } = req.body;
+
+    const name = req.body.name?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const phone = req.body.phone?.trim();
+    const address = req.body.address?.trim();
+    const city = req.body.city?.trim();
+    const emp_id = req.body.emp_id?.trim();
+    const status = req.body.status;
+
+    if (!name || !email || !phone || !address || !city || !emp_id) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const emailExists = await db.Admin.findOne({ where: { email } });
+    if (emailExists) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newAdmin = await db.Admin.create({
-      username,
+      name,
       email,
       phone,
       password: hashedPassword,
@@ -18,57 +44,86 @@ exports.addAdmin = async (req, res) => {
       status: status ?? true,
     });
 
+    const { password: _, ...adminData } = newAdmin.get({ plain: true });
+
     res
       .status(201)
-      .json({ message: "Admin created successfully", admin: newAdmin });
+      .json({ message: "Admin created successfully", admin: adminData });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 exports.assignRoleToAdmin = async (req, res) => {
+  const t = await db.sequelize.transaction();
   try {
     const { adminId, roleId } = req.body;
 
-    const admin = await db.Admin.findByPk(adminId);
-    const role = await db.Role.findByPk(roleId);
+    const admin = await db.Admin.findByPk(adminId, { transaction: t });
+    const role = await db.Role.findByPk(roleId, { transaction: t });
 
     if (!admin || !role) {
+      await t.rollback();
       return res.status(404).json({ message: "Admin or Role not found" });
     }
 
-    await admin.addRole(role); // Sequelize magic method
+    const alreadyHasRole = await admin.hasRole(role, { transaction: t });
+    if (alreadyHasRole) {
+      await t.rollback();
+      return res.status(400).json({ message: "Admin already has this role" });
+    }
 
-    res.json({ message: `Role ${role.code} assigned to ${admin.username}` });
+    await admin.addRole(role, { transaction: t }); // Sequelize magic method
+    await t.commit();
+
+    res.json({ message: `Role ${role.code} assigned to ${admin.name}` });
   } catch (error) {
+    await t.rollback();
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 exports.assignPermissionToRole = async (req, res) => {
+  const t = await db.sequelize.transaction();
   try {
     const { roleId, permissionId } = req.body;
 
-    const role = await db.Role.findByPk(roleId);
-    const permission = await db.Permission.findByPk(permissionId);
+    const role = await db.Role.findByPk(roleId, { transaction: t });
+    const permission = await db.Permission.findByPk(permissionId, {
+      transaction: t,
+    });
 
     if (!role || !permission) {
+      await t.rollback();
       return res.status(404).json({ message: "Role or Permission not found" });
     }
 
-    await role.addPermission(permission); // Sequelize magic method
+    const alreadyHasPermission = await role.hasPermission(permission, {
+      transaction: t,
+    });
+    if (alreadyHasPermission) {
+      await t.rollback();
+      return res
+        .status(400)
+        .json({ message: "Role already has this permission" });
+    }
+
+    await role.addPermission(permission, { transaction: t }); // Sequelize magic method
+    await t.commit();
 
     res.json({
       message: `Permission ${permission.name} assigned to role ${role.code}`,
     });
   } catch (error) {
+    await t.rollback();
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 exports.createRole = async (req, res) => {
   try {
-    const { name, code } = req.body;
+    const { name } = req.body;
+    const code = req.body.code?.trim().toUpperCase();
 
     if (!name || !code) {
       return res.status(400).json({ message: "Name and Code are required" });
@@ -89,7 +144,7 @@ exports.createRole = async (req, res) => {
 // 5️⃣ Create New Permission
 exports.createPermission = async (req, res) => {
   try {
-    const { name } = req.body;
+    const name = req.body.name?.trim().toLowerCase();
 
     if (!name) {
       return res.status(400).json({ message: "Permission name is required" });

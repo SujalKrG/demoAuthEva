@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
       httpOnly: true,
       secure: true, // ⚠️ set to false for local dev without HTTPS
       sameSite: "strict",
-      maxAge: 60 * 1000,
+      maxAge: 15 * 60 * 1000,
     });
 
     // Set Refresh Token Cookie (7 days) only if rememberMe
