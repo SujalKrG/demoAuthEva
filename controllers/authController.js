@@ -5,13 +5,7 @@ require("dotenv").config({ path: "../.env" });
 
 const generateAccessToken = (user) => {
   return jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "1m",
-  });
-};
-
-const generateRefreshToken = (user) => {
-  return jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "15m",
   });
 };
 
@@ -40,70 +34,50 @@ exports.login = async (req, res) => {
 
     if (!admin)
       return res.status(400).json({ message: "Invalid email or password" });
-
+    if (admin.status !== true) {
+      return res
+        .status(403)
+        .json({ message: "Account is inactive contact super admin" });
+    }
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
 
     // Tokens
     const accessToken = generateAccessToken(admin);
-    const refreshToken = rememberMe ? generateRefreshToken(admin) : null;
 
-    // Set Access Token Cookie (15 min)
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true, // ⚠️ set to false for local dev without HTTPS
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+    admin.remember_token = accessToken;
+    await admin.save();
+
+    res.json({
+      message: "Login successful",
+      accessToken,
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        roles: admin.roles,
+      },
     });
-
-    // Set Refresh Token Cookie (7 days) only if rememberMe
-    if (rememberMe) {
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-    }
-
-    res.json({ message: "Login successful", accessToken, refreshToken });
   } catch (error) {
+    console.log(error);
+
     res
       .status(500)
       .json({ error: "Something went wrong. Please try again later." });
   }
 };
 
-exports.refresh = async (req, res) => {
+exports.logout = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-      return res.status(403).json({ message: "Refresh token required" });
+    const admin = await Admin.findByPk(req.admin.id);
+    if (admin) {
+      admin.remember_token = null; // clear token in DB
+      await admin.save();
     }
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
-      if (err)
-        return res.status(403).json({ message: "Invalid refresh token" });
 
-      const newAccessToken = generateAccessToken({
-        id: decoded.id,
-        email: decoded.email,
-      });
-
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 60 * 1000,
-      });
-
-      return res.json({ message: "Access token refreshed" });
-    });
-  } catch (error) {}
-};
-
-exports.logout = (req, res) => {
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
-  res.json({ message: "Logout successful" });
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Logout failed" });
+  }
 };

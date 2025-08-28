@@ -46,11 +46,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: true,
       },
+      remember_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       tableName: "admin",
       timestamps: true,
-      paranoid: true,
+      // paranoid: true,
     }
   );
 

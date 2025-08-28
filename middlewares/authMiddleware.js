@@ -1,54 +1,47 @@
 const jwt = require("jsonwebtoken");
+const { Admin } = require("../models");
 
 const authenticate = async (req, res, next) => {
   try {
     const headerToken = req.headers.authorization?.split(" ")[1];
-    const cookieToken = req.cookies?.accessToken;
 
-    if (!headerToken && !cookieToken) {
+    if (!headerToken) {
       return res.status(401).json({ message: "No token provided" });
     }
 
-    const accessToken = headerToken || cookieToken;
-
-    let decoded;
-    try {
-      decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-    } catch (error) {
-      if (error.name === "TokenExpiredError") {
-        return res.status(401).json({ message: "Token expired", error });
-      }
-      return res.status(401).json({ message: "Unauthorized", error });
+    const decoded = jwt.verify(headerToken, process.env.JWT_SECRET);
+    const admin = await Admin.findByPk(decoded.id);
+    if (!admin) {
+      return res.status(401).json({ message: "admin not found" });
     }
 
-    // ✅ Attach user info
-    req.user = { id: decoded.id, email: decoded.email };
+    if (admin.remember_token !== headerToken) {
+      return res
+        .status(401)
+        .json({ message: "Token mismatch. Please login again." });
+    }
 
-    // ✅ Auto-Rotate Token Logic
-    const exp = decoded.exp * 1000; // ms
-    const now = Date.now();
-
-    // If less than 2 minutes left, issue a new access token
-    if (exp - now < 30 * 1000) {
-      const newAccessToken = jwt.sign(
-        { id: decoded.id, email: decoded.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1m" }
-      );
-
-      // 🍪 Replace old cookie
-      res.cookie("token", newAccessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        // If you have "remember me", set a maxAge, else session-only
-        maxAge: req.cookies?.refreshToken ? 15 * 60 * 1000 : undefined,
+    // Case 2: admin inactive (status = 0)
+    if (admin.status === false) {
+      admin.remember_token = null;
+      await admin.save();
+      return res.status(401).json({
+        message: "Your account is inactive. Logged out automatically.",
       });
     }
+    console.log("Header token:", headerToken);
+    console.log("DB token:", admin.remember_token);
+    console.log("Status:", admin.status);
 
+    // ✅ Attach user info
+    req.admin = admin;
     return next();
   } catch (error) {
-    return res.status(401).json({ message: "Unauthorized", error });
+    console.log(error);
+
+    return res
+      .status(401)
+      .json({ message: "Unauthorized", error: error.message });
   }
 };
 
