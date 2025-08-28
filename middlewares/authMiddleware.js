@@ -8,8 +8,15 @@ const authenticate = async (req, res, next) => {
     if (!headerToken) {
       return res.status(401).json({ message: "No token provided" });
     }
+    let decoded;
+    try {
+      decoded = jwt.verify(headerToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired token", error: error.message });
+    }
 
-    const decoded = jwt.verify(headerToken, process.env.JWT_SECRET);
     const admin = await Admin.findByPk(decoded.id);
     if (!admin) {
       return res.status(401).json({ message: "admin not found" });
@@ -23,8 +30,12 @@ const authenticate = async (req, res, next) => {
 
     // Case 2: admin inactive (status = 0)
     if (admin.status === false) {
-      admin.remember_token = null;
-      await admin.save();
+      try {
+        admin.remember_token = null;
+        await admin.save();
+      } catch (error) {
+        res.json({ message: "db update error", error: error.message });
+      }
       return res.status(401).json({
         message: "Your account is inactive. Logged out automatically.",
       });
@@ -41,7 +52,7 @@ const authenticate = async (req, res, next) => {
 
     return res
       .status(401)
-      .json({ message: "Unauthorized", error: error.message });
+      .json({ message: "authentication failed", error: error.message });
   }
 };
 
