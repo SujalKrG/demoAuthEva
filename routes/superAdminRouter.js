@@ -8,10 +8,11 @@ const {
 } = require("../controllers/adminController.js");
 const authenticate = require("../middlewares/authMiddleware.js");
 const authorize = require("../middlewares/authorizeMiddleware.js");
+const admin = require("../models/admin.js");
 const router = express.Router();
 
 router.get("/admin-only", authenticate, authorize([2]), (req, res) => {
-  res.json({ message: "This is an admin-only route", user: req.user });
+  res.json({ message: "This is an admin-only route", admin: req.admin });
 });
 
 router.post("/add", authenticate, authorize(["SUPER_ADMIN"]), addAdmin);

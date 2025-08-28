@@ -44,6 +44,10 @@ module.exports = {
         allowNull: false,
         defaultValue: true,
       },
+      remember_token: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
