@@ -5,7 +5,7 @@ const authorize = (permissionsToCheck = []) => {
   return async (req, res, next) => {
     try {
       // get logged in user from req (set by authenticate middleware)
-      const userId = req.user?.id;
+      const userId = req.admin?.id;
 
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
