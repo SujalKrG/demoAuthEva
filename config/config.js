@@ -22,4 +22,11 @@ module.exports = {
     host: process.env.DB_HOST,
     dialect: "mysql",
   },
+  remote: {
+    username: process.env.DB2_USERNAME,
+    password: process.env.DB2_PASSWORD,
+    database: process.env.DB2_DATABASE,
+    host: process.env.DB2_HOST,
+    dialect: "mysql",
+  },
 };

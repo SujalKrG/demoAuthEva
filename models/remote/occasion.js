@@ -1,0 +1,45 @@
+module.exports = (sequelize, DataTypes) => {
+  const Occassion = sequelize.define(
+    "Occassion",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      slug: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+      },
+      image: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      category: {
+        type: DataTypes.TINYINT,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
+      invitation_status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
+    },
+    {
+      tableName: "occasions",
+      timestamps: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }
+  );
+
+  return Occassion;
+};

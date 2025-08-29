@@ -3,6 +3,8 @@ const {
   occasionFieldController,
   getOccasionDetails,
 } = require("../../controllers/superAdmin/occasionFieldController.js");
+
+const {occasions} = require("../../controllers/superAdmin/occasionController.js");
 const {
   addAdmin,
   assignPermissionToRole,
@@ -59,5 +61,13 @@ router.get(
   authorize(["SUPER_ADMIN"]),
   getOccasionDetails
 );
+//Get occasions from remote DB
+router.get(
+  "/get-occasion",
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
+  occasions
+);
+
 
 module.exports = router;
