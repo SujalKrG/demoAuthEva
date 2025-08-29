@@ -6,7 +6,7 @@ const authenticate = async (req, res, next) => {
     const headerToken = req.headers.authorization?.split(" ")[1];
 
     if (!headerToken) {
-      return res.status(401).json({ message: "No token provided" });
+      return res.status(401).json({ message: "No token provided in authMiddleware" });
     }
     let decoded;
     try {
