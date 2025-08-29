@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const db = require("../models");
+const db = require("../../models");
 
 exports.addAdmin = async (req, res) => {
   try {
