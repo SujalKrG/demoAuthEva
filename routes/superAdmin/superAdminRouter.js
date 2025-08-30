@@ -1,15 +1,14 @@
 const express = require("express");
 const {
   occasionFieldController,
-  getOccasionFieldsById,
-  getOccasionFields,
   updateOccasionField,
-  deleteOccasionField
+  deleteOccasionField,
 } = require("../../controllers/superAdmin/occasionFieldController.js");
 
 const {
   occasions,
   getAllOccasionFields,
+  getOccasionFieldsById,
 } = require("../../controllers/superAdmin/occasionController.js");
 const {
   addAdmin,
@@ -67,36 +66,36 @@ router.post(
  */
 router.post(
   "/occasion-field/store",
-  authenticate,
-  checkAdminStatus,
-  authorize(["SUPER_ADMIN"]),
+  // authenticate,
+  // checkAdminStatus,
+  // authorize(["SUPER_ADMIN"]),
   occasionFieldController
 );
 router.get(
   "/occasion-field/get",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  getOccasionFields
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
+  getAllOccasionFields
 );
 
 router.get(
   "/occasion-field/show/:id",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
   getOccasionFieldsById
 );
 //-------------------------------------------------------------------------------------------
 router.patch(
   "/occasion-field/update/:id",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
   updateOccasionField
 );
 
 router.delete(
   "/occasion-field/delete/:id",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
   deleteOccasionField
 );
 
@@ -114,12 +113,12 @@ router.get(
   // authorize(["SUPER_ADMIN"]),
   occasions
 );
-router.get(
-  "/get-occasion-with-fields",
-  // authenticate,
-  // authorize(["SUPER_ADMIN"]),
-  getAllOccasionFields
-);
+// router.get(
+//   "/get-occasion-with-fields",
+//   // authenticate,
+//   // authorize(["SUPER_ADMIN"]),
+//   getAllOccasionFields
+// );
 
 //! Occasion field routes
 
