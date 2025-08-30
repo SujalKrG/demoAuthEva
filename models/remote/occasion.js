@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Occassion = sequelize.define(
-    "Occassion",
+  const Occasion = sequelize.define(
+    "Occasion",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -41,5 +41,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  return Occassion;
+  return Occasion;
 };

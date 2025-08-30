@@ -6,6 +6,7 @@ const {
 
 const {
   occasions,
+  getAllOccasionFields,
 } = require("../../controllers/superAdmin/occasionController.js");
 const {
   addAdmin,
@@ -90,11 +91,24 @@ router.delete(
 );
 
 //! Get occasions from remote DB
+/**
+ * 1. Get all occasions from /get-occasion
+ * 2. Get occasion details from /get-occasion/:id
+ * 3. Create a new occasion from /get-occasion
+ * 4. Update an existing occasion from /get-occasion/:id
+ * 5. Delete an occasion from /get-occasion/:id
+ */
 router.get(
   "/get-occasion",
   // authenticate,
   // authorize(["SUPER_ADMIN"]),
   occasions
+);
+router.get(
+  "/get-occasion-with-fields",
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
+  getAllOccasionFields
 );
 
 //! Occasion field routes
