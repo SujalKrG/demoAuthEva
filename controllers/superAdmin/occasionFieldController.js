@@ -35,12 +35,20 @@ const occasionFieldController = async (req, res) => {
 
     // 🔹 Validate each record
     for (const [index, item] of data.entries()) {
-      const requiredFields = ["occasion_id", "field_key", "label", "type", "order_no"];
+      const requiredFields = [
+        "occasion_id",
+        "field_key",
+        "label",
+        "type",
+        "order_no",
+      ];
 
       // Check for missing required fields
       const missingFields = requiredFields.filter(
         (field) =>
-          item[field] === undefined || item[field] === null || item[field] === ""
+          item[field] === undefined ||
+          item[field] === null ||
+          item[field] === ""
       );
 
       // Special validations
@@ -97,27 +105,26 @@ const occasionFieldController = async (req, res) => {
   }
 };
 
-
 const getOccasionDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
     // 1️⃣ Validate input
     if (!id) {
-      return res.status(400).json({ 
-        message: "Invalid request: ID parameter is required" 
+      return res.status(400).json({
+        message: "Invalid request: ID parameter is required",
       });
     }
 
     // 2️⃣ Query database
     const occasionFields = await OccasionField.findAll({
-      where: { occasion_id: id }, // filtering by `type` as per your last code
+      where: { id: id }, // filtering by `type` as per your last code
     });
 
     // 3️⃣ Handle no data found
     if (!occasionFields || occasionFields.length === 0) {
-      return res.status(404).json({ 
-        message: "No occasion fields found for the given type" 
+      return res.status(404).json({
+        message: "No occasion fields found for the given type",
       });
     }
 
@@ -127,7 +134,6 @@ const getOccasionDetails = async (req, res) => {
       count: occasionFields.length,
       data: occasionFields,
     });
-
   } catch (error) {
     console.error("Get Occasion Details Error:", error);
 
@@ -149,7 +155,7 @@ const getOccasionDetails = async (req, res) => {
     if (error.name === "SequelizeValidationError") {
       return res.status(400).json({
         message: "Validation error",
-        errors: error.errors.map(e => e.message),
+        errors: error.errors.map((e) => e.message),
       });
     }
 
@@ -162,7 +168,5 @@ const getOccasionDetails = async (req, res) => {
 };
 
 module.exports = { getOccasionDetails };
-
-
 
 module.exports = { occasionFieldController, getOccasionDetails };
