@@ -54,7 +54,14 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true,
       },
-    });
+     
+});
+
+await queryInterface.addConstraint("occasion_fields", {
+  fields: ["occasion_id", "order_no"],
+  type: "unique",
+  name: "unique_occasion_order",
+});
 
     await queryInterface.addIndex("occasion_fields", [
       "occasion_id",

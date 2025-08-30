@@ -1,7 +1,10 @@
 const express = require("express");
 const {
   occasionFieldController,
-  getOccasionDetails,
+  getOccasionFieldsById,
+  getOccasionFields,
+  updateOccasionField,
+  deleteOccasionField
 } = require("../../controllers/superAdmin/occasionFieldController.js");
 
 const {
@@ -69,25 +72,32 @@ router.post(
   authorize(["SUPER_ADMIN"]),
   occasionFieldController
 );
-router.get("/occasion-field/get", authenticate, authorize(["SUPER_ADMIN"]));
+router.get(
+  "/occasion-field/get",
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
+  getOccasionFields
+);
 
 router.get(
   "/occasion-field/show/:id",
   authenticate,
   authorize(["SUPER_ADMIN"]),
-  getOccasionDetails
+  getOccasionFieldsById
 );
-
+//-------------------------------------------------------------------------------------------
 router.patch(
   "/occasion-field/update/:id",
   authenticate,
-  authorize(["SUPER_ADMIN"])
+  authorize(["SUPER_ADMIN"]),
+  updateOccasionField
 );
 
 router.delete(
   "/occasion-field/delete/:id",
   authenticate,
-  authorize(["SUPER_ADMIN"])
+  authorize(["SUPER_ADMIN"]),
+  deleteOccasionField
 );
 
 //! Get occasions from remote DB
