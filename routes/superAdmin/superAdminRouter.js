@@ -1,11 +1,15 @@
 const express = require("express");
 const {
   occasionFieldController,
-  getOccasionDetails,
+  getOccasionFieldsById,
+  getOccasionFields,
+  updateOccasionField,
+  deleteOccasionField
 } = require("../../controllers/superAdmin/occasionFieldController.js");
 
 const {
   occasions,
+  getAllOccasionFields,
 } = require("../../controllers/superAdmin/occasionController.js");
 const {
   addAdmin,
@@ -68,33 +72,53 @@ router.post(
   authorize(["SUPER_ADMIN"]),
   occasionFieldController
 );
-router.get("/occasion-field/get", authenticate, authorize(["SUPER_ADMIN"]));
+router.get(
+  "/occasion-field/get",
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
+  getOccasionFields
+);
 
 router.get(
   "/occasion-field/show/:id",
   authenticate,
   authorize(["SUPER_ADMIN"]),
-  getOccasionDetails
+  getOccasionFieldsById
 );
-
+//-------------------------------------------------------------------------------------------
 router.patch(
   "/occasion-field/update/:id",
   authenticate,
-  authorize(["SUPER_ADMIN"])
+  authorize(["SUPER_ADMIN"]),
+  updateOccasionField
 );
 
 router.delete(
   "/occasion-field/delete/:id",
   authenticate,
-  authorize(["SUPER_ADMIN"])
+  authorize(["SUPER_ADMIN"]),
+  deleteOccasionField
 );
 
 //! Get occasions from remote DB
+/**
+ * 1. Get all occasions from /get-occasion
+ * 2. Get occasion details from /get-occasion/:id
+ * 3. Create a new occasion from /get-occasion
+ * 4. Update an existing occasion from /get-occasion/:id
+ * 5. Delete an occasion from /get-occasion/:id
+ */
 router.get(
   "/get-occasion",
   // authenticate,
   // authorize(["SUPER_ADMIN"]),
   occasions
+);
+router.get(
+  "/get-occasion-with-fields",
+  // authenticate,
+  // authorize(["SUPER_ADMIN"]),
+  getAllOccasionFields
 );
 
 //! Occasion field routes
