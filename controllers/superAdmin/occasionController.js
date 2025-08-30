@@ -38,13 +38,13 @@ exports.getAllOccasionFields = async (req, res) => {
       return {
         ...occasion, // <-- already has id, name, slug, image, category
         formFields: relatedFields.map((f) => ({
-          id: f.id,
-          field_key: f.field_key,
+          formFieldId: f.id,
+          fieldKey: f.field_key,
           label: f.label,
           type: f.type,
           required: f.required,
           options: f.options,
-          order_no: f.order_no,
+          orderNo: f.order_no,
         })),
       };
     });
@@ -52,5 +52,64 @@ exports.getAllOccasionFields = async (req, res) => {
   } catch (error) {
     console.error("Error fetching occasion fields:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getOccasionFieldsById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Validate input
+    if (!id) {
+      return res.status(400).json({
+        message: "Invalid request: ID parameter is required",
+      });
+    }
+
+    const occasion = await OccasionModel.findOne({
+      where: { id, invitation_status: true },
+    });
+
+    if (!occasion) {
+      return res.status(404).json({
+        message: "No occasion found",
+      });
+    }
+
+    const normalizedOccasion = new OccasionResource(occasion);
+
+    // 2️⃣ Query database
+    const occasionFields = await OccasionFieldModel.findAll({
+      where: { occasion_id: id },
+    });
+
+    // 3️⃣ Handle no data found
+    if (!occasionFields || occasionFields.length === 0) {
+      return res.status(404).json({
+        message: "No occasion fields found",
+      });
+    }
+
+    // attach fields
+    const response = {
+      ...normalizedOccasion,
+      formFields: occasionFields.map((f) => ({
+        formFieldId: f.id,
+        fieldKey: f.field_key,
+        label: f.label,
+        type: f.type,
+        required: f.required,
+        options: f.options,
+        orderNo: f.order_no,
+      })),
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Get Occasion Fields Error:", error);
+    return res.status(500).json({
+      message: "Failed to retrieve occasion fields",
+      error: error.message,
+    });
   }
 };
