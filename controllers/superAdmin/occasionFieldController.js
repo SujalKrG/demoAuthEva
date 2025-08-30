@@ -1,4 +1,7 @@
-const { OccasionField } = require("../../models");
+const { OccasionField,sequelize } = require("../../models");
+const { cleanString } = require("../../utils/occasionResource");
+
+const handleSequelizeError = require("../../utils/handelSequelizeError");
 
 const occasionFieldController = async (req, res) => {
   try {
@@ -69,14 +72,12 @@ const occasionFieldController = async (req, res) => {
     }
 
     // 🔹 Insert into DB
-    const newOccasionFields = await OccasionField.bulkCreate(data, {
-      validate: true,
-      ignoreDuplicates: false, // set true if you want to skip duplicates
-    });
-
+   await sequelize.transaction(async (t) => {
+  await OccasionField.bulkCreate(data, { validate: true, transaction: t });
+});
     return res.status(201).json({
-      message: `${newOccasionFields.length} Occasion field(s) created successfully`,
-      data: newOccasionFields,
+      message: `${data.length} Occasion field(s) created successfully`,
+      data: data,
     });
   } catch (error) {
     console.error("OccasionField Error:", error);
@@ -105,7 +106,7 @@ const occasionFieldController = async (req, res) => {
   }
 };
 
-const getOccasionDetails = async (req, res) => {
+const getOccasionFieldsById = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -124,49 +125,175 @@ const getOccasionDetails = async (req, res) => {
     // 3️⃣ Handle no data found
     if (!occasionFields || occasionFields.length === 0) {
       return res.status(404).json({
-        message: "No occasion fields found for the given type",
+        message: "No occasion fields found",
       });
     }
 
     // 4️⃣ Success response
     return res.status(200).json({
-      message: "Occasion fields retrieved successfully",
+      message: `Occasion fields for the given ID (${id}) retrieved successfully`,
       count: occasionFields.length,
       data: occasionFields,
     });
   } catch (error) {
     console.error("Get Occasion Details Error:", error);
 
-    // 5️⃣ Handle Sequelize-specific errors
-    if (error.name === "SequelizeDatabaseError") {
-      return res.status(500).json({
-        message: "Database query error",
-        error: error.message,
-      });
-    }
+    // Handle Sequelize errors
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
 
-    if (error.name === "SequelizeConnectionError") {
-      return res.status(503).json({
-        message: "Database connection failed",
-        error: error.message,
-      });
-    }
-
-    if (error.name === "SequelizeValidationError") {
-      return res.status(400).json({
-        message: "Validation error",
-        errors: error.errors.map((e) => e.message),
-      });
-    }
-
-    // 6️⃣ Generic fallback
+    // Handle generic Node.js / unexpected errors
     return res.status(500).json({
-      message: "Failed to retrieve occasion fields due to an unexpected error",
-      error: error.message,
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
     });
   }
 };
 
-module.exports = { getOccasionDetails };
+const getOccasionFields = async (req, res) => {
+  try {
+    const occasionFields = await OccasionField.findAll();
 
-module.exports = { occasionFieldController, getOccasionDetails };
+    if (!occasionFields || occasionFields.length === 0) {
+      return res.status(404).json({
+        message: "No occasion fields found",
+        data: [],
+      });
+    }
+
+    return res.status(200).json({
+      message: "Occasion fields retrieved successfully",
+      data: occasionFields,
+    });
+  } catch (error) {
+    console.error("Get Occasion Fields Error:", error);
+
+    // Handle Sequelize errors
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
+
+    // Handle generic Node.js / unexpected errors
+    return res.status(500).json({
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
+    });
+  }
+};
+
+const updateOccasionField = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const allowedUpdates = [
+      "field_key",
+      "label",
+      "type",
+      "required",
+      "options",
+      "order_no",
+    ];
+    const safeUpdates = Object.keys(updates)
+      .filter((key) => allowedUpdates.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = updates[key];
+        return obj;
+      }, {});
+
+    // 1️⃣ Validate input
+    if (!id) {
+      return res.status(400).json({
+        message: "Invalid request: ID parameter is required",
+      });
+    }
+
+    // 2️⃣ Query database
+    const [updated] = await OccasionField.update(safeUpdates, {
+      where: { id },
+    });
+
+    // 3️⃣ Handle no data found
+    if (!updated) {
+      return res.status(404).json({
+        message: "No occasion field found to update",
+      });
+    }
+
+    // 4️⃣ Success response
+    return res.status(200).json({
+      message: `Occasion field with ID (${id}) updated successfully`,
+    });
+  } catch (error) {
+    console.error("Update Occasion Field Error:", error);
+
+    // Handle Sequelize errors
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
+
+    // Handle generic Node.js / unexpected errors
+    return res.status(500).json({
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
+    });
+  }
+};
+
+const deleteOccasionField = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Validate input
+    if (!id) {
+      return res.status(400).json({
+        message: "Invalid request: ID parameter is required",
+      });
+    }
+
+    const occasionField = await OccasionField.findByPk(id);
+
+    if (!occasionField) {
+      return res.status(404).json({
+        message: `Occasion field with id ${id} not found`,
+      });
+    }
+
+    // 🔹 Soft delete (sets deleted_at instead of removing row)
+    await occasionField.destroy();
+
+    // 4️⃣ Success response
+    return res.status(200).json({
+      message: `Occasion field with ID (${id}) deleted successfully`,
+    });
+  } catch (error) {
+    console.error("Delete Occasion Field Error:", error);
+
+    // Handle Sequelize errors
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
+
+    // Handle generic Node.js / unexpected errors
+    return res.status(500).json({
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
+    });
+  }
+};
+
+module.exports = {
+  occasionFieldController,
+  getOccasionFieldsById,
+  getOccasionFields,
+  updateOccasionField,
+  deleteOccasionField,
+};
