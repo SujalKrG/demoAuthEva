@@ -1,32 +1,33 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { Admin, Role, Permission } = require("../models");
-require("dotenv").config({ path: "../.env" });
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import db from "../models/index.js";
+import dotenv from "dotenv";
+
+dotenv.config(); // auto loads from project root
 
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
+  return jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 };
 
-//LOGIN
-exports.login = async (req, res) => {
+// LOGIN controller
+export const login = async (req, res) => {
   try {
-    const { email, password, rememberMe } = req.body;
+    const { email, password } = req.body;
     if (!email || !password) {
       return res
         .status(400)
         .json({ message: "Email and password are required" });
     }
-    const admin = await Admin.findOne({
+
+    const admin = await db.Admin.findOne({
       where: { email },
       include: [
         {
-          model: Role,
+          model: db.Role,
           as: "roles",
           include: [
             {
-              model: Permission,
+              model: db.Permission,
               as: "permissions",
               attributes: ["id"],
               through: { attributes: [] },
@@ -38,30 +39,23 @@ exports.login = async (req, res) => {
 
     if (!admin)
       return res.status(400).json({ message: "Invalid email or password" });
-
-    if (admin.status !== true) {
+    if (!admin.status) {
       return res
         .status(403)
-        .json({ message: "Account is inactive contact super admin" });
+        .json({ message: "Account is inactive, contact super admin" });
     }
-    const isMatch = await bcrypt.compare(password, admin.password);
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ message: "JWT is not configured" });
-    }
+    const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    // Tokens
-    const accessToken = generateAccessToken(admin);
-    try {
-      admin.remember_token = accessToken;
-      await admin.save();
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "failed to update the token", error: error.message });
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "JWT_SECRET not configured" });
     }
+
+    const accessToken = generateAccessToken(admin);
+    admin.remember_token = accessToken;
+    await admin.save();
 
     res.json({
       message: "Login successful",
@@ -73,36 +67,48 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
-
+    console.error(error);
     res
       .status(500)
       .json({ error: "Something went wrong. Please try again later." });
   }
 };
 
-exports.logout = async (req, res) => {
+// LOGOUT controller
+export const logout = async (req, res) => {
   try {
     const headerToken = req.headers.authorization?.split(" ")[1];
+
+    //if no token provided
     if (!headerToken) {
-      return res.status(200).json({ message: "Logout successful" });
-      // 👍 Don't expose info, client should just clear local token
+      return res.status(200).json({ message: "Logout successful(no token)" });
     }
 
     let decoded;
     try {
       decoded = jwt.verify(headerToken, process.env.JWT_SECRET);
     } catch (error) {
+
       if (error.name === "TokenExpiredError") {
-        decoded = jwt.decode(headerToken); // fallback to extract id
+        decoded = jwt.decode(headerToken);
       } else {
-        return res.status(200).json({ message: "Logout successful" });
-        // 👍 Treat as logged out
+        return res
+          .status(200)
+          .json({ message: "Logout successful (invalid token)" });
       }
+    }
+     //decoded token doesn't have id
+    if (!decoded?.id) {
+      return res.status(200).json({ message: "Logout successful (no user id)" });
+    }
+
+    // user lookup
+    const admin = await db.Admin.findByPk(decoded.id);
+    if (!admin) {
+      return res.status(200).json({ message: "Logout successful (user not found)" });
     }
 
     if (decoded?.id) {
-      const admin = await Admin.findByPk(decoded.id);
       if (admin && admin.remember_token === headerToken) {
         admin.remember_token = null;
         await admin.save();

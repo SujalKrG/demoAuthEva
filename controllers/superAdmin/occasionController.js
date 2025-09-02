@@ -1,16 +1,17 @@
 // occasionController.js
-const { remoteSequelize, Sequelize, sequelize } = require("../../models");
-const OccasionResource = require("../../utils/occasionResource.js");
-const OccasionModel = require("../../models/remote/occasion.js")(
-  remoteSequelize,
-  Sequelize.DataTypes
-);
-const OccasionFieldModel = require("../../models/occasionfield.js")(
-  sequelize,
-  Sequelize.DataTypes
-);
+import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
+import OccasionResource from "../../utils/occasionResource.js";
 
-exports.occasions = async (req, res) => {
+// Import model factories
+import OccasionModelFactory from "../../models/remote/occasion.js";
+import OccasionFieldModelFactory from "../../models/occasionfield.js";
+
+// Initialize models
+const OccasionModel = OccasionModelFactory(remoteSequelize, Sequelize.DataTypes);
+const OccasionFieldModel = OccasionFieldModelFactory(sequelize, Sequelize.DataTypes);
+
+// occasion controller
+export const occasions = async (req, res) => {
   try {
     const occasions = await OccasionModel.findAll({
       where: { invitation_status: true },
@@ -22,7 +23,8 @@ exports.occasions = async (req, res) => {
   }
 };
 
-exports.getAllOccasionFields = async (req, res) => {
+// Get All Occasion Fields controller
+export const getAllOccasionFields = async (req, res) => {
   try {
     const occasions = await OccasionModel.findAll({
       where: { invitation_status: true },
@@ -36,7 +38,7 @@ exports.getAllOccasionFields = async (req, res) => {
       );
 
       return {
-        ...occasion, // <-- already has id, name, slug, image, category
+        ...occasion, // id, name, slug, image, category
         formFields: relatedFields.map((f) => ({
           formFieldId: f.id,
           fieldKey: f.field_key,
@@ -55,7 +57,8 @@ exports.getAllOccasionFields = async (req, res) => {
   }
 };
 
-exports.getOccasionFieldsById = async (req, res) => {
+// Get Occasion Fields By ID controller
+export const getOccasionFieldsById = async (req, res) => {
   try {
     const { id } = req.params;
 

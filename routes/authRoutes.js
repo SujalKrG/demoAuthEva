@@ -1,8 +1,8 @@
-const express = require("express");
-const { login, logout} = require("../controllers/authController.js");
+import  express from"express";
+import { login, logout} from "../controllers/authController.js";
 
-const authenticate = require("../middlewares/authMiddleware.js");
-const authorize = require("../middlewares/authorizeMiddleware.js");
+import authenticate from"../middlewares/authMiddleware.js";
+import authorize from "../middlewares/authorizeMiddleware.js";
 
 
 const router = express.Router();
@@ -18,4 +18,4 @@ router.get("/dashboard", authenticate, authorize([2]), (req, res) => {
 
 router.post("/logout", logout);
 
-module.exports = router;
+export default router;

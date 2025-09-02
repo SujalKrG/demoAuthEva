@@ -1,12 +1,20 @@
-const jwt = require("jsonwebtoken");
-const { Admin } = require("../models");
+import jwt from "jsonwebtoken";
+import db from "../models/index.js";
 
 const authenticate = async (req, res, next) => {
   try {
-    const headerToken = req.headers.authorization?.split(" ")[1];
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ message: "Authorization header missing or malformed" });
+    }
+    const headerToken = authHeader.split(" ")[1];
 
     if (!headerToken) {
-      return res.status(401).json({ message: "No token provided in authMiddleware" });
+      return res
+        .status(401)
+        .json({ message: "No token provided in authMiddleware" });
     }
     let decoded;
     try {
@@ -17,7 +25,7 @@ const authenticate = async (req, res, next) => {
         .json({ message: "Invalid or expired token", error: error.message });
     }
 
-    const admin = await Admin.findByPk(decoded.id);
+    const admin = await db.Admin.findByPk(decoded.id);
     if (!admin) {
       return res.status(401).json({ message: "admin not found" });
     }
@@ -56,4 +64,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = authenticate;
+export default authenticate;

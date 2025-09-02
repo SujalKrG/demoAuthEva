@@ -1,7 +1,8 @@
-const bcrypt = require("bcryptjs");
-const db = require("../../models");
+import bcrypt from "bcryptjs";
+import db from "../../models/index.js";
 
-exports.addAdmin = async (req, res) => {
+//admin controller (super admin only)
+export const addAdmin = async (req, res) => {
   try {
     const { password } = req.body;
 
@@ -54,7 +55,8 @@ exports.addAdmin = async (req, res) => {
   }
 };
 
-exports.assignRoleToAdmin = async (req, res) => {
+// Assign Role to Admin controller(super admin only)
+export const assignRoleToAdmin = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     const { adminId, roleId } = req.body;
@@ -83,7 +85,8 @@ exports.assignRoleToAdmin = async (req, res) => {
   }
 };
 
-exports.assignPermissionToRole = async (req, res) => {
+// Assign Permission to Role controller(super admin only)
+export const assignPermissionToRole = async (req, res) => {
   const t = await db.sequelize.transaction();
   try {
     const { roleId, permissionId } = req.body;
@@ -120,7 +123,8 @@ exports.assignPermissionToRole = async (req, res) => {
   }
 };
 
-exports.createRole = async (req, res) => {
+// Create New Role controller (super admin only)
+export const createRole = async (req, res) => {
   try {
     const { name } = req.body;
     const code = req.body.code?.trim().toUpperCase();
@@ -141,8 +145,8 @@ exports.createRole = async (req, res) => {
   }
 };
 
-// 5️⃣ Create New Permission
-exports.createPermission = async (req, res) => {
+// Create New Permission controller (super admin only)
+export const createPermission = async (req, res) => {
   try {
     const name = req.body.name?.trim().toLowerCase();
 

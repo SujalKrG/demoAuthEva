@@ -1,9 +1,9 @@
-const { Admin } = require("../models");
+import db from"../models/index.js";
 
 // Fetch access token by admin ID
 const getAccessTokenByAdminId = async (adminId) => {
   try {
-    const admin = await Admin.findByPk(adminId, {
+    const admin = await db.Admin.findByPk(adminId, {
       attributes: ["id", "remember_token"], // only fetch what you need
     });
 
@@ -21,7 +21,7 @@ const getAccessTokenByAdminId = async (adminId) => {
 // Fetch access token directly by token value
 const getAdminByAccessToken = async (token) => {
   try {
-    const admin = await Admin.findOne({
+    const admin = await db.Admin.findOne({
       where: { remember_token: token },
       attributes: ["id", "email", "remember_token"],
     });
@@ -33,7 +33,7 @@ const getAdminByAccessToken = async (token) => {
   }
 };
 
-module.exports = {
+export {
   getAccessTokenByAdminId,
   getAdminByAccessToken,
 };

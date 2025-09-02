@@ -1,31 +1,29 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   occasionFieldController,
   updateOccasionField,
   deleteOccasionField,
-} = require("../../controllers/superAdmin/occasionFieldController.js");
+} from "../../controllers/superAdmin/occasionFieldController.js";
 
-const {
+import {
   occasions,
   getAllOccasionFields,
   getOccasionFieldsById,
-} = require("../../controllers/superAdmin/occasionController.js");
-const {
+} from "../../controllers/superAdmin/occasionController.js";
+import {
   addAdmin,
   assignPermissionToRole,
   assignRoleToAdmin,
   createPermission,
   createRole,
-} = require("../../controllers/superAdmin/adminController.js");
-const authenticate = require("../../middlewares/authMiddleware.js");
-const authorize = require("../../middlewares/authorizeMiddleware.js");
-const checkAdminStatus = require("../../middlewares/statusMiddleware.js");
+} from "../../controllers/superAdmin/adminController.js";
+import authenticate from "../../middlewares/authMiddleware.js";
+import authorize from "../../middlewares/authorizeMiddleware.js";
+import checkAdminStatus from "../../middlewares/statusMiddleware.js";
 
 const router = express.Router();
 
-// router.get("/admin-only", authenticate, authorize([2]), (req, res) => {
-//   res.json({ message: "This is an admin-only route", admin: req.admin });
-// });
+
 
 //! Manage admin routes
 
@@ -66,60 +64,44 @@ router.post(
  */
 router.post(
   "/occasion-field/store",
-  // authenticate,
-  // checkAdminStatus,
-  // authorize(["SUPER_ADMIN"]),
+  authenticate,
+  checkAdminStatus,
+  authorize(["SUPER_ADMIN"]),
   occasionFieldController
 );
 router.get(
   "/occasion-field/get",
-  // authenticate,
-  // authorize(["SUPER_ADMIN"]),
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
   getAllOccasionFields
 );
 
 router.get(
   "/occasion-field/show/:id",
-  // authenticate,
-  // authorize(["SUPER_ADMIN"]),
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
   getOccasionFieldsById
 );
 //-------------------------------------------------------------------------------------------
 router.patch(
   "/occasion-field/update/:id",
-  // authenticate,
-  // authorize(["SUPER_ADMIN"]),
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
   updateOccasionField
 );
 
 router.delete(
   "/occasion-field/delete/:id",
-  // authenticate,
-  // authorize(["SUPER_ADMIN"]),
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
   deleteOccasionField
 );
 
-//! Get occasions from remote DB
-/**
- * 1. Get all occasions from /get-occasion
- * 2. Get occasion details from /get-occasion/:id
- * 3. Create a new occasion from /get-occasion
- * 4. Update an existing occasion from /get-occasion/:id
- * 5. Delete an occasion from /get-occasion/:id
- */
 router.get(
   "/get-occasion",
-  // authenticate,
-  // authorize(["SUPER_ADMIN"]),
+  authenticate,
+  authorize(["SUPER_ADMIN"]),
   occasions
 );
-// router.get(
-//   "/get-occasion-with-fields",
-//   // authenticate,
-//   // authorize(["SUPER_ADMIN"]),
-//   getAllOccasionFields
-// );
 
-//! Occasion field routes
-
-module.exports = router;
+export default router;

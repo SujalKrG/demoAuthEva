@@ -1,4 +1,4 @@
-const handleSequelizeError = (error, res) => {
+ const handleSequelizeError = (error, res) => {
   switch (error.name) {
     case "SequelizeDatabaseError":
       return res
@@ -32,4 +32,4 @@ const handleSequelizeError = (error, res) => {
       return null; // fallback to generic handler
   }
 };
-module.exports = handleSequelizeError;
+export default handleSequelizeError;

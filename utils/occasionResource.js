@@ -9,7 +9,7 @@ const OCCASIONS_CATEGORY = {
 class OccasionResource {
   constructor(occasion) {
     this.occasionId = occasion.id;
-    this.name = OccasionResource.cleanString(occasion.name);
+    this.name = cleanString(occasion.name); // use function directly
     this.slug = occasion.slug;
     this.image = occasion.image;
     this.category = {
@@ -18,15 +18,15 @@ class OccasionResource {
     };
   }
 
-  // Static method to clean strings
-  static cleanString(str) {
-    if (!str) return str;
-    return str.replace(/^["\\]+|["\\]+$/g, ""); // removes leading/trailing quotes or slashes
-  }
-
   static collection(occasions) {
     return occasions.map((o) => new OccasionResource(o));
   }
 }
 
-module.exports = OccasionResource;
+// 👇 move cleanString outside and export it
+export function cleanString(str) {
+  if (!str) return str;
+  return str.replace(/^["\\]+|["\\]+$/g, "");
+}
+
+export default OccasionResource;
