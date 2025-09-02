@@ -1,4 +1,4 @@
-const { Role, Permission, Admin } = require("../models");
+import db  from "../models/index.js";
 
 //permissionsToCheck = ['manageUsers', 'viewReports']
 const authorize = (permissionsToCheck = []) => {
@@ -11,17 +11,17 @@ const authorize = (permissionsToCheck = []) => {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const admin = await Admin.findByPk(userId, {
+      const admin = await db.Admin.findByPk(userId, {
         attributes: ["id", "email"],
         include: [
           {
-            model: Role,
+            model: db.Role,
             as: "roles",
             attributes: ["id", "code"],
             through: { attributes: [] },
             include: [
               {
-                model: Permission,
+                model: db.Permission,
                 as: "permissions",
                 attributes: ["id"],
                 through: { attributes: [] },
@@ -68,4 +68,4 @@ const authorize = (permissionsToCheck = []) => {
   };
 };
 
-module.exports = authorize;
+export default authorize;

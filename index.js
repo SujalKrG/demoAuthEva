@@ -1,11 +1,12 @@
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
-const authRouter = require("./routes/authRoutes");
-const adminRouter = require("./routes/superAdmin/superAdminRouter");
-const { sequelize, remoteSequelize } = require("./models");
+import authRouter from "./routes/authRoutes.js";
+import adminRouter from "./routes/superAdmin/superAdminRouter.js";
+import { sequelize, remoteSequelize } from "./models/index.js";
 
 const app = express();
 const PORT = process.env.PORT;

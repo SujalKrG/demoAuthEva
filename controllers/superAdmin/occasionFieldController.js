@@ -1,9 +1,8 @@
-const { OccasionField, sequelize } = require("../../models");
-const { cleanString } = require("../../utils/occasionResource");
+import db from "../../models/index.js";
+import handleSequelizeError from "../../utils/handelSequelizeError.js";
 
-const handleSequelizeError = require("../../utils/handelSequelizeError");
-
-const occasionFieldController = async (req, res) => {
+//create occasion field controller
+export const occasionFieldController = async (req, res) => {
   try {
     let data = req.body;
 
@@ -13,7 +12,12 @@ const occasionFieldController = async (req, res) => {
     }
 
     if (!data.length) {
-      return res.status(400).json({ message: "No data provided" });
+      return res
+        .status(400)
+        .json({
+          message:
+            "No data provided(length check for array in occasionFieldController)",
+        });
     }
 
     // 🔹 Sanitize input before validation
@@ -72,8 +76,11 @@ const occasionFieldController = async (req, res) => {
     }
 
     // 🔹 Insert into DB
-    await sequelize.transaction(async (t) => {
-      await OccasionField.bulkCreate(data, { validate: true, transaction: t });
+    await db.sequelize.transaction(async (t) => {
+      await db.OccasionField.bulkCreate(data, {
+        validate: true,
+        transaction: t,
+      });
     });
     return res.status(201).json({
       message: `${data.length} Occasion field(s) created successfully`,
@@ -106,87 +113,8 @@ const occasionFieldController = async (req, res) => {
   }
 };
 
-// const getOccasionFieldsById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-
-//     // 1️⃣ Validate input
-//     if (!id) {
-//       return res.status(400).json({
-//         message: "Invalid request: ID parameter is required",
-//       });
-//     }
-
-//     // 2️⃣ Query database
-//     const occasionFields = await OccasionField.findAll({
-//       where: { id: id }, // filtering by `type` as per your last code
-//     });
-
-//     // 3️⃣ Handle no data found
-//     if (!occasionFields || occasionFields.length === 0) {
-//       return res.status(404).json({
-//         message: "No occasion fields found",
-//       });
-//     }
-
-//     // 4️⃣ Success response
-//     return res.status(200).json({
-//       message: `Occasion fields for the given ID (${id}) retrieved successfully`,
-//       count: occasionFields.length,
-//       data: occasionFields,
-//     });
-//   } catch (error) {
-//     console.error("Get Occasion Details Error:", error);
-
-//     // Handle Sequelize errors
-//     const handled = handleSequelizeError(error, res);
-//     if (handled) return handled;
-
-//     // Handle generic Node.js / unexpected errors
-//     return res.status(500).json({
-//       message: "Unexpected server error",
-//       error:
-//         process.env.NODE_ENV === "production"
-//           ? "Internal Server Error"
-//           : error.message,
-//     });
-//   }
-// };
-
-// const getOccasionFields = async (req, res) => {
-//   try {
-//     const occasionFields = await OccasionField.findAll();
-
-//     if (!occasionFields || occasionFields.length === 0) {
-//       return res.status(404).json({
-//         message: "No occasion fields found",
-//         data: [],
-//       });
-//     }
-
-//     return res.status(200).json({
-//       message: "Occasion fields retrieved successfully",
-//       data: occasionFields,
-//     });
-//   } catch (error) {
-//     console.error("Get Occasion Fields Error:", error);
-
-//     // Handle Sequelize errors
-//     const handled = handleSequelizeError(error, res);
-//     if (handled) return handled;
-
-//     // Handle generic Node.js / unexpected errors
-//     return res.status(500).json({
-//       message: "Unexpected server error",
-//       error:
-//         process.env.NODE_ENV === "production"
-//           ? "Internal Server Error"
-//           : error.message,
-//     });
-//   }
-// };
-
-const updateOccasionField = async (req, res) => {
+// Update Occasion Field controller
+export const updateOccasionField = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -213,7 +141,7 @@ const updateOccasionField = async (req, res) => {
     }
 
     // 2️⃣ Query database
-    const [updated] = await OccasionField.update(safeUpdates, {
+    const [updated] = await db.OccasionField.update(safeUpdates, {
       where: { id },
     });
 
@@ -246,7 +174,8 @@ const updateOccasionField = async (req, res) => {
   }
 };
 
-const deleteOccasionField = async (req, res) => {
+// Delete Occasion Field controller
+export const deleteOccasionField = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -257,7 +186,7 @@ const deleteOccasionField = async (req, res) => {
       });
     }
 
-    const occasionField = await OccasionField.findByPk(id);
+    const occasionField = await db.OccasionField.findByPk(id);
 
     if (!occasionField) {
       return res.status(404).json({
@@ -288,12 +217,4 @@ const deleteOccasionField = async (req, res) => {
           : error.message,
     });
   }
-};
-
-module.exports = {
-  occasionFieldController,
-  // getOccasionFieldsById,
-  // getOccasionFields,
-  updateOccasionField,
-  deleteOccasionField,
 };
