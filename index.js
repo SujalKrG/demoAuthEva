@@ -1,5 +1,4 @@
 import express from "express";
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet"
@@ -14,7 +13,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json({ limit: "16kb" })); // Prevents huge payloads
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(helmet());
 app.use(
   cors({
