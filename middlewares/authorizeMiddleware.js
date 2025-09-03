@@ -8,7 +8,7 @@ const authorize = (permissionsToCheck = []) => {
       const userId = req.admin?.id;
 
       if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({success: false, message: "userId not found" });
       }
 
       const admin = await db.Admin.findByPk(userId, {
@@ -32,7 +32,7 @@ const authorize = (permissionsToCheck = []) => {
       });
 
       if (!admin) {
-        return res.status(403).json({ message: "User not found" });
+        return res.status(403).json({success: false, message: "User not found" });
       }
 
       // superAdmin bypass → has all permissions
@@ -57,13 +57,13 @@ const authorize = (permissionsToCheck = []) => {
       if (!hasAllRequired) {
         return res
           .status(403)
-          .json({ message: "Access denied: insufficient permissions" });
+          .json({success: false, message: "Access denied: insufficient permissions" });
       }
 
       next();
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ message: "Server error" });
+      return res.status(500).json({success: false, message: "Server error", error: error.message });
     }
   };
 };
