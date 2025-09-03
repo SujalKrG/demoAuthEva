@@ -23,8 +23,6 @@ import checkAdminStatus from "../../middlewares/statusMiddleware.js";
 
 const router = express.Router();
 
-
-
 //! Manage admin routes
 
 router.post("/admin/store", authenticate, authorize(["SUPER_ADMIN"]), addAdmin);
