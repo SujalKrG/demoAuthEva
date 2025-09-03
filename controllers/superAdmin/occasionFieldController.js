@@ -2,7 +2,7 @@ import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
 
 //create occasion field controller
-export const occasionFieldController = async (req, res) => {
+export const createOccasionField = async (req, res) => {
   try {
     let data = req.body;
 
@@ -14,7 +14,7 @@ export const occasionFieldController = async (req, res) => {
     if (!data.length) {
       return res
         .status(400)
-        .json({
+        .json({success: false,
           message:
             "No data provided(length check for array in occasionFieldController)",
         });
@@ -69,6 +69,7 @@ export const occasionFieldController = async (req, res) => {
 
       if (missingFields.length > 0) {
         return res.status(400).json({
+          success: false,
           message: `Validation failed for record at index ${index}`,
           missing_fields: missingFields,
         });
@@ -82,7 +83,7 @@ export const occasionFieldController = async (req, res) => {
         transaction: t,
       });
     });
-    return res.status(201).json({
+    return res.status(201).json({success: true,
       message: `${data.length} Occasion field(s) created successfully`,
       data: data,
     });
@@ -94,6 +95,7 @@ export const occasionFieldController = async (req, res) => {
       error?.original?.code === "ER_DUP_ENTRY"
     ) {
       return res.status(409).json({
+        success: false,
         message:
           "Duplicate entry: some combination of occasion_id and order_no already exists",
         details: error?.errors?.map((e) => e.message) || error.message,
@@ -102,11 +104,13 @@ export const occasionFieldController = async (req, res) => {
 
     if (error.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
+        success: false,
         message: "Invalid occasion_id (foreign key constraint failed)",
       });
     }
 
     return res.status(500).json({
+      success: false,
       message: "Failed to create occasion fields",
       error: error.message,
     });
@@ -136,6 +140,7 @@ export const updateOccasionField = async (req, res) => {
     // 1️⃣ Validate input
     if (!id) {
       return res.status(400).json({
+        success: false,
         message: "Invalid request: ID parameter is required",
       });
     }
@@ -148,12 +153,14 @@ export const updateOccasionField = async (req, res) => {
     // 3️⃣ Handle no data found
     if (!updated) {
       return res.status(404).json({
+        success: false,
         message: "No occasion field found to update",
       });
     }
 
     // 4️⃣ Success response
     return res.status(200).json({
+      success: true,
       message: `Occasion field with ID (${id}) updated successfully`,
     });
   } catch (error) {

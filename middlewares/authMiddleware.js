@@ -7,14 +7,14 @@ const authenticate = async (req, res, next) => {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res
         .status(401)
-        .json({ message: "Authorization header missing or malformed" });
+        .json({success: false, message: "Authorization header missing or malformed" });
     }
     const headerToken = authHeader.split(" ")[1];
 
     if (!headerToken) {
       return res
         .status(401)
-        .json({ message: "No token provided in authMiddleware" });
+        .json({success: false, message: "No token provided in authMiddleware" });
     }
     let decoded;
     try {
@@ -22,18 +22,18 @@ const authenticate = async (req, res, next) => {
     } catch (error) {
       return res
         .status(401)
-        .json({ message: "Invalid or expired token", error: error.message });
+        .json({success: false, message: "Invalid or expired token", error: error.message });
     }
 
     const admin = await db.Admin.findByPk(decoded.id);
     if (!admin) {
-      return res.status(401).json({ message: "admin not found" });
+      return res.status(401).json({success: false, message: "admin not found" });
     }
 
     if (admin.remember_token !== headerToken) {
       return res
         .status(401)
-        .json({ message: "Token mismatch. Please login again." });
+        .json({success: false, message: "Token mismatch. Please login again." });
     }
 
     // Case 2: admin inactive (status = 0)
@@ -42,9 +42,10 @@ const authenticate = async (req, res, next) => {
         admin.remember_token = null;
         await admin.save();
       } catch (error) {
-        res.json({ message: "db update error", error: error.message });
+        res.json({success: false, message: "db update error", error: error.message });
       }
       return res.status(401).json({
+        success: false,
         message: "Your account is inactive. Logged out automatically.",
       });
     }
@@ -60,7 +61,7 @@ const authenticate = async (req, res, next) => {
 
     return res
       .status(401)
-      .json({ message: "authentication failed", error: error.message });
+      .json({success: false, message: "authentication failed", error: error.message });
   }
 };
 

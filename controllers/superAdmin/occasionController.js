@@ -11,7 +11,7 @@ const OccasionModel = OccasionModelFactory(remoteSequelize, Sequelize.DataTypes)
 const OccasionFieldModel = OccasionFieldModelFactory(sequelize, Sequelize.DataTypes);
 
 // occasion controller
-export const occasions = async (req, res) => {
+export const getOccasions = async (req, res) => {
   try {
     const occasions = await OccasionModel.findAll({
       where: { invitation_status: true },
@@ -19,7 +19,7 @@ export const occasions = async (req, res) => {
     res.json(OccasionResource.collection(occasions));
   } catch (error) {
     console.error("Error fetching occasions:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({success: false, message: "Failed to retrieve occasions", error: error.message });
   }
 };
 
@@ -53,7 +53,7 @@ export const getAllOccasionFields = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error("Error fetching occasion fields:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({success: false, message: "Internal server error", error: error.message });
   }
 };
 
@@ -64,7 +64,7 @@ export const getOccasionFieldsById = async (req, res) => {
 
     // 1️⃣ Validate input
     if (!id) {
-      return res.status(400).json({
+      return res.status(400).json({success: false,
         message: "Invalid request: ID parameter is required",
       });
     }
@@ -74,7 +74,7 @@ export const getOccasionFieldsById = async (req, res) => {
     });
 
     if (!occasion) {
-      return res.status(404).json({
+      return res.status(404).json({success: false,
         message: "No occasion found",
       });
     }
@@ -88,7 +88,7 @@ export const getOccasionFieldsById = async (req, res) => {
 
     // 3️⃣ Handle no data found
     if (!occasionFields || occasionFields.length === 0) {
-      return res.status(404).json({
+      return res.status(404).json({success: false,
         message: "No occasion fields found",
       });
     }
@@ -111,6 +111,7 @@ export const getOccasionFieldsById = async (req, res) => {
   } catch (error) {
     console.error("Get Occasion Fields Error:", error);
     return res.status(500).json({
+      success: false,
       message: "Failed to retrieve occasion fields",
       error: error.message,
     });

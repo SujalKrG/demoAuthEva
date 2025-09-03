@@ -48,6 +48,15 @@ export default {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      resetPasswordOTP: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      resetPasswordOTPExpires: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

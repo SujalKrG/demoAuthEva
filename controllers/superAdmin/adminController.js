@@ -15,22 +15,24 @@ export const addAdmin = async (req, res) => {
     const status = req.body.status;
 
     if (!name || !email || !phone || !address || !city || !emp_id) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ success: false, message: "All fields are required" });
     }
+
+
 
     const emailExists = await db.Admin.findOne({ where: { email } });
     if (emailExists) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({ success: false, message: "Email already exists" });
     }
 
     if (!password) {
-      return res.status(400).json({ message: "Password is required" });
+      return res.status(400).json({ success: false, message: "Password is required" });
     }
 
     if (password.length < 6) {
       return res
         .status(400)
-        .json({ message: "Password must be at least 6 characters long" });
+        .json({ success: false, message: "Password must be at least 6 characters long" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -66,13 +68,13 @@ export const assignRoleToAdmin = async (req, res) => {
 
     if (!admin || !role) {
       await t.rollback();
-      return res.status(404).json({ message: "Admin or Role not found" });
+      return res.status(404).json({ success: false, message: "Admin or Role not found" });
     }
 
     const alreadyHasRole = await admin.hasRole(role, { transaction: t });
     if (alreadyHasRole) {
       await t.rollback();
-      return res.status(400).json({ message: "Admin already has this role" });
+      return res.status(400).json({ success: false, message: "Admin already has this role" });
     }
 
     await admin.addRole(role, { transaction: t }); // Sequelize magic method
@@ -81,7 +83,7 @@ export const assignRoleToAdmin = async (req, res) => {
     res.json({ message: `Role ${role.code} assigned to ${admin.name}` });
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -98,7 +100,7 @@ export const assignPermissionToRole = async (req, res) => {
 
     if (!role || !permission) {
       await t.rollback();
-      return res.status(404).json({ message: "Role or Permission not found" });
+      return res.status(404).json({ success: false, message: "Role or Permission not found" });
     }
 
     const alreadyHasPermission = await role.hasPermission(permission, {
@@ -108,7 +110,7 @@ export const assignPermissionToRole = async (req, res) => {
       await t.rollback();
       return res
         .status(400)
-        .json({ message: "Role already has this permission" });
+        .json({ success: false, message: "Role already has this permission" });
     }
 
     await role.addPermission(permission, { transaction: t }); // Sequelize magic method
@@ -119,7 +121,7 @@ export const assignPermissionToRole = async (req, res) => {
     });
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -130,18 +132,18 @@ export const createRole = async (req, res) => {
     const code = req.body.code?.trim().toUpperCase();
 
     if (!name || !code) {
-      return res.status(400).json({ message: "Name and Code are required" });
+      return res.status(400).json({ success: false, message: "Name and Code are required" });
     }
 
     const existing = await db.Role.findOne({ where: { code } });
     if (existing) {
-      return res.status(400).json({ message: "Role code already exists" });
+      return res.status(400).json({ success: false, message: "Role code already exists" });
     }
 
     const role = await db.Role.create({ name, code });
-    res.status(201).json({ message: "Role created successfully", role });
+    res.status(201).json({ success: true, message: "Role created successfully", role });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -151,19 +153,19 @@ export const createPermission = async (req, res) => {
     const name = req.body.name?.trim().toLowerCase();
 
     if (!name) {
-      return res.status(400).json({ message: "Permission name is required" });
+      return res.status(400).json({ success: false, message: "Permission name is required" });
     }
 
     const existing = await db.Permission.findOne({ where: { name } });
     if (existing) {
-      return res.status(400).json({ message: "Permission already exists" });
+      return res.status(400).json({ success: false, message: "Permission already exists" });
     }
 
     const permission = await db.Permission.create({ name });
     res
       .status(201)
-      .json({ message: "Permission created successfully", permission });
+      .json({ success: true, message: "Permission created successfully", permission });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };

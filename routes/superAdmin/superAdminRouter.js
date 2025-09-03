@@ -1,12 +1,12 @@
 import express from "express";
 import {
-  occasionFieldController,
+  createOccasionField,
   updateOccasionField,
   deleteOccasionField,
 } from "../../controllers/superAdmin/occasionFieldController.js";
 
 import {
-  occasions,
+  getOccasions,
   getAllOccasionFields,
   getOccasionFieldsById,
 } from "../../controllers/superAdmin/occasionController.js";
@@ -22,35 +22,16 @@ import authorize from "../../middlewares/authorizeMiddleware.js";
 import checkAdminStatus from "../../middlewares/statusMiddleware.js";
 
 const router = express.Router();
+router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
 
 //! Manage admin routes
 
-router.post("/admin/store", authenticate, authorize(["SUPER_ADMIN"]), addAdmin);
+router.post("/admin/store", addAdmin);
 
-router.post(
-  "/admin-role/store",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  assignRoleToAdmin
-);
-router.post(
-  "/role-permission/store",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  assignPermissionToRole
-);
-router.post(
-  "/role/store",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  createRole
-);
-router.post(
-  "/permission/store",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  createPermission
-);
+router.post("/admin-role/store", assignRoleToAdmin);
+router.post("/role-permission/store", assignPermissionToRole);
+router.post("/role/store", createRole);
+router.post("/permission/store", createPermission);
 
 //! Occasion form field routes
 /**
@@ -60,46 +41,11 @@ router.post(
  * 4. Update occasion form fields through /occasion-field/update/:id
  * 5. Delete occasion form fields through /occasion-field/delete/:id
  */
-router.post(
-  "/occasion-field/store",
-  authenticate,
-  checkAdminStatus,
-  authorize(["SUPER_ADMIN"]),
-  occasionFieldController
-);
-router.get(
-  "/occasion-field/get",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  getAllOccasionFields
-);
-
-router.get(
-  "/occasion-field/show/:id",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  getOccasionFieldsById
-);
-//-------------------------------------------------------------------------------------------
-router.patch(
-  "/occasion-field/update/:id",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  updateOccasionField
-);
-
-router.delete(
-  "/occasion-field/delete/:id",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  deleteOccasionField
-);
-
-router.get(
-  "/get-occasion",
-  authenticate,
-  authorize(["SUPER_ADMIN"]),
-  occasions
-);
+router.post("/occasion-field/store", createOccasionField);
+router.get("/occasion-field/get", getAllOccasionFields);
+router.get("/occasion-field/show/:id", getOccasionFieldsById);
+router.patch("/occasion-field/update/:id", updateOccasionField);
+router.delete("/occasion-field/delete/:id", deleteOccasionField);
+router.get("/get-occasion", getOccasions);
 
 export default router;
