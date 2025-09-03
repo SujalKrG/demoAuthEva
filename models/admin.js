@@ -23,6 +23,12 @@ export default (sequelize, DataTypes) => {
       phone: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+          is: {
+            args: /^[0-9]{10}$/,
+            msg: "Invalid phone number format.",
+          },
+        },
       },
       password: {
         type: DataTypes.STRING,
@@ -50,11 +56,19 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      resetPasswordOTP: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      resetPasswordOTPExpires: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     {
       tableName: "admin",
       timestamps: true,
-      // paranoid: true,
+      paranoid: true,
     }
   );
 
@@ -67,21 +81,18 @@ export default (sequelize, DataTypes) => {
     });
   };
 
+  // Instance method
   Admin.prototype.getPermissions = async function () {
     const roles = await this.getRoles({
       include: [{ model: sequelize.models.Permission, as: "permissions" }],
     });
 
-    const permissions = [];
-    roles.forEach((role) => {
-      role.permissions.forEach((perm) => {
-        if (!permissions.find((p) => p.id === perm.id)) {
-          permissions.push(perm);
-        }
-      });
-    });
+    const permissionMap = new Map();
+    roles.forEach((role) =>
+      role.permissions.forEach((perm) => permissionMap.set(perm.id, perm))
+    );
 
-    return permissions;
+    return Array.from(permissionMap.values());
   };
 
   return Admin;

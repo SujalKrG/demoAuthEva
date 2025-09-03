@@ -16,7 +16,6 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.2",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
@@ -24,12 +23,11 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.3",
+    "nodemailer": "^7.0.6",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3"
   },
   "devDependencies": {
-    "cross-env": "^10.0.0",
-    "jest": "^30.0.5",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4"
   }
