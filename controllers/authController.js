@@ -2,9 +2,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import db from "../models/index.js";
 import dotenv from "dotenv";
+import handleSequelizeError from "../utils/handelSequelizeError.js";
 
 dotenv.config();
 
+// Utility to generate JWT
 const generateAccessToken = (user) => {
   return jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 };
@@ -42,12 +44,10 @@ export const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid email or password" });
     if (!admin.status) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Account is inactive, contact super admin",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Account is inactive, contact super admin",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
@@ -78,12 +78,10 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Something went wrong. Please try again later.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    });
   }
 };
 
@@ -106,12 +104,10 @@ export const logout = async (req, res) => {
       if (error.name === "TokenExpiredError") {
         decoded = jwt.decode(headerToken);
       } else {
-        return res
-          .status(200)
-          .json({
-            success: true,
-            message: "Logout successful (invalid token)",
-          });
+        return res.status(200).json({
+          success: true,
+          message: "Logout successful (invalid token)",
+        });
       }
     }
     //decoded token doesn't have id
@@ -142,5 +138,75 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "Logout failed" });
+  }
+};
+
+// CHANGE PASSWORD controller
+export const changePassword = async (req, res) => {
+  try {
+    if (!req.admin || !req.admin.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Admin not logged in",
+      });
+    }
+    const adminId = req.admin.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current and new passwords are required",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters long",
+      });
+    }
+    if( currentPassword === newPassword){
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from current password",
+      });
+    }
+
+    const admin = await db.Admin.findByPk(adminId);
+    if (!admin) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, admin.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Current password is incorrect" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    admin.password = hashedNewPassword;
+    await admin.save();
+
+    res.json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.error(error);
+    handleSequelizeError(error, res);
+
+    // Handle Sequelize errors
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
+
+    // Handle generic Node.js / unexpected errors
+    return res.status(500).json({
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
+    });
   }
 };

@@ -9,16 +9,16 @@ const authenticate = async (req, res, next) => {
         .status(401)
         .json({success: false, message: "Authorization header missing or malformed" });
     }
-    const headerToken = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1];
 
-    if (!headerToken) {
+    if (!token) {
       return res
         .status(401)
         .json({success: false, message: "No token provided in authMiddleware" });
     }
     let decoded;
     try {
-      decoded = jwt.verify(headerToken, process.env.JWT_SECRET);
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       return res
         .status(401)
@@ -30,7 +30,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({success: false, message: "admin not found" });
     }
 
-    if (admin.remember_token !== headerToken) {
+    if (admin.remember_token !== token) {
       return res
         .status(401)
         .json({success: false, message: "Token mismatch. Please login again." });
@@ -49,7 +49,7 @@ const authenticate = async (req, res, next) => {
         message: "Your account is inactive. Logged out automatically.",
       });
     }
-    console.log("Header token:", headerToken);
+    console.log("Header token:", token);
     console.log("DB token:", admin.remember_token);
     console.log("Status:", admin.status);
 
