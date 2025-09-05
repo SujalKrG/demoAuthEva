@@ -5,9 +5,14 @@ import OccasionResource from "../../utils/occasionResource.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import OccasionFieldModelFactory from "../../models/occasionfield.js";
 
-const OccasionModel = OccasionModelFactory(remoteSequelize, Sequelize.DataTypes);
-const OccasionFieldModel = OccasionFieldModelFactory(sequelize, Sequelize.DataTypes);
-
+const OccasionModel = OccasionModelFactory(
+  remoteSequelize,
+  Sequelize.DataTypes
+);
+const OccasionFieldModel = OccasionFieldModelFactory(
+  sequelize,
+  Sequelize.DataTypes
+);
 
 //create occasion field controller
 export const createOccasionField = async (req, res) => {
@@ -22,33 +27,63 @@ export const createOccasionField = async (req, res) => {
     if (!data.length) {
       return res
         .status(400)
-        .json({success: false,
+        .json({
+          success: false,
           message:
             "No data provided(length check for array in occasionFieldController)",
         });
     }
 
-    // 🔹 Sanitize input before validation
-    data = data.map((item) => {
-      const sanitizedItem = {};
-
-      for (const key in item) {
-        if (typeof item[key] === "string") {
-          sanitizedItem[key] = item[key].trim(); // remove extra spaces
+    // 🔹 Normalize + coerce types (handles JSON and multipart form-data)
+    data = data.map((raw) => {
+      const item = {};
+      // trim strings
+      for (const k in raw) {
+        item[k] = typeof raw[k] === "string" ? raw[k].trim() : raw[k];
+      }
+      // normalize field_key
+      if (item.field_key) item.field_key = item.field_key.trim();
+      // numbers
+      if (item.occasion_id != null) item.occasion_id = Number(item.occasion_id);
+      if (item.order_no != null) item.order_no = Number(item.order_no);
+      // booleans (required may arrive as "true"/"false"/"1"/"0")
+      if (typeof item.required === "string") {
+        const s = item.required.toLowerCase();
+        item.required = s === "true" || s === "1" || s === "yes";
+      }
+      // options: can arrive as JSON string or CSV
+      if (typeof item.options === "string") {
+        const s = item.options.trim();
+        if (!s || s.toLowerCase() === "null") {
+          item.options = null;
         } else {
-          sanitizedItem[key] = item[key];
+          try {
+            const parsed = JSON.parse(s);
+            if (Array.isArray(parsed)) item.options = parsed;
+            else if (parsed && Array.isArray(parsed.values))
+              item.options = parsed.values;
+            else if (parsed && typeof parsed === "object")
+              item.options = Object.values(parsed);
+            else item.options = [String(parsed)];
+          } catch {
+            // CSV fallback: "Bride,Groom"
+            item.options = s
+              .split(",")
+              .map((x) => x.trim())
+              .filter(Boolean);
+          }
         }
       }
-
-      // Optionally normalize case for field_key
-      if (sanitizedItem.field_key) {
-        sanitizedItem.field_key = sanitizedItem.field_key.trim();
+      // ensure options is array or null (what the UI expects)
+      if (item.options != null && !Array.isArray(item.options)) {
+        if (typeof item.options === "object")
+          item.options = Object.values(item.options);
+        else item.options = [String(item.options)];
       }
-
-      return sanitizedItem;
+      return item;
     });
 
-    // 🔹 Validate each record
+    // 🔹 Validate each record (after coercion)
     for (const [index, item] of data.entries()) {
       const requiredFields = [
         "occasion_id",
@@ -57,29 +92,21 @@ export const createOccasionField = async (req, res) => {
         "type",
         "order_no",
       ];
-
-      // Check for missing required fields
       const missingFields = requiredFields.filter(
-        (field) =>
-          item[field] === undefined ||
-          item[field] === null ||
-          item[field] === ""
+        (f) => item[f] === undefined || item[f] === null || item[f] === ""
       );
-
-      // Special validations
       if (typeof item.required !== "boolean") {
         missingFields.push("required (must be boolean)");
       }
-
-      if (item.options && typeof item.options !== "object") {
-        missingFields.push("options (must be object or null)");
+      if (!(item.options == null || Array.isArray(item.options))) {
+        missingFields.push("options (must be array or null)");
       }
-
       if (missingFields.length > 0) {
         return res.status(400).json({
           success: false,
           message: `Validation failed for record at index ${index}`,
           missing_fields: missingFields,
+          received: item,
         });
       }
     }
@@ -91,10 +118,13 @@ export const createOccasionField = async (req, res) => {
         transaction: t,
       });
     });
-    return res.status(201).json({success: true,
-      message: `${data.length} Occasion field(s) created successfully`,
-      data: data,
-    });
+    return res
+      .status(201)
+      .json({
+        success: true,
+        message: `${data.length} Occasion field(s) created successfully`,
+        data: data,
+      });
   } catch (error) {
     console.error("OccasionField Error:", error);
 
@@ -264,7 +294,13 @@ export const getAllOccasionFields = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error("Error fetching occasion fields:", error);
-    res.status(500).json({success: false, message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
   }
 };
 
@@ -275,9 +311,12 @@ export const getOccasionFieldsById = async (req, res) => {
 
     // 1️⃣ Validate input
     if (!id) {
-      return res.status(400).json({success: false,
-        message: "Invalid request: ID parameter is required",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid request: ID parameter is required",
+        });
     }
 
     const occasion = await OccasionModel.findOne({
@@ -285,9 +324,9 @@ export const getOccasionFieldsById = async (req, res) => {
     });
 
     if (!occasion) {
-      return res.status(404).json({success: false,
-        message: "No occasion found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "No occasion found" });
     }
 
     const normalizedOccasion = new OccasionResource(occasion);
@@ -299,9 +338,9 @@ export const getOccasionFieldsById = async (req, res) => {
 
     // 3️⃣ Handle no data found
     if (!occasionFields || occasionFields.length === 0) {
-      return res.status(404).json({success: false,
-        message: "No occasion fields found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "No occasion fields found" });
     }
 
     // attach fields
