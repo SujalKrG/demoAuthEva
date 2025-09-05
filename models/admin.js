@@ -79,6 +79,7 @@ export default (sequelize, DataTypes) => {
       otherKey: "roleId",
       as: "roles",
     });
+   
   };
 
   // Instance method

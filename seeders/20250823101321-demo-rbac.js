@@ -1,7 +1,7 @@
 "use strict";
-const bcrypt = require("bcryptjs");
+import bcrypt  from "bcryptjs";
 
-module.exports = {
+export default {
   async up(queryInterface, Sequelize) {
     // 1️⃣ Insert Roles
     const roles = [

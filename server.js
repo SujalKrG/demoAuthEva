@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import helmet from "helmet"
 
 import authRouter from "./routes/authRoutes.js";
-import adminRouter from "./routes/superAdmin/superAdminRouter.js";
+import adminRouter from "./routes/index.js";
 import { sequelize, remoteSequelize } from "./models/index.js";
 
 dotenv.config();

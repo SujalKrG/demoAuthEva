@@ -27,12 +27,13 @@ export default (sequelize, DataTypes) => {
       },
       required: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
-      },
-      options: {
-        type: DataTypes.JSON,
         allowNull: true,
       },
+      options: {
+        type: DataTypes.JSON, // store as text
+        allowNull: true,
+      },
+
       order_no: {
         type: DataTypes.INTEGER,
         allowNull: false,
