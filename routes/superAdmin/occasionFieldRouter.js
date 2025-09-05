@@ -12,7 +12,7 @@ import checkAdminStatus from "../../middlewares/statusMiddleware.js";
 
 const router = express.Router();
 
-// router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
+router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
 
 router.post("/occasion-field/store", createOccasionField);
 router.get("/occasion-field/get", getAllOccasionFields);

@@ -5,6 +5,7 @@ import Sequelize from "sequelize";
 import process from "process";
 import { fileURLToPath, pathToFileURL } from "url";
 import configFile from "../config/config.js";
+import { registerActivityHooks } from "../hooks/activityLogger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +56,6 @@ Object.keys(db).forEach((modelName) => {
 db.sequelize = sequelize;
 db.remoteSequelize = remoteSequelize;
 db.Sequelize = Sequelize;
-
+registerActivityHooks(db);
 export default db;
 export { sequelize, Sequelize, remoteSequelize };
