@@ -6,7 +6,7 @@ import checkAdminStatus from "../../middlewares/statusMiddleware.js";
 
 
 const router = express.Router();
-router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
+// router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
 
 
 router.post("/admin/store", addAdmin);

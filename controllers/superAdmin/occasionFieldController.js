@@ -5,6 +5,10 @@ import OccasionResource from "../../utils/occasionResource.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import OccasionFieldModelFactory from "../../models/occasionfield.js";
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/recover
 const OccasionModel = OccasionModelFactory(
   remoteSequelize,
   Sequelize.DataTypes
@@ -25,6 +29,7 @@ export const createOccasionField = async (req, res) => {
     }
 
     if (!data.length) {
+<<<<<<< HEAD
       return res
         .status(400)
         .json({
@@ -32,6 +37,13 @@ export const createOccasionField = async (req, res) => {
           message:
             "No data provided(length check for array in occasionFieldController)",
         });
+=======
+      return res.status(400).json({
+        success: false,
+        message:
+          "No data provided(length check for array in occasionFieldController)",
+      });
+>>>>>>> origin/recover
     }
 
     // 🔹 Normalize + coerce types (handles JSON and multipart form-data)
@@ -116,8 +128,13 @@ export const createOccasionField = async (req, res) => {
       await db.OccasionField.bulkCreate(data, {
         validate: true,
         transaction: t,
-      });
+        individualHooks: true,
+        userId: req.admin?.id,
+      },
+      
+     ); // 🔑 required for activity hooks
     });
+<<<<<<< HEAD
     return res
       .status(201)
       .json({
@@ -125,6 +142,13 @@ export const createOccasionField = async (req, res) => {
         message: `${data.length} Occasion field(s) created successfully`,
         data: data,
       });
+=======
+    return res.status(201).json({
+      success: true,
+      message: `${data.length} Occasion field(s) created successfully`,
+      data: data,
+    });
+>>>>>>> origin/recover
   } catch (error) {
     console.error("OccasionField Error:", error);
 
@@ -154,12 +178,12 @@ export const createOccasionField = async (req, res) => {
     });
   }
 };
-
 // Update Occasion Field controller
 export const updateOccasionField = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
     const allowedUpdates = [
       "field_key",
       "label",
@@ -168,6 +192,7 @@ export const updateOccasionField = async (req, res) => {
       "options",
       "order_no",
     ];
+
     const safeUpdates = Object.keys(updates)
       .filter((key) => allowedUpdates.includes(key))
       .reduce((obj, key) => {
@@ -175,7 +200,6 @@ export const updateOccasionField = async (req, res) => {
         return obj;
       }, {});
 
-    // 1️⃣ Validate input
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -183,20 +207,20 @@ export const updateOccasionField = async (req, res) => {
       });
     }
 
-    // 2️⃣ Query database
+    // 🔹 Update record with hooks logging automatically
     const [updated] = await db.OccasionField.update(safeUpdates, {
       where: { id },
+      individualHooks: true,
+      userId: req.admin?.id, // 🔑 required for activity hooks
     });
 
-    // 3️⃣ Handle no data found
     if (!updated) {
       return res.status(404).json({
         success: false,
-        message: "No occasion field found to update",
+        message: "Occasion field not found or no changes made",
       });
     }
 
-    // 4️⃣ Success response
     return res.status(200).json({
       success: true,
       message: `Occasion field with ID (${id}) updated successfully`,
@@ -204,11 +228,9 @@ export const updateOccasionField = async (req, res) => {
   } catch (error) {
     console.error("Update Occasion Field Error:", error);
 
-    // Handle Sequelize errors
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
-    // Handle generic Node.js / unexpected errors
     return res.status(500).json({
       message: "Unexpected server error",
       error:
@@ -218,6 +240,7 @@ export const updateOccasionField = async (req, res) => {
     });
   }
 };
+
 
 // Delete Occasion Field controller
 export const deleteOccasionField = async (req, res) => {
@@ -240,7 +263,10 @@ export const deleteOccasionField = async (req, res) => {
     }
 
     // 🔹 Soft delete (sets deleted_at instead of removing row)
-    await occasionField.destroy();
+    await occasionField.destroy({
+      individualHooks: true,
+      userId: req.admin?.id, // 🔑 required for activity hooks
+    });
 
     // 4️⃣ Success response
     return res.status(200).json({
@@ -294,6 +320,7 @@ export const getAllOccasionFields = async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error("Error fetching occasion fields:", error);
+<<<<<<< HEAD
     res
       .status(500)
       .json({
@@ -301,6 +328,13 @@ export const getAllOccasionFields = async (req, res) => {
         message: "Internal server error",
         error: error.message,
       });
+=======
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+>>>>>>> origin/recover
   }
 };
 
@@ -311,12 +345,19 @@ export const getOccasionFieldsById = async (req, res) => {
 
     // 1️⃣ Validate input
     if (!id) {
+<<<<<<< HEAD
       return res
         .status(400)
         .json({
           success: false,
           message: "Invalid request: ID parameter is required",
         });
+=======
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request: ID parameter is required",
+      });
+>>>>>>> origin/recover
     }
 
     const occasion = await OccasionModel.findOne({

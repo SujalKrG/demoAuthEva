@@ -49,11 +49,11 @@ export default {
         allowNull: true,
       },
       resetPasswordOTP: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true,
       },
       resetPasswordOTPExpires: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: true,
       },
 

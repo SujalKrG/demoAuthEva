@@ -79,8 +79,12 @@ export default (sequelize, DataTypes) => {
       otherKey: "roleId",
       as: "roles",
     });
-   
+    Admin.hasMany(models.AdminActivityLog, {
+      foreignKey: "created_by",
+      as: "activityLogs",
+    });
   };
+  
 
   // Instance method
   Admin.prototype.getPermissions = async function () {
