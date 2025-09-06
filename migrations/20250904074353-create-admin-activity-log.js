@@ -3,55 +3,53 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("AdminActivityLog", {
+    await queryInterface.createTable("admin_activity_log", {
       id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
         autoIncrement: true,
         primaryKey: true,
+        allowNull: false,
       },
-      adminId: {
+      created_by: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Admin", // name of Target model
-          key: "id", // key in Target model that we're referencing
+          model: "admin", 
+          key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      action: {
+      description: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      description: {
-        type: Sequelize.TEXT,
+      module: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      previous_data: {
+        type: Sequelize.JSON,
         allowNull: true,
       },
-      ipAddress: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      userAgent: {
-        type: Sequelize.STRING,
+      new_data: {
+        type: Sequelize.JSON,
         allowNull: true,
       },
       createdAt: {
-        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
-        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-        ),
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("AdminActivityLogs");
+    await queryInterface.dropTable("admin_activity_log");
   },
 };

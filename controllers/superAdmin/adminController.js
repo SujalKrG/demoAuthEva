@@ -1,5 +1,8 @@
 import bcrypt from "bcryptjs";
 import db from "../../models/index.js";
+import { logActivity } from "../../utils/logActivity.js";
+
+
 
 //admin controller (super admin only)
 export const addAdmin = async (req, res) => {
