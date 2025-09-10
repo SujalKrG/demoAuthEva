@@ -1,5 +1,5 @@
 "use strict";
-import bcrypt  from "bcryptjs";
+import bcrypt from "bcryptjs";
 
 export default {
   async up(queryInterface, Sequelize) {
@@ -8,32 +8,32 @@ export default {
       {
         name: "Super Admin",
         code: "SUPER_ADMIN",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         name: "Editor",
         code: "EDITOR",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         name: "Viewer",
         code: "VIEWER",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("role", roles, {});
+    await queryInterface.bulkInsert("roles", roles, {});
 
     // 2️⃣ Insert Permissions
     const permissions = [
-      { name: "create_post", createdAt: new Date(), updatedAt: new Date() },
-      { name: "edit_post", createdAt: new Date(), updatedAt: new Date() },
-      { name: "delete_post", createdAt: new Date(), updatedAt: new Date() },
-      { name: "view_post", createdAt: new Date(), updatedAt: new Date() },
+      { name: "create_post", created_at: new Date(), updated_at: new Date() },
+      { name: "edit_post", created_at: new Date(), updated_at: new Date() },
+      { name: "delete_post", created_at: new Date(), updated_at: new Date() },
+      { name: "view_post", created_at: new Date(), updated_at: new Date() },
     ];
-    await queryInterface.bulkInsert("permission", permissions, {});
+    await queryInterface.bulkInsert("permissions", permissions, {});
 
     // 3️⃣ Insert Admins (with all required fields)
     const passwordHash = await bcrypt.hash("dummy123", 10); // hashed password
@@ -45,8 +45,8 @@ export default {
         password: passwordHash,
         emp_id: "EMP001",
         status: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
         name: "Bob",
@@ -55,21 +55,21 @@ export default {
         password: passwordHash,
         emp_id: "EMP002",
         status: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("admin", admins, {});
+    await queryInterface.bulkInsert("admins", admins, {});
 
     // 4️⃣ Get inserted roles, permissions, admins IDs
     const insertedRoles = await queryInterface.sequelize.query(
-      `SELECT id, code FROM role;`
+      `SELECT id, code FROM roles;`
     );
     const insertedPermissions = await queryInterface.sequelize.query(
-      `SELECT id, name FROM permission;`
+      `SELECT id, name FROM permissions;`
     );
     const insertedAdmins = await queryInterface.sequelize.query(
-      `SELECT id, name FROM admin;`
+      `SELECT id, name FROM admins;`
     );
 
     const rolesMap = insertedRoles[0].reduce((acc, r) => {
@@ -86,77 +86,77 @@ export default {
     }, {});
 
     // 5️⃣ Assign Permissions to Roles (pivot table)
-    const permissionRoles = [
+    const RolePermissions = [
       {
-        roleId: rolesMap["SUPER_ADMIN"],
-        permissionId: permsMap["create_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: rolesMap["SUPER_ADMIN"],
+        permission_id: permsMap["create_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
-        roleId: rolesMap["SUPER_ADMIN"],
-        permissionId: permsMap["edit_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: rolesMap["SUPER_ADMIN"],
+        permission_id: permsMap["edit_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
-        roleId: rolesMap["SUPER_ADMIN"],
-        permissionId: permsMap["delete_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: rolesMap["SUPER_ADMIN"],
+        permission_id: permsMap["delete_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
-        roleId: rolesMap["SUPER_ADMIN"],
-        permissionId: permsMap["view_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-
-      {
-        roleId: rolesMap["EDITOR"],
-        permissionId: permsMap["edit_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: rolesMap["EDITOR"],
-        permissionId: permsMap["view_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: rolesMap["SUPER_ADMIN"],
+        permission_id: permsMap["view_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
 
       {
-        roleId: rolesMap["VIEWER"],
-        permissionId: permsMap["view_post"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: rolesMap["EDITOR"],
+        permission_id: permsMap["edit_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        role_id: rolesMap["EDITOR"],
+        permission_id: permsMap["view_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+
+      {
+        role_id: rolesMap["VIEWER"],
+        permission_id: permsMap["view_post"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("permission_role", permissionRoles, {});
+    await queryInterface.bulkInsert("role_permissions", RolePermissions, {});
 
     // 6️⃣ Assign Roles to Admins (pivot table)
-    const roleAdmins = [
+    const adminRoles = [
       {
-        adminId: adminsMap["Alice"],
-        roleId: rolesMap["SUPER_ADMIN"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        admin_id: adminsMap["Alice"],
+        role_id: rolesMap["SUPER_ADMIN"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
       {
-        adminId: adminsMap["Bob"],
-        roleId: rolesMap["EDITOR"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        admin_id: adminsMap["Bob"],
+        role_id: rolesMap["EDITOR"],
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ];
-    await queryInterface.bulkInsert("role_admin", roleAdmins, {});
+    await queryInterface.bulkInsert("admin_roles", adminRoles, {});
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("role_admin", null, {});
-    await queryInterface.bulkDelete("permission_role", null, {});
-    await queryInterface.bulkDelete("admin", null, {});
-    await queryInterface.bulkDelete("permission", null, {});
-    await queryInterface.bulkDelete("role", null, {});
+    await queryInterface.bulkDelete("admin_roles", null, {});
+    await queryInterface.bulkDelete("role_permissions", null, {});
+    await queryInterface.bulkDelete("admins", null, {});
+    await queryInterface.bulkDelete("permissions", null, {});
+    await queryInterface.bulkDelete("roles", null, {});
   },
 };

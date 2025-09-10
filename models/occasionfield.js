@@ -29,7 +29,7 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         allowNull: true,
       },
-      options: {
+      option: {
         type: DataTypes.JSON, // store as text
         allowNull: true,
       },

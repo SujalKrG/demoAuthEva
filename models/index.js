@@ -5,7 +5,7 @@ import Sequelize from "sequelize";
 import process from "process";
 import { fileURLToPath, pathToFileURL } from "url";
 import configFile from "../config/config.js";
-import { registerActivityHooks } from "../hooks/activityLogger.js";
+import registerActivityHooks  from "../utils/registerAcitivityHooks.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

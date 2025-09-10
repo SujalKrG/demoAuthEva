@@ -16,17 +16,19 @@ export default (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "permission",
+      tableName: "permissions",
       timestamps: true,
+      createdAt:"created_at",
+      updatedAt:"updated_at",
       paranoid: false,
     }
   );
 
   Permission.associate = (models) => {
     Permission.belongsToMany(models.Role, {
-      through: models.PermissionRole,
-      foreignKey: "permissionId",
-      otherKey: "roleId",
+      through: models.RolePermission,
+      foreignKey: "permission_id",
+      otherKey: "role_id",
       as: "roles",
     });
   };

@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import db from "../models/index.js";
 import dotenv from "dotenv";
 import handleSequelizeError from "../utils/handelSequelizeError.js";
+import redisClient from "../config/redis.js";
+import logActivity from "../utils/logActivity.js";
 
 dotenv.config();
 
@@ -27,11 +29,12 @@ export const login = async (req, res) => {
         {
           model: db.Role,
           as: "roles",
+          attributes: ["code"],
           include: [
             {
               model: db.Permission,
               as: "permissions",
-              attributes: ["id"],
+              attributes: ["name"],
               through: { attributes: [] },
             },
           ],
@@ -49,6 +52,7 @@ export const login = async (req, res) => {
         message: "Account is inactive, contact super admin",
       });
     }
+    console.log(admin);
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
@@ -62,9 +66,26 @@ export const login = async (req, res) => {
         .json({ success: false, message: "JWT_SECRET not configured" });
     }
 
+    const roles = admin.roles.map((r) => r.code);
+    const permissions = admin.roles.flatMap((r) =>
+      r.permissions.map((p) => p.code)
+    );
+
+    const adminToken = generateAccessToken({
+      id: admin.id,
+      email: admin.email,
+      roles,
+      permissions,
+    });
+
     const accessToken = generateAccessToken(admin);
     admin.remember_token = accessToken;
     await admin.save();
+    logActivity({
+      created_by: admin.id,
+      action: "LOGIN",
+      module: "Admin",
+    });
 
     res.json({
       success: true,
@@ -166,7 +187,7 @@ export const changePassword = async (req, res) => {
         message: "New password must be at least 6 characters long",
       });
     }
-    if( currentPassword === newPassword){
+    if (currentPassword === newPassword) {
       return res.status(400).json({
         success: false,
         message: "New password must be different from current password",
@@ -189,7 +210,10 @@ export const changePassword = async (req, res) => {
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     admin.password = hashedNewPassword;
-    await admin.save();
+    await admin.save({
+      individualHooks: true,
+      userId: req.admin?.id,
+    });
 
     res.json({ success: true, message: "Password changed successfully" });
   } catch (error) {

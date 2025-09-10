@@ -5,7 +5,6 @@ import OccasionResource from "../../utils/occasionResource.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import OccasionFieldModelFactory from "../../models/occasionfield.js";
 
-
 const OccasionModel = OccasionModelFactory(
   remoteSequelize,
   Sequelize.DataTypes
@@ -117,9 +116,7 @@ export const createOccasionField = async (req, res) => {
         transaction: t,
         individualHooks: true,
         userId: req.admin?.id,
-      },
-      
-     ); // 🔑 required for activity hooks
+      }); // 🔑 required for activity hooks
     });
     return res.status(201).json({
       success: true,
@@ -184,12 +181,16 @@ export const updateOccasionField = async (req, res) => {
       });
     }
 
-    // 🔹 Update record with hooks logging automatically
+    // 🔹 Update record with activity hooks
     const [updated] = await db.OccasionField.update(safeUpdates, {
       where: { id },
       individualHooks: true,
-      userId: req.admin?.id, // 🔑 required for activity hooks
+      user:{id:req.admin?.id},
+      userTargetId: req.admin?.id,
+      // userId:  req.admin?.id||null,
+      // entity affected
     });
+
 
     if (!updated) {
       return res.status(404).json({
@@ -217,7 +218,6 @@ export const updateOccasionField = async (req, res) => {
     });
   }
 };
-
 
 // Delete Occasion Field controller
 export const deleteOccasionField = async (req, res) => {
