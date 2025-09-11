@@ -43,5 +43,5 @@ jobs:
 
             # PM2 ya nohup se server restart
             pm2 stop all || true
-            pm2 start index.js --name my-backend
+            pm2 start server.js --name my-backend
           EOF
