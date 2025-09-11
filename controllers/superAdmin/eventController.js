@@ -25,13 +25,11 @@ export const getAllEvents = async (req, res) => {
         .status(404)
         .json({ success: false, message: "No events found", data: [] });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Events retrieved successfully",
-        data: events,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Events retrieved successfully",
+      data: events,
+    });
   } catch (error) {
     console.log(error);
 
@@ -66,8 +64,8 @@ export const EventFiltration = async (req, res) => {
         { venue_address: { [Op.like]: `%${q}%` } },
         Sequelize.where(
           Sequelize.fn(
-            "JSON_SEARCH",
-            Sequelize.col("occasion_data"),
+            "JSON_UNQUOTE",
+            Sequelize.col("occasion_name"),
             "one",
             `%${q}%`
           ),
@@ -146,6 +144,10 @@ export const EventFiltration = async (req, res) => {
           "venue_name",
           "venue_address",
           "occasion_data",
+          [
+            Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_name"), "one"),
+            "occasion_name",
+          ],
         ],
       });
       filteredEvents = [...filteredEvents, ...userEvents];
@@ -153,8 +155,7 @@ export const EventFiltration = async (req, res) => {
 
     // Deduplicate
     filteredEvents = filteredEvents.filter(
-      (event, index, self) =>
-        index === self.findIndex((e) => e.id === event.id)
+      (event, index, self) => index === self.findIndex((e) => e.id === event.id)
     );
 
     if (!filteredEvents.length) {
