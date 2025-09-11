@@ -13,7 +13,11 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      description: {
+      user_id:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      action: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -21,18 +25,18 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      previous_data: {
+      details: {
         type: DataTypes.JSON,
         allowNull: true,
       },
-      new_data: {
-        type: DataTypes.JSON,
-        allowNull: true,
-      },
+      
     },
     {
-      tableName: "admin_activity_log",
+      tableName: "admin_activity_logs",
       timestamps: true, // will auto-create createdAt & updatedAt
+      createdAt:"created_at",
+      updatedAt:"updated_at",
+      
     }
   );
 

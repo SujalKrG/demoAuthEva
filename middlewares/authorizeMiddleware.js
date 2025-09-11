@@ -1,17 +1,19 @@
-import db  from "../models/index.js";
+import db from "../models/index.js";
 
 //permissionsToCheck = ['manageUsers', 'viewReports']
 const authorize = (permissionsToCheck = []) => {
   return async (req, res, next) => {
     try {
       // get logged in user from req (set by authenticate middleware)
-      const userId = req.admin?.id;
+      const adminId = req.admin?.id;
 
-      if (!userId) {
-        return res.status(401).json({success: false, message: "userId not found" });
+      if (!adminId) {
+        return res
+          .status(401)
+          .json({ success: false, message: "adminId not found" });
       }
 
-      const admin = await db.Admin.findByPk(userId, {
+      const admin = await db.Admin.findByPk(adminId, {
         attributes: ["id", "email"],
         include: [
           {
@@ -32,7 +34,9 @@ const authorize = (permissionsToCheck = []) => {
       });
 
       if (!admin) {
-        return res.status(403).json({success: false, message: "User not found" });
+        return res
+          .status(403)
+          .json({ success: false, message: "User not found" });
       }
 
       // superAdmin bypass → has all permissions
@@ -57,13 +61,22 @@ const authorize = (permissionsToCheck = []) => {
       if (!hasAllRequired) {
         return res
           .status(403)
-          .json({success: false, message: "Access denied: insufficient permissions" });
+          .json({
+            success: false,
+            message: "Access denied: insufficient permissions",
+          });
       }
 
       next();
     } catch (error) {
       console.log(error);
-      return res.status(500).json({success: false, message: "Server error", error: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: "Server error",
+          error: error.message,
+        });
     }
   };
 };

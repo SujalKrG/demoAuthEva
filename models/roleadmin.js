@@ -1,39 +1,41 @@
 "use strict";
 export default (sequelize, DataTypes) => {
-  const RoleAdmin = sequelize.define(
-    "RoleAdmin",
+  const AdminRole = sequelize.define(
+    "AdminRole",
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      roleId: {
+      role_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      adminId: {
+      admin_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
     },
     {
-      tableName: "role_admin",
+      tableName: "admin_roles",
       timestamps: true,
+      createdAt:"created_at",
+      updatedAt:"updated_at",
       paranoid: false,
     }
   );
 
-  RoleAdmin.associate = (models) => {
-    RoleAdmin.belongsTo(models.Role, {
-      foreignKey: "roleId",
+  AdminRole.associate = (models) => {
+    AdminRole.belongsTo(models.Role, {
+      foreignKey: "role_id",
       as: "role",
     });
-    RoleAdmin.belongsTo(models.Admin, {
-      foreignKey: "adminId",
+    AdminRole.belongsTo(models.Admin, {
+      foreignKey: "admin_id",
       as: "admin",
     });
   };
 
-  return RoleAdmin;
+  return AdminRole;
 };

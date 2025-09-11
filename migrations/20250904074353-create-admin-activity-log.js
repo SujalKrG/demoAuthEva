@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("admin_activity_log", {
+    await queryInterface.createTable("admin_activity_logs", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -14,13 +14,17 @@ export default {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "admin", 
+          model: "admins", 
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      description: {
+      user_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      action: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -28,20 +32,16 @@ export default {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      previous_data: {
+      details: {
         type: Sequelize.JSON,
         allowNull: true,
       },
-      new_data: {
-        type: Sequelize.JSON,
-        allowNull: true,
-      },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,
@@ -50,6 +50,6 @@ export default {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("admin_activity_log");
+    await queryInterface.dropTable("admin_activity_logs");
   },
 };
