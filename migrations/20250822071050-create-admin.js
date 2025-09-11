@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("admin", {
+    await queryInterface.createTable("admins", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -48,28 +48,28 @@ export default {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      resetPasswordOTP: {
+      reset_password_OTP: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      resetPasswordOTPExpires: {
+      reset_password_OTP_expire: {
         type: Sequelize.DATE,
         allowNull: true,
       },
 
-      createdAt: {
+      created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal(
           "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         ),
       },
-      deletedAt: {
+      deleted_at: {
         type: Sequelize.DATE,
         allowNull: true,
       },
@@ -83,6 +83,6 @@ export default {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable("admin");
+    await queryInterface.dropTable("admins");
   },
 };

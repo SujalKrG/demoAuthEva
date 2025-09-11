@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 export default{
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("permission", {
+    await queryInterface.createTable("permissions", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -14,12 +14,12 @@ export default{
         allowNull: false,
         unique: true,
       },
-      createdAt: {
+      created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal(
@@ -30,6 +30,6 @@ export default{
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("permission");
+    await queryInterface.dropTable("permissions");
   },
 };

@@ -1,39 +1,41 @@
 "use strict";
 export default (sequelize, DataTypes) => {
-  const PermissionRole = sequelize.define(
-    "PermissionRole",
+  const RolePermission = sequelize.define(
+    "RolePermission",
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      roleId: {
+      role_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      permissionId: {
+      permission_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
     },
     {
-      tableName: "permission_role",
+      tableName: "role_permissions",
       timestamps: true,
+      createdAt:"created_at",
+      updatedAt:"updated_at",
       paranoid: false,
     }
   );
 
-  PermissionRole.associate = (models) => {
-    PermissionRole.belongsTo(models.Role, {
-      foreignKey: "roleId",
+  RolePermission.associate = (models) => {
+    RolePermission.belongsTo(models.Role, {
+      foreignKey: "role_id",
       as: "role",
     });
-    PermissionRole.belongsTo(models.Permission, {
-      foreignKey: "permissionId",
+    RolePermission.belongsTo(models.Permission, {
+      foreignKey: "permission_id",
       as: "permission",
     });
   };
 
-  return PermissionRole;
+  return RolePermission;
 };

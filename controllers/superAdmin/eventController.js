@@ -1,5 +1,6 @@
 import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
+import { cleanString } from "../../utils/occasionResource.js";
 
 export const getAllEvents = async (req, res) => {
   try {
@@ -29,3 +30,5 @@ export const getAllEvents = async (req, res) => {
     });
   }
 };
+
+export const getUserWithEvents = async (req, res) => {}

@@ -20,24 +20,26 @@ export default (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "role",
+      tableName: "roles",
       timestamps: true,
+      createdAt:"created_at",
+      updatedAt:"updated_at",
       paranoid: false,
     }
   );
 
   Role.associate = (models) => {
     Role.belongsToMany(models.Admin, {
-      through: models.RoleAdmin,
-      foreignKey: "roleId",
-      otherKey: "adminId",
+      through: models.AdminRole,
+      foreignKey: "role_id",
+      otherKey: "admin_id",
       as: "admins",
     });
 
     Role.belongsToMany(models.Permission, {
-      through: models.PermissionRole,
-      foreignKey: "roleId",
-      otherKey: "permissionId",
+      through: models.RolePermission,
+      foreignKey: "role_id",
+      otherKey: "permission_id",
       as: "permissions",
     });
   };

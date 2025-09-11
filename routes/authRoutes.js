@@ -2,8 +2,8 @@ import express from "express";
 import { login, logout ,changePassword} from "../controllers/authController.js";
 import { requestPasswordOTP,resetPasswordWithOTP } from "../controllers/forgotPassword.js";
 
-// import authenticate from "../middlewares/authMiddleware.js";
-// import authorize from "../middlewares/authorizeMiddleware.js";
+import authenticate from "../middlewares/authMiddleware.js";
+import authorize from "../middlewares/authorizeMiddleware.js";
 
 const router = express.Router();
 
@@ -20,8 +20,8 @@ router.post("/request-password-otp", requestPasswordOTP);
 router.post("/reset-password-otp", resetPasswordWithOTP);
 
 
-router.post("/change-password",  changePassword);
+router.post("/change-password",authenticate,authorize(["SUPER_ADMIN"]),  changePassword);
 
-router.post("/logout", logout);
+router.post("/logout",authenticate, logout);
 
 export default router;

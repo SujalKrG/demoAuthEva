@@ -32,7 +32,7 @@ export default{
         allowNull: false,
         defaultValue: false,
       },
-      options: {
+      option: {
         type: Sequelize.JSON,
         allowNull: true,
       },

@@ -1,6 +1,6 @@
 import db from "../../models/index.js";
 const { AdminActivityLog } = db;
-
+//this controller fetch all admin activity 
 export const getAdminActivityLogs = async (req, res) => {
   try {
     const logs = await AdminActivityLog.findAll();

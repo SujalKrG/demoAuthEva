@@ -1,19 +1,19 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import helmet from "helmet"
+import helmet from "helmet";
 
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
 import { sequelize, remoteSequelize } from "./models/index.js";
-import { requestLogger } from "./middlewares/requestLogger.js";
+import  redisClient from "./config/redis.js";
+
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json({ limit: "16kb" })); // Prevents huge payloads
-app.use(requestLogger)
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(
@@ -35,6 +35,8 @@ async function testDBConnections() {
 
     await remoteSequelize.authenticate();
     console.log("Remote DB connection established successfully.");
+
+    // redisClient.connect();
   } catch (error) {
     console.error("Unable to connect to the databases:", error);
     process.exit(1);

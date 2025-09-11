@@ -56,32 +56,39 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      resetPasswordOTP: {
+      reset_password_OTP: {
         type: DataTypes.STRING,
         allowNull: true,
+        field: 'reset_password_otp',
+        
       },
-      resetPasswordOTPExpires: {
+      reset_password_OTP_expire: {
         type: DataTypes.DATE,
         allowNull: true,
+        field: 'reset_password_otp_expire'
       },
     },
     {
-      tableName: "admin",
+      tableName: "admins",
       timestamps: true,
-      paranoid: true,
+       underscored: true,
+       paranoid: true,
+      createdAt:"created_at",
+      updatedAt:"updated_at",
+      deletedAt: 'deleted_at',
     }
   );
 
   Admin.associate = (models) => {
     Admin.belongsToMany(models.Role, {
-      through: models.RoleAdmin,
-      foreignKey: "adminId",
-      otherKey: "roleId",
+      through: models.AdminRole,
+      foreignKey: "admin_id",
+      otherKey: "role_id",
       as: "roles",
     });
     Admin.hasMany(models.AdminActivityLog, {
       foreignKey: "created_by",
-      as: "activityLogs",
+      as: "admin_activity_logs",
     });
   };
   

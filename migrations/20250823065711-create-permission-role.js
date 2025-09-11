@@ -3,38 +3,38 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("permission_role", {
+    await queryInterface.createTable("role_permissions", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      roleId: {
+      role_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "role",
+          model: "roles",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      permissionId: {
+      permission_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "permission",
+          model: "permissions",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      createdAt: {
+      created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal(
@@ -43,23 +43,23 @@ export default {
       },
     });
 
-    await queryInterface.addConstraint("permission_role", {
-      fields: ["roleId", "permissionId"],
+    await queryInterface.addConstraint("role_permissions", {
+      fields: ["role_id", "permission_id"],
       type: "unique",
       name: "uniq_permission_role_roleId_permissionId",
     });
 
     //Adding indexes
-    await queryInterface.addIndex("permission_role", ["roleId"], {
+    await queryInterface.addIndex("role_permissions", ["role_id"], {
       name: "idx_permission_role_roleId",
     });
 
-    await queryInterface.addIndex("permission_role", ["permissionId"], {
+    await queryInterface.addIndex("role_permissions", ["permission_id"], {
       name: "idx_permission_role_permissionId",
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("permission_role");
+    await queryInterface.dropTable("role_permissions");
   },
 };

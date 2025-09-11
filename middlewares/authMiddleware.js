@@ -49,10 +49,6 @@ const authenticate = async (req, res, next) => {
         message: "Your account is inactive. Logged out automatically.",
       });
     }
-    console.log("Header token:", token);
-    console.log("DB token:", admin.remember_token);
-    console.log("Status:", admin.status);
-
     // ✅ Attach user info
     req.admin = admin;
     return next();
