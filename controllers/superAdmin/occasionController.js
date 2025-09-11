@@ -1,6 +1,6 @@
 // occasionController.js
 import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
-
+import OccasionResource from "../../utils/occasionResource.js";
 // Import model factories
 import OccasionModelFactory from "../../models/remote/occasion.js";
 
