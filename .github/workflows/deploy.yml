@@ -41,6 +41,8 @@ jobs:
             # Node.js dependencies install
             npm install --production
 
+             npm run migrate-and-seed || { echo "Migration/Seeding failed"; exit 1; }
+
             # PM2 ya nohup se server restart
             pm2 stop all || true
             pm2 start server.js --name my-backend
