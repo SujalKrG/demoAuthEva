@@ -53,9 +53,8 @@ jobs:
         # We build a small deployment script that will run on the EC2 instance.
         run: |
           cat > deploy_remote.sh <<'SH'
-          #!/usr/bin/env bash
+          #!/usr/bin/env bas
           set -euo pipefail
-
           # Ensure we run from the user's home app directory
           cd ~/app || { mkdir -p ~/app && cd ~/app; }
 
