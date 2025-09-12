@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import db from "../models/index.js";
 import dotenv from "dotenv";
 import handleSequelizeError from "../utils/handelSequelizeError.js";
-import redisClient from "../config/redis.js";
 import logActivity from "../utils/logActivity.js";
 
 dotenv.config();

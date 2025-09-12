@@ -273,7 +273,7 @@ export const getAllOccasionFields = async (req, res) => {
       where: { invitation_status: true },
     });
     const normalizedOccasions = OccasionResource.collection(occasions);
-    const fields = await OccasionFieldModel.findAll();
+    const fields = await OccasionFieldModel.findAll({order: [["order_no", "ASC"]]});
 
     const response = normalizedOccasions.map((occasion) => {
       const relatedFields = fields.filter(
@@ -319,6 +319,7 @@ export const getOccasionFieldsById = async (req, res) => {
 
     const occasion = await OccasionModel.findOne({
       where: { id, invitation_status: true },
+      order: [["order_no", "ASC"]],
     });
 
     if (!occasion) {

@@ -1,37 +1,37 @@
-
 import fs from "fs";
 import path from "path";
 import Sequelize from "sequelize";
-import process from "process";
 import { fileURLToPath, pathToFileURL } from "url";
 import configFile from "../config/config.js";
-import registerActivityHooks  from "../utils/registerAcitivityHooks.js";
+import registerActivityHooks from "../utils/registerAcitivityHooks.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || "development";
-const config = configFile[env];
+
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-
-// Remote DB
-const remoteConfig = configFile.remote;
-const remoteSequelize = new Sequelize(
-  remoteConfig.database,
-  remoteConfig.username,
-  remoteConfig.password,
-  remoteConfig
+// Remote DB #1 (use "development" block from config)
+const config1 = configFile[env];  // 👈 now this matches your config
+const sequelize = new Sequelize(
+  config1.database,
+  config1.username,
+  config1.password,
+  config1
 );
 
-// Load models dynamically
+// Remote DB #2 (use "remote" block from config)
+const config2 = configFile.remote;
+const remoteSequelize = new Sequelize(
+  config2.database,
+  config2.username,
+  config2.password,
+  config2
+);
+
+// Load models dynamically into Remote DB #1
 for (const file of fs.readdirSync(__dirname).filter(
   (file) =>
     file.indexOf(".") !== 0 &&
@@ -40,7 +40,7 @@ for (const file of fs.readdirSync(__dirname).filter(
     !file.includes(".test.js")
 )) {
   const modelPath = path.join(__dirname, file);
-  const modelModule = await import(pathToFileURL(modelPath).href); // ✅ FIX
+  const modelModule = await import(pathToFileURL(modelPath).href);
   const modelFactory = modelModule.default || modelModule;
   const model = modelFactory(sequelize, Sequelize.DataTypes);
   db[model.name] = model;
@@ -53,9 +53,11 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-db.sequelize = sequelize;
-db.remoteSequelize = remoteSequelize;
+db.sequelize = sequelize;         // Remote DB #1
+db.remoteSequelize = remoteSequelize; // Remote DB #2
 db.Sequelize = Sequelize;
+
 registerActivityHooks(db);
+
 export default db;
 export { sequelize, Sequelize, remoteSequelize };
