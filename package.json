@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "migrate:run": "node --unhandled-rejections=strict scripts/runMigrations.mjs",
-    "seed:run": "node --unhandled-rejections=strict scripts/runSeeders.mjs",
+    "migrate:run": "node --unhandled-rejections=strict scripts/runMigrations.js",
+    "seed:run": "node --unhandled-rejections=strict scripts/runSeeders.js",
     "migrate-and-seed": "npm run migrate:run && npm run seed:run",
     "test": "cross-env NODE_ENV=test JWT_SECRET=test_secret jest --runInBand"
   },
