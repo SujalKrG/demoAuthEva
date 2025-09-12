@@ -21,12 +21,12 @@ jobs:
           chmod 600 private_key.pem
 
       - name: Debug: SSH verbose attempt from runner
+        timeout-minutes: 3
         run: |
           echo "Running verbose ssh (10s connect timeout)..."
           # -o BatchMode=yes avoids password prompts
           # -o ConnectTimeout=10 ensures step doesn't hang forever
           ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i private_key.pem "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" 'echo SSH_OK' || true
-        timeout-minutes: 3
 
       - name: Debug: TCP port test and traceroute (port 22)
         run: |
