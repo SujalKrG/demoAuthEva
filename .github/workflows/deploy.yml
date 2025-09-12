@@ -20,6 +20,35 @@ jobs:
           printf '%s\n' "${{ secrets.EC2_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
+                - name: Debug: SSH verbose attempt from runner
+        run: |
+          printf '%s\n' "${{ secrets.EC2_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          echo "Running verbose ssh (10s connect timeout)..."
+          # -o BatchMode=yes avoids password prompts
+          # -o ConnectTimeout=10 ensures step doesn't hang forever
+          ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i private_key.pem "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" 'echo SSH_OK' || true
+        timeout-minutes: 3
+
+      - name: Debug: TCP port test and traceroute (port 22)
+        run: |
+          echo "Testing TCP connect via /dev/tcp (5s timeout)..."
+          timeout 5 bash -c 'cat < /dev/null > /dev/tcp/'"${{ secrets.EC2_HOST }}"'/22' && echo "TCP 22: OPEN" || echo "TCP 22: CLOSED/TIMED OUT"
+
+          echo "Installing traceroute (if needed) and running TCP traceroute to port 22..."
+          sudo apt-get update -y
+          sudo apt-get install -y traceroute iputils-ping || true
+          # TCP traceroute using -T (might require sudo)
+          sudo traceroute -T -p 22 "${{ secrets.EC2_HOST }}" || true
+
+      - name: Dump DNS resolution and route to host
+        run: |
+          echo "Resolving host..."
+          nslookup "${{ secrets.EC2_HOST }}" || true
+          echo "IP route & interfaces on runner:"
+          ip route || true
+
+
       - name: Prepare deploy script (local runner)
         # We build a small deployment script that will run on the EC2 instance.
         run: |
