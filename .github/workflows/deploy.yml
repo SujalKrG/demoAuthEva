@@ -20,10 +20,8 @@ jobs:
           printf '%s\n' "${{ secrets.EC2_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-                - name: Debug: SSH verbose attempt from runner
+      - name: Debug: SSH verbose attempt from runner
         run: |
-          printf '%s\n' "${{ secrets.EC2_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
           echo "Running verbose ssh (10s connect timeout)..."
           # -o BatchMode=yes avoids password prompts
           # -o ConnectTimeout=10 ensures step doesn't hang forever
@@ -48,13 +46,13 @@ jobs:
           echo "IP route & interfaces on runner:"
           ip route || true
 
-
       - name: Prepare deploy script (local runner)
         # We build a small deployment script that will run on the EC2 instance.
         run: |
           cat > deploy_remote.sh <<'SH'
-          #!/usr/bin/env bas
+          #!/usr/bin/env bash
           set -euo pipefail
+
           # Ensure we run from the user's home app directory
           cd ~/app || { mkdir -p ~/app && cd ~/app; }
 
