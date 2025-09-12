@@ -6,7 +6,6 @@ import helmet from "helmet";
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
 import { sequelize, remoteSequelize } from "./models/index.js";
-import redisClient from "./config/redis.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +24,8 @@ app.use(
 app.use("/api/v1/", authRouter);
 app.use("/api/v1/", adminRouter);
 // app.use("/api/v1/", adminRouter);
+console.log("DB1 config:", sequelize.config);
+console.log("DB2 config:", remoteSequelize.config);
 
 //db test
 async function testDBConnections() {

@@ -46,16 +46,16 @@ export default {
     await queryInterface.addConstraint("role_permissions", {
       fields: ["role_id", "permission_id"],
       type: "unique",
-      name: "uniq_permission_role_roleId_permissionId",
+      name: "uniq_permission_role_role_id_permission_id",
     });
 
     //Adding indexes
     await queryInterface.addIndex("role_permissions", ["role_id"], {
-      name: "idx_permission_role_roleId",
+      name: "idx_permission_role_role_id",
     });
 
     await queryInterface.addIndex("role_permissions", ["permission_id"], {
-      name: "idx_permission_role_permissionId",
+      name: "idx_permission_role_permission_id",
     });
   },
 
