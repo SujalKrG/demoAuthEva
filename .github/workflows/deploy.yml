@@ -20,18 +20,23 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
+
             cd ~/app || mkdir -p ~/app && cd ~/app
 
             # Clean and fetch fresh code
-            rm -rf * .[!.]*
-            git clone https://github.com/SujalKrG/demoAuthEva.git temp
-            mv temp/* temp/.[!.]* ./
+            rm -rf * .[!.]* || true
+            git clone --depth 1 https://github.com/SujalKrG/demoAuthEva.git temp
+            # copy including hidden files
+            cp -a temp/. .
             rm -rf temp
+            # remove .git so server isn't a git repo (optional)
+            rm -rf .git || true
+            
 
             # Install dependencies (include dev deps since migrations/seeders often need them)
-            npm install
+            npm install 
 
             # Export secrets into this remote session (do NOT echo secret values)
             export DB_HOST="${{ secrets.DB_HOST }}"
