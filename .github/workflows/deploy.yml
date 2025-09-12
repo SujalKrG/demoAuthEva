@@ -8,59 +8,80 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup SSH key
+        # Use printf to preserve newlines reliably when writing the PEM from GH Secret
         run: |
-          echo "${{ secrets.EC2_KEY }}" > private_key.pem
+          printf '%s\n' "${{ secrets.EC2_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-      - name: Deploy to EC2
+      - name: Prepare deploy script (local runner)
+        # We build a small deployment script that will run on the EC2 instance.
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e
-            cd ~/app || mkdir -p ~/app && cd ~/app
+          cat > deploy_remote.sh <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
 
-            # Clean and fetch fresh code
-            rm -rf * .[!.]*
-            git clone https://github.com/SujalKrG/demoAuthEva.git temp
-            mv temp/* temp/.[!.]* ./
-            rm -rf temp
+          # Ensure we run from the user's home app directory
+          cd ~/app || { mkdir -p ~/app && cd ~/app; }
 
-            # Install dependencies (include dev deps since migrations/seeders often need them)
-            npm install
+          # Safely remove files inside app (avoid removing home)
+          rm -rf ./* ./.??* || true
 
-            # Export secrets into this remote session (do NOT echo secret values)
-            export DB_HOST="${{ secrets.DB_HOST }}"
-            export DB_USER="${{ secrets.DB_USER }}"
-            export DB_PASS="${{ secrets.DB_PASS }}"
-            export DB_NAME="${{ secrets.DB_NAME }}"
-            # also export common alternate names in case config expects them
-            export DB_USERNAME="${{ secrets.DB_USER }}"
-            export DB_PASSWORD="${{ secrets.DB_PASS }}"
-            # export DB_DIALECT="${{ secrets.DB_DIALECT }}" || true
-            export NODE_ENV=production
+          # Clone fresh copy into a temp dir and move contents out
+          git clone https://github.com/SujalKrG/demoAuthEva.git temp
+          mv temp/* temp/.[!.]* . || true
+          rm -rf temp
 
-            # Verify required variables are present (fail early with helpful messages)
-            if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
-              echo "ERROR: Missing DB env vars. Aborting deploy."
-              echo "DB_HOST empty? $([ -z \"$DB_HOST\" ] && echo yes || echo no)"
-              echo "DB_USER empty? $([ -z \"$DB_USER\" ] && echo yes || echo no)"
-              echo "DB_PASS empty? $([ -z \"$DB_PASS\" ] && echo yes || echo no)"
-              echo "DB_NAME empty? $([ -z \"$DB_NAME\" ] && echo yes || echo no)"
-              exit 1
-            fi
+          # Install only production deps by default; change if you need dev deps
+          npm install --production
 
-            echo "DB envs appear set. Running migrations & seeders..."
+          # At this point, the following environment variables should be set in the shell:
+          # DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_USERNAME, DB_PASSWORD, NODE_ENV
+          # Fail if required DB envs are missing
+          if [ -z "${DB_HOST:-}" ] || [ -z "${DB_USER:-}" ] || [ -z "${DB_PASS:-}" ] || [ -z "${DB_NAME:-}" ]; then
+            echo "ERROR: Required DB envs missing. Aborting."
+            echo "DB_HOST empty? $([ -z "${DB_HOST:-}" ] && echo yes || echo no)"
+            echo "DB_USER empty? $([ -z "${DB_USER:-}" ] && echo yes || echo no)"
+            echo "DB_PASS empty? $([ -z "${DB_PASS:-}" ] && echo yes || echo no)"
+            echo "DB_NAME empty? $([ -z "${DB_NAME:-}" ] && echo yes || echo no)"
+            exit 1
+          fi
 
-            # Ensure the npm scripts exist: migrate:run and seed:run (or migrate-and-seed)
-            # Run migration and seeding (this should be defined in package.json)
-            npm run migrate-and-seed || { echo "Migration/Seeding failed"; exit 1; }
+          echo "DB envs appear set. Running migrations & seeders..."
 
-            # Restart application with pm2 (ensure server.js is your app entry)
-            pm2 stop my-backend || true
-            pm2 start server.js --name my-backend
-          EOF
+          # Run migration and seeding (ensure this script exists in package.json)
+          npm run migrate-and-seed || { echo "Migration/Seeding failed"; exit 1; }
+
+          # Restart app via pm2 (ensure pm2 is installed globally on the server)
+          pm2 stop my-backend || true
+          pm2 start server.js --name my-backend
+          SH
+          chmod +x deploy_remote.sh
+
+      - name: Copy deploy script to EC2 and run it
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          # copy the deploy script to the remote host
+          scp -o StrictHostKeyChecking=no -o ConnectTimeout=20 -i private_key.pem deploy_remote.sh "${EC2_USER}@${EC2_HOST}:/tmp/deploy_remote.sh"
+
+          # Run the script remotely while exporting DB envs in the remote shell.
+          # We wrap secret values in single quotes to avoid word-splitting on the remote side.
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=20 -i private_key.pem "${EC2_USER}@${EC2_HOST}" \
+            "export DB_HOST='${DB_HOST}' DB_USER='${DB_USER}' DB_PASS='${DB_PASS}' DB_NAME='${DB_NAME}' DB_USERNAME='${DB_USER}' DB_PASSWORD='${DB_PASS}' NODE_ENV=production && bash -l /tmp/deploy_remote.sh"
+
+      - name: Clean up sensitive files on runner
+        if: always()
+        run: |
+          rm -f private_key.pem deploy_remote.sh || true
