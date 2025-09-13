@@ -59,7 +59,7 @@ jobs:
               exit 1
             fi
 
-            echo "DB envs appear set. Running migrations & seeders..."
+            # echo "DB envs appear set. Running migrations & seeders..."
 
             # Ensure the npm scripts exist: migrate:run and seed:run (or migrate-and-seed)
             # Run migration and seeding (this should be defined in package.json)
