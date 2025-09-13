@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "migrate:undo": "node --unhandled-rejections=strict scripts/runUndoMigrations.js",
     "migrate:run": "node --unhandled-rejections=strict scripts/runMigrations.js",
     "seed:run": "node --unhandled-rejections=strict scripts/runSeeders.js",
     "migrate-and-seed": "npm run migrate:run && npm run seed:run",
