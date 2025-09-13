@@ -49,7 +49,7 @@ jobs:
             # export DB_DIALECT="${{ secrets.DB_DIALECT }}" || true
             export NODE_ENV=production
 
-            # Verify required variables are present (fail early with helpful messages)
+            # Verify required variables are present (fail early with helpful mesages)
             if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
               echo "ERROR: Missing DB env vars. Aborting deploy."
               echo "DB_HOST empty? $([ -z \"$DB_HOST\" ] && echo yes || echo no)"
