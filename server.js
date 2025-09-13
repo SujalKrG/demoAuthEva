@@ -47,7 +47,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "something went wrong" });
 });
 
-app.listen(PORT, "0.0.0.0", async () => {
+app.listen(PORT, async () => {
   console.log("Server running on port", PORT);
   await testDBConnections();
 });
