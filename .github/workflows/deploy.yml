@@ -63,8 +63,6 @@ jobs:
 
             # Ensure the npm scripts exist: migrate:run and seed:run (or migrate-and-seed)
             # Run migration and seeding (this should be defined in package.json)
-            npm run migrate:undo
-            npm run migrate-and-seed || { echo "Migration/Seeding failed"; exit 1; }
 
             # Restart application with pm2 (ensure server.js is your app entry)
             pm2 stop my-backend || true
