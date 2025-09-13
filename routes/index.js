@@ -10,6 +10,8 @@ import roleRouter from "./superAdmin/roleRouter.js";
 import roleToAdminRouter from "./superAdmin/roleToAdminRouter.js";
 import userRouter from "./superAdmin/userRouter.js";
 import adminActivityLogRouter from "./superAdmin/adminActivityLogRouter.js";
+import themeRouter from "./superAdmin/themeRouter.js";
+import themeCategoryRouter from "./superAdmin/themeCategoryRouter.js";
 
 const router = express.Router();
 
@@ -23,5 +25,7 @@ router.use("/", roleRouter);
 router.use("/", roleToAdminRouter);
 router.use("/", userRouter);
 router.use("/", adminActivityLogRouter);
+router.use("/", themeRouter);
+router.use("/", themeCategoryRouter);
 
 export default router;
