@@ -76,9 +76,9 @@ jobs:
             # npm run seed:run || true
 
             # Restart application with pm2 (use --update-env so pm2 picks up exported envs)
-            pm2 stop my-backend || true
-            pm2 delete my-backend || true
-            pm2 start server.js --name my-backend --update-env
+            pm2 stop myapp || true
+            pm2 delete myapp || true
+            pm2 start server.js --name myapp --update-env
 
             # Show pm2 status for debugging
             pm2 status
