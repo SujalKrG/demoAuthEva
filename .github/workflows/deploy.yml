@@ -39,12 +39,17 @@ jobs:
             npm install 
 
             # Export secrets into this remote session (do NOT echo secret values)
-            export PORT="${{ secrets.PORT }}"
-            export DB_HOST="${{ secrets.DB_HOST }}"
-            export DB_USER="${{ secrets.DB_USER }}"
-            export DB_PASS="${{ secrets.DB_PASS }}"
-            export DB_NAME="${{ secrets.DB_NAME }}"
-            export DB_PORT="${{ secrets.DB_PORT }}"
+            - name: start app with pm2
+              run: |
+                cd ~/app
+                pm2 start server.js --name myapp --update-env
+                env:
+                  PORT: 8080
+                  DB_HOST: ${{ secrets.DB_HOST }}
+                  DB_USER: ${{ secrets.DB_USER }}
+                  DB_PASS: ${{ secrets.DB_PASS }}
+                  DB_NAME: ${{ secrets.DB_NAME }}
+                  DB_PORT: ${{ secrets.DB_PORT }}
             # also export common alternate names in case config expects them
             export DB_USERNAME="${{ secrets.DB_USER }}"
             export DB_PASSWORD="${{ secrets.DB_PASS }}"
