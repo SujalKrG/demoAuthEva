@@ -61,6 +61,14 @@ jobs:
             export DB_USERNAME="$DB_USER"
             export DB_PASSWORD="$DB_PASS"
 
+            # Remote DB (DB2 occasions)
+            export DB2_CONNECTION="${{ secrets.DB2_CONNECTION }}"
+            export DB2_HOST="${{ secrets.DB2_HOST }}"
+            export DB2_PORT="${{ secrets.DB2_PORT }}"
+            export DB2_DATABASE="${{ secrets.DB2_DATABASE }}"
+            export DB2_USERNAME="${{ secrets.DB2_USERNAME }}"
+            export DB2_PASSWORD="${{ secrets.DB2_PASSWORD }}"
+
             # Basic validation
             if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
               echo "ERROR: Missing DB env vars. Aborting deploy."
