@@ -20,7 +20,7 @@ router.post("/request-password-otp", requestPasswordOTP);
 router.post("/reset-password-otp", resetPasswordWithOTP);
 
 
-router.post("/change-password",authenticate,authorize(["SUPER_ADMIN"]),  changePassword);
+// router.post("/change-password",authenticate,authorize(["SUPER_ADMIN"]),  changePassword);
 
 router.post("/logout",authenticate, logout);
 

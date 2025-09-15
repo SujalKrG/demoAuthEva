@@ -4,6 +4,7 @@ import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
 import OccasionResource from "../../utils/occasionResource.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import OccasionFieldModelFactory from "../../models/occasionfield.js";
+import { where } from "sequelize";
 
 const OccasionModel = OccasionModelFactory(
   remoteSequelize,
@@ -237,6 +238,7 @@ export const deleteOccasionField = async (req, res) => {
         message: `Occasion field with id ${id} not found`,
       });
     }
+    await occasionField.update({ order_no: null });
 
     // 🔹 Soft delete (sets deleted_at instead of removing row)
     await occasionField.destroy({
@@ -273,7 +275,9 @@ export const getAllOccasionFields = async (req, res) => {
       where: { invitation_status: true },
     });
     const normalizedOccasions = OccasionResource.collection(occasions);
-    const fields = await OccasionFieldModel.findAll({order: [["order_no", "ASC"]]});
+    const fields = await OccasionFieldModel.findAll({
+      order: [["order_no", "ASC"]],
+    });
 
     const response = normalizedOccasions.map((occasion) => {
       const relatedFields = fields.filter(

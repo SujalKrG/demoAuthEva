@@ -24,8 +24,8 @@ app.use(
 app.use("/api/v1/", authRouter);
 app.use("/api/v1/", adminRouter);
 // app.use("/api/v1/", adminRouter);
-console.log("DB1 config:", sequelize.config);
-console.log("DB2 config:", remoteSequelize.config);
+// console.log("DB1 config:", sequelize.config);
+// console.log("DB2 config:", remoteSequelize.config);
 
 //db test
 async function testDBConnections() {

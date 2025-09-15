@@ -20,7 +20,7 @@ export default {
         unique: true,
       },
       type: {
-        type: Sequelize.ENUM("image", "video", "document"),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       status: {

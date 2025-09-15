@@ -29,6 +29,11 @@ export default {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      slug: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
       preview_image: {
         type: Sequelize.STRING,
         allowNull: true,
