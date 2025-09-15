@@ -7,7 +7,7 @@ import {searchLimiter} from "../../middlewares/rateLimiterMiddleware.js";
 
 const router = express.Router();
 
-router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
+// router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
 
 // router.get("/event/get", getAllEvents);
 router.get("/get-events",searchLimiter, EventFiltration);

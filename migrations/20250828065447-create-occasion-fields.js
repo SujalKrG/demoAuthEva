@@ -38,7 +38,7 @@ export default {
       },
       order_no: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       created_at: {
         type: Sequelize.DATE,

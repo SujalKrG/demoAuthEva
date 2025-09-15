@@ -1,4 +1,4 @@
-import db from "../models/index.js";
+import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
 
 const generateSlug = (name) => {
@@ -11,10 +11,8 @@ const generateSlug = (name) => {
   // Ensure "-invitation" is added if not already
   const slugBase = base.endsWith("-invitation") ? base : `${base}-invitation`;
 
-  // Generate random 6-digit number
-  const uniqueSuffix = Math.floor(100000 + Math.random() * 900000);
-
-  return `${slugBase}-${uniqueSuffix}`;
+  
+  return `${slugBase}`;
 };
 
 
@@ -56,7 +54,84 @@ export const createThemeCategory = async (req, res) => {
 };
 
 
+export const updateThemeCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id || isNaN(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid or missing theme id" });
+    }
+    const themeCategory = await db.ThemeCategory.findByPk(id);
+    if (!themeCategory) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Theme category not found" });
+    }
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "no update data provided" });
+    }
+    const updatedThemeCategory = await themeCategory.update(req.body);
+    return res.status(200).json({
+      success: true,
+      message: "Theme category updated successfully",
+      data: updatedThemeCategory,
+    });
+  } catch (error) {
+   console.log("Error updating theme category:", error);
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
 
-export const updateThemeCategory = async (req, res) => {}
+    // Handle generic Node.js / unexpected errors
+    return res.status(500).json({
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
+    });
+  }
+};
 
-export const deleteThemeCategory = async (req, res) => {}
+
+export const deleteThemeCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or missing theme category ID",
+      });
+    }
+    const themeCategory = await db.ThemeCategory.findByPk(id);
+    if (!themeCategory) {
+      return res.status(404).json({
+        success: false,
+        message: "Theme category not found",
+      });
+    }
+    await themeCategory.destroy();
+    return res.status(200).json({
+      success: true,
+      message: "Theme category deleted successfully (soft delete)",
+    });
+  } catch (error) {
+    console.log("Error deleting theme category:", error);
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
+
+    // Handle generic Node.js / unexpected errors
+    return res.status(500).json({
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
+    });
+  }
+  
+   
+}
+

@@ -19,7 +19,7 @@ export default (sequelize, DataTypes) => {
         unique: true,
       },
       type: {
-        type: DataTypes.ENUM("image", "video", "document"),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       status: {

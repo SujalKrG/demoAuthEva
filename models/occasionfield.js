@@ -33,10 +33,9 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.JSON, // store as text
         allowNull: true,
       },
-
       order_no: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
     },
     {

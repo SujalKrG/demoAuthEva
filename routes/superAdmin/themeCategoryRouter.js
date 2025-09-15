@@ -6,7 +6,7 @@ import checkAdminStatus from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
+// router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
 
 router.post("/theme-category/store", createThemeCategory);
 router.patch("/theme-category/update/:id", updateThemeCategory);
