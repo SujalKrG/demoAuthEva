@@ -39,10 +39,12 @@ jobs:
             npm install 
 
             # Export secrets into this remote session (do NOT echo secret values)
+            export PORT="${{ secrets.PORT }}"
             export DB_HOST="${{ secrets.DB_HOST }}"
             export DB_USER="${{ secrets.DB_USER }}"
             export DB_PASS="${{ secrets.DB_PASS }}"
             export DB_NAME="${{ secrets.DB_NAME }}"
+            export DB_PORT="${{ secrets.DB_PORT }}"
             # also export common alternate names in case config expects them
             export DB_USERNAME="${{ secrets.DB_USER }}"
             export DB_PASSWORD="${{ secrets.DB_PASS }}"
