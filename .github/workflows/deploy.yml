@@ -23,17 +23,10 @@ jobs:
           ssh -T -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -euo pipefail
 
-            # Navigate to app directory or create it
-            mkdir -p ~/app
-            cd ~/app
+            cd ~/app || mkdir -p ~/app && cd ~/app
 
-            # Backup old code (optional, safe)
-            if [ -d backup ]; then rm -rf backup; fi
-            mkdir backup
-            cp -a ./* backup/ 2>/dev/null || true
-
-            # Clean workspace but keep .pm2, uploads, logs safe
-            find . -maxdepth 1 ! -name '.' ! -name 'server.js' ! -name 'node_modules' ! -name '.pm2' ! -name 'uploads' -exec rm -rf {} +
+            # Clean workspace (be careful: this deletes files inside ~/app)
+            rm -rf ./* .[!.]* || true
 
             # Fetch fresh copy
             git clone --depth 1 https://github.com/SujalKrG/demoAuthEva.git temp
@@ -41,21 +34,21 @@ jobs:
             rm -rf temp
             rm -rf .git || true
 
-            # Ensure Node.js exists
+            # Ensure node & npm exist
             if ! command -v node >/dev/null 2>&1; then
-              echo "ERROR: Node.js not found. Install Node.js first."
+              echo "ERROR: node not found on remote. Install Node.js on the EC2 instance first."
               exit 1
             fi
 
-            # Ensure PM2 exists
+            # Ensure pm2 is installed (install globally if missing)
             if ! command -v pm2 >/dev/null 2>&1; then
               npm install -g pm2
             fi
 
-            # Install dependencies
-            npm ci --production
+            # Install dependencies (change to npm ci if you prefer reproducible installs)
+            npm install
 
-            # Export DB and app env variables
+            # Export secrets into this remote session (these are expanded by Actions before sending)
             export DB_HOST="${{ secrets.DB_HOST }}"
             export DB_USER="${{ secrets.DB_USER }}"
             export DB_PASS="${{ secrets.DB_PASS }}"
@@ -68,25 +61,25 @@ jobs:
             export DB_USERNAME="$DB_USER"
             export DB_PASSWORD="$DB_PASS"
 
-            # Validate env vars
+            # Basic validation
             if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
               echo "ERROR: Missing DB env vars. Aborting deploy."
+              echo "DB_HOST empty? $([ -z \"$DB_HOST\" ] && echo yes || echo no)"
+              echo "DB_USER empty? $([ -z \"$DB_USER\" ] && echo yes || echo no)"
+              echo "DB_PASS empty? $([ -z \"$DB_PASS\" ] && echo yes || echo no)"
+              echo "DB_NAME empty? $([ -z \"$DB_NAME\" ] && echo yes || echo no)"
               exit 1
             fi
 
-            # Optional: migrations/seeders
+            # Optional: run migrations/seeders if you have scripts
             # npm run migrate:run || true
             # npm run seed:run || true
 
-            # Restart PM2 process safely
-            pm2 stop myapp || true
-            pm2 delete myapp || true
-            pm2 start server.js --name myapp --update-env
+            # Restart application with pm2 (use --update-env so pm2 picks up exported envs)
+            pm2 stop my-backend || true
+            pm2 delete my-backend || true
+            pm2 start server.js --name my-backend --update-env
 
-            # Save PM2 process for auto-start on reboot
-            pm2 save
-            pm2 startup systemd -u $USER --hp $HOME || true
-
-            # Show PM2 status
+            # Show pm2 status for debugging
             pm2 status
           EOF
