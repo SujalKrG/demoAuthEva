@@ -1,55 +1,57 @@
-import multer from "multer";
+import { PutObjectCommand , DeleteObjectCommand} from "@aws-sdk/client-s3";
 import { s3Client } from "../config/s3.js";
-import { PutObjectCommand ,DeleteObjectCommand } from "@aws-sdk/client-s3";
+import multer from "multer";
+import dotenv from "dotenv";
+dotenv.config();
 
-const storage = multer.memoryStorage(); // keep files in memory buffer for S3 upload
+export const uploadFileToS3 = async (buffer, folder, filename, mimetype) => {
+  const key = `${folder}/${Date.now()}-${filename}`;
 
-export const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit (adjust as needed)
-});
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: mimetype,
+    })
+  );
 
-
-
-
-// Sanitize file names
-export const sanitizeFileName = (filename) => {
-  return filename
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9.-]/g, "-");
+  return `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 };
 
-// Upload file to S3 and return public URL
-export const uploadFileToS3 = async (fileBuffer, folder, originalName, mimetype) => {
-  const key = `themes/${folder}/${Date.now()}-${sanitizeFileName(originalName)}`;
 
-  const command = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET,
-    Key: key,
-    Body: fileBuffer,
-    ContentType: mimetype,
-  });
 
-  await s3Client.send(command);
-
-  return `${process.env.AWS_URL}/${key}`;
-};
-
-// Delete file from S3
 export const deleteFileFromS3 = async (fileUrl) => {
-  if (!fileUrl) return;
+   try {
+    if (!fileUrl) throw new Error("No file URL provided");
 
-  const urlParts = fileUrl.split(`${process.env.AWS_URL}/`);
-  if (!urlParts[1]) return;
+    // Example URL:
+    // https://my-bucket.s3.ap-south-1.amazonaws.com/videos/12345-file.mp4
 
-  const key = urlParts[1];
+    // Extract Key after the domain
+    const url = new URL(fileUrl);
+    const key = url.pathname.substring(1); // removes leading "/"
 
-  const command = new DeleteObjectCommand({
-    Bucket: process.env.AWS_BUCKET,
-    Key: key,
-  });
+    console.log(`[deleteFileFromS3] Deleting from S3: Key=${key}`);
 
-  await s3Client.send(command);
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET,
+        Key: key,
+      })
+    );
+
+    console.log("[deleteFileFromS3] File deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("[deleteFileFromS3] Error deleting file:", error);
+    return false;
+  }
+}
+export const sanitizeFileName = (filename) => {
+  return filename.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
+};
+
+export const upload = () => {
+  multer({ storage: multer.memoryStorage() });
 };

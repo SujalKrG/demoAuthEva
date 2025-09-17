@@ -4,7 +4,6 @@ import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
 import OccasionResource from "../../utils/occasionResource.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import OccasionFieldModelFactory from "../../models/occasionfield.js";
-import { where } from "sequelize";
 
 const OccasionModel = OccasionModelFactory(
   remoteSequelize,

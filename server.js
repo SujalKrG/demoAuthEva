@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json({ limit: "16kb" })); // Prevents huge payload
+app.use(express.json()); // Prevents huge payload
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(

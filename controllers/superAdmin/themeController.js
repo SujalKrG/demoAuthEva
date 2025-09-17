@@ -1,28 +1,31 @@
-import { s3Client } from "../../config/s3.js";
-import db from "../../models/index.js";
-import slugify from "slugify";
 import multer from "multer";
-import handleSequelizeError from "../../utils/handelSequelizeError.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import db from "../../models/index.js";
+import { Op } from "sequelize";
+import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
+import OccasionModelFactory from "../../models/remote/occasion.js";
+import CountryModelFactory from "../../models/remote/country.js";
+import { capitalizeSentence, slug } from "../../utils/requiredMethods.js";
+import { imageUploadQueue, videoUploadQueue } from "../../jobs/queues.js";
 import {
-  uploadFileToS3,
   deleteFileFromS3,
   sanitizeFileName,
 } from "../../middlewares/uploadS3.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+const OccasionModel = OccasionModelFactory(
+  remoteSequelize,
+  Sequelize.DataTypes
+);
+const CountryModel = CountryModelFactory(remoteSequelize, Sequelize.DataTypes);
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
 
-const slug = (name) => {
-  return (
-    slugify(name, { lower: true, strict: true }) +
-    "-" +
-    Date.now().toString().slice(-6)
-  );
-};
-
 export const createTheme = async (req, res) => {
   try {
+    console.log("[createTheme] Incoming request:", req.body);
+
     const {
       occasion_id,
       category_id,
@@ -35,62 +38,137 @@ export const createTheme = async (req, res) => {
       status,
     } = req.body;
 
-    // Generate slug
-
-    let previewImageUrl = null;
-    let previewVideoUrl = null;
-
-    if (req.files?.preview_image?.[0]) {
-      const imageFile = req.files.preview_image[0];
-      previewImageUrl = await uploadFileToS3(
-        imageFile.buffer,
-        "images",
-        sanitizeFileName(imageFile.originalname),
-        imageFile.mimetype
-      );
+    // Basic validation
+    if (!occasion_id || !category_id || !name) {
+      return res.status(400).json({
+        success: false,
+        message: "occasion_id, category_id, and name are required",
+      });
     }
 
-    if (req.files?.preview_video?.[0]) {
-      const videoFile = req.files.preview_video[0];
-      previewVideoUrl = await uploadFileToS3(
-        videoFile.buffer,
-        "videos",
-        sanitizeFileName(videoFile.originalname),
-        videoFile.mimetype
-      );
+    // Validate category
+    const themeCategory = await db.ThemeCategory.findByPk(category_id);
+    if (!themeCategory) {
+      return res.status(400).json({
+        success: false,
+        message: "Theme category not found",
+      });
+    }
+    const occasions = await OccasionModel.findByPk(occasion_id);
+    if (!occasions){
+      return res.status(400).json({
+        success: false,
+        message: "Occasion not found",
+      });
     }
 
-    // Save in DB
+    // Generate slug (safe + unique)
+    const themeSlug = slug(name) + "-" + Date.now();
+
+    // Create DB record
     const theme = await db.Theme.create({
       occasion_id,
       category_id,
-      name,
+      name:capitalizeSentence(name),
       slug: slug(name),
-      component_name,
-      config,
-      base_price,
-      offer_price,
-      currency,
-      status,
-      preview_image: previewImageUrl,
-      preview_video: previewVideoUrl,
+      component_name: component_name || null,
+      config: config || {},
+      base_price: base_price ||null,
+      offer_price: offer_price || 0,
+      currency: currency || "INR",
+      status: status ?? true,
+      preview_image: null,
+      preview_video: null,
     });
 
+    console.log(`[createTheme] Theme created: id=${theme.id}, slug=${themeSlug}`);
+
+    /**
+     * Handle image upload (async via BullMQ)
+     */
+    if (req.files?.preview_image?.[0]) {
+      try {
+        const img = req.files.preview_image[0];
+        await imageUploadQueue.add(
+          "uploadImage",
+          {
+            themeId: theme.id,
+            file: img.buffer.toString("base64"),
+            filename: sanitizeFileName(img.originalname),
+            mimetype: img.mimetype,
+          },
+          {
+            attempts: 5,
+            backoff: { type: "exponential", delay: 5000 },
+            removeOnComplete: true,
+            removeOnFail: 200,
+          }
+        );
+        console.log(`[createTheme] Image job queued: themeId=${theme.id}`);
+      } catch (err) {
+        console.error("[createTheme] Failed to enqueue image job:", err);
+      }
+    } else {
+      console.log("[createTheme] No preview_image provided");
+    }
+
+    /**
+     * Handle video upload (only for video categories)
+     */
+    if (themeCategory.type === "video" && req.files?.preview_video?.[0]) {
+      try {
+        const vid = req.files.preview_video[0];
+        await videoUploadQueue.add(
+          "uploadVideo",
+          {
+            themeId: theme.id,
+            file: vid.buffer.toString("base64"),
+            filename: sanitizeFileName(vid.originalname),
+            mimetype: vid.mimetype,
+          },
+          {
+            attempts: 5,
+            backoff: { type: "exponential", delay: 10000 },
+            removeOnComplete: true,
+            removeOnFail: 200,
+          }
+        );
+        console.log(`[createTheme] Video job queued: themeId=${theme.id}`);
+      } catch (err) {
+        console.error("[createTheme] Failed to enqueue video job:", err);
+      }
+    } else {
+      console.log("[createTheme] No preview_video provided or category not video");
+    }
+
+    // Success response
     return res.status(201).json({
-      message: "Theme created successfully",
-      theme,
+      success: true,
+      message: "Theme created successfully. Media uploads are queued.",
+      data: theme,
     });
   } catch (error) {
-    console.error("Error creating theme:", error);
-    return res.status(500).json({ message: "Error creating theme", error });
+    console.error("[createTheme] Fatal error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error creating theme",
+      error: error.message,
+    });
   }
 };
+
 
 export const updateTheme = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: "Theme ID is required" });
+    }
+
     const theme = await db.Theme.findByPk(id);
-    if (!theme) return res.status(404).json({ message: "Theme not found" });
+    if (!theme) {
+      return res.status(404).json({ success: false, message: "Theme not found" });
+    }
 
     const {
       occasion_id,
@@ -104,68 +182,120 @@ export const updateTheme = async (req, res) => {
       status,
     } = req.body;
 
-    // Update S3 files if new files are uploaded
+    // validate category
+    const themeCategories = await db.ThemeCategory.findByPk(category_id ?? theme.category_id);
+    if (!themeCategories) {
+      return res.status(400).json({
+        success: false,
+        message: "Theme category not found",
+      });
+    }
+
+    // update DB fields
+    await theme.update({
+      occasion_id: occasion_id ?? theme.occasion_id,
+      category_id: category_id ?? theme.category_id,
+      name: capitalizeSentence(name) ?? theme.name,
+      slug: name ? slug(name) : theme.slug,
+      component_name: component_name ?? theme.component_name,
+      config: config ?? theme.config,
+      base_price: base_price ?? theme.base_price,
+      offer_price: offer_price ?? theme.offer_price,
+      currency: currency ?? theme.currency,
+      status: status ?? theme.status,
+    });
+
+    console.log(`[updateTheme] Theme updated successfully: id=${theme.id}`);
+
+    /**
+     * Handle media updates
+     */
+    // --- IMAGE ---
     if (req.files?.preview_image?.[0]) {
-      // Delete old image
-      await deleteFileFromS3(theme.preview_image);
+      try {
+        if (theme.preview_image) {
+          console.log(`[updateTheme] Deleting old image: ${theme.preview_image}`);
+          await deleteFileFromS3(theme.preview_image);
+        }
 
-      const imageFile = req.files.preview_image[0];
-      theme.preview_image = await uploadFileToS3(
-        imageFile.buffer,
-        "images",
-        imageFile.originalname,
-        imageFile.mimetype
-      );
+        const img = req.files.preview_image[0];
+        await imageUploadQueue.add(
+          "uploadImage",
+          {
+            themeId: theme.id,
+            file: img.buffer.toString("base64"),
+            filename: sanitizeFileName(img.originalname),
+            mimetype: img.mimetype,
+          },
+          {
+            attempts: 5,
+            backoff: { type: "exponential", delay: 5000 },
+            removeOnComplete: true,
+            removeOnFail: 200,
+          }
+        );
+
+        console.log(`[updateTheme] New image job queued: themeId=${theme.id}`);
+      } catch (err) {
+        console.error("[updateTheme] Error handling image:", err);
+      }
     }
 
-    if (req.files?.preview_video?.[0]) {
-      await deleteFileFromS3(theme.preview_video);
+    // --- VIDEO ---
+    if (themeCategories.type === "video" && req.files?.preview_video?.[0]) {
+      try {
+        if (theme.preview_video) {
+          console.log(`[updateTheme] Deleting old video: ${theme.preview_video}`);
+          await deleteFileFromS3(theme.preview_video);
+        }
 
-      const videoFile = req.files.preview_video[0];
-      theme.preview_video = await uploadFileToS3(
-        videoFile.buffer,
-        "videos",
-        videoFile.originalname,
-        videoFile.mimetype
-      );
+        const vid = req.files.preview_video[0];
+        await videoUploadQueue.add(
+          "uploadVideo",
+          {
+            themeId: theme.id,
+            file: vid.buffer.toString("base64"),
+            filename: sanitizeFileName(vid.originalname),
+            mimetype: vid.mimetype,
+          },
+          {
+            attempts: 5,
+            backoff: { type: "exponential", delay: 10000 },
+            removeOnComplete: true,
+            removeOnFail: 200,
+          }
+        );
+
+        console.log(`[updateTheme] New video job queued: themeId=${theme.id}`);
+      } catch (err) {
+        console.error("[updateTheme] Error handling video:", err);
+      }
+    } else if (themeCategories.type !== "video") {
+      console.log(`[updateTheme] Skipping video upload (type=${themeCategories.type})`);
     }
 
-    // Update other fields
-    theme.occasion_id = occasion_id ?? theme.occasion_id;
-    theme.category_id = category_id ?? theme.category_id;
-    theme.name = name ?? theme.name;
-    if (name) theme.slug = slug(name);
-    theme.component_name = component_name ?? theme.component_name;
-    theme.config = config ?? theme.config;
-    theme.base_price = base_price ?? theme.base_price;
-    theme.offer_price = offer_price ?? theme.offer_price;
-    theme.currency = currency ?? theme.currency;
-    theme.status = status ?? theme.status;
-
-    await theme.save();
-
-    return res
-      .status(200)
-      .json({ message: "Theme updated successfully", theme });
+    // --- Final response ---
+    return res.status(200).json({
+      success: true,
+      message: "Theme updated successfully. Media uploads are queued.",
+      data: theme,
+    });
   } catch (error) {
-    console.error(error);
-    const handled = handleSequelizeError(error, res);
-    if (handled) return handled;
-    return res
-      .status(500)
-      .json({ message: "Error updating theme", error: error.message });
+    console.error("[updateTheme] Fatal error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error updating theme",
+      error: error.message,
+    });
   }
 };
+
 
 export const deleteTheme = async (req, res) => {
   try {
     const { id } = req.params;
     const theme = await db.Theme.findByPk(id);
     if (!theme) return res.status(404).json({ message: "Theme not found" });
-
-    // Delete files from S3
-    await deleteFileFromS3(theme.preview_image);
-    await deleteFileFromS3(theme.preview_video);
 
     // Delete from DB (paranoid = true, so soft delete)
     await theme.destroy();
@@ -178,3 +308,153 @@ export const deleteTheme = async (req, res) => {
       .json({ message: "Error deleting theme", error: error.message });
   }
 };
+
+export const getAllTheme = async (req, res) => {
+  try {
+    console.log("theme model ", db.Theme);
+    console.log("theme category model ", db.ThemeCategory);
+    console.log("occasion model ", OccasionModel.Occasion);
+
+    // 1. Fetch themes from main DB
+    const themes = await db.Theme.findAll({
+      attributes: [
+        "id",
+        "name",
+        "slug",
+        "occasion_id",
+        "category_id",
+        "preview_image",
+        "preview_video",
+        "component_name",
+        "config",
+        "base_price",
+        "offer_price",
+        "currency",
+        "status",
+      ],
+      include: [
+        {
+          model: db.ThemeCategory,
+          as: "themeCategory",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+
+    // 2. Fetch occasions from remote DB
+    const occasionIds = themes.map((t) => t.occasion_id).filter(Boolean);
+
+    const occasions = await OccasionModel.findAll({
+      where: { id: { [Op.in]: occasionIds } },
+      attributes: ["id", "name"],
+    });
+
+    const occasionMap = {};
+    occasions.forEach((occ) => {
+      occasionMap[occ.id] = occ.name;
+    });
+
+    // 3. Format response
+    const result = themes.map((t) => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+      occasion: {
+        id: t.occasion_id,
+        name: occasionMap[t.occasion_id]?.replace(/^"|"$/g, "") || null,
+      },
+      theme_category: {
+        id: t.category_id,
+        name: t.themeCategory ? t.themeCategory.name : null,
+      },
+      thumbnail: t.preview_image,
+      preview_video: t.preview_video,
+      component_name: t.component_name,
+
+      base_price: t.base_price,
+      offer_price: t.offer_price,
+      currency: t.currency,
+      status: t.status,
+    }));
+
+    return res.status(200).json({
+      result,
+    });
+  } catch (error) {
+    console.error("Error fetching themes:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch themes",
+    });
+  }
+};
+
+export const countryCode = async (req, res) => {
+  try {
+    const countries = await CountryModel.findAll({
+      where: { status: 1 },
+    });
+    res.json(countries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// export const getThemeBySlug = async (req, res) => {
+//   try {
+//     const { slug } = req.params;
+
+//     // 1. Find theme with full details
+//     const theme = await db.Theme.findOne(
+//       { where: { slug } },
+//       {
+//         include: [
+//           {
+//             model: db.ThemeCategory,
+//             as: "themeCategory",
+//             attributes: ["id", "name"],
+//           },
+//         ],
+//       }
+//     );
+
+//     if (!theme) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Theme not found",
+//       });
+//     }
+
+//     // 2. Get occasion from remote DB
+//     let occasion = null;
+//     if (theme.occasion_id) {
+//       occasion = await OccasionModel.findByPk(theme.occasion_id, {
+//         attributes: [
+//           "id",
+//           "name",
+//           "slug",
+//           "image",
+//           "status",
+//           "invitation_status",
+//         ],
+//       });
+//     }
+
+//     // 3. Prepare full detail response
+//     const result = {
+//       ...theme.toJSON(),
+//       occasion: occasion ? occasion.toJSON() : null,
+//       themeCategory: theme.themeCategory ? theme.themeCategory.toJSON() : null,
+//     };
+
+//     return res.status(200).json({
+//       result,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching theme:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch theme details",
+//     });
+//   }
+// };
