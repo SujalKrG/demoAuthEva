@@ -25,6 +25,11 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      currency_symbol: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
       status: {
         type: DataTypes.TINYINT,
         allowNull: false,

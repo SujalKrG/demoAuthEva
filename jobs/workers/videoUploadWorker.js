@@ -1,20 +1,19 @@
 // jobs/workers/videoUploadWorker.js
 import BullMQ from "bullmq";
 import db from "../../models/index.js";
+import { redisConfig } from "../../config/redis.js";
 import {
   uploadFileToS3,
   sanitizeFileName,
 } from "../../middlewares/uploadS3.js";
 import dotenv from "dotenv";
+import { redisConfig } from "../../config/redis.js";
 dotenv.config();
 
 
 const { Worker } = BullMQ;
 
-const redisConfig = {
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-};
+
 
 export const videoWorker = new Worker(
   "videoUploadQueue",

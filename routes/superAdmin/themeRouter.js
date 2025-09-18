@@ -20,7 +20,7 @@ router.patch("/theme/update/:id",upload.fields([{ name: "preview_image" }, { nam
 router.delete("/theme/delete/:id", deleteTheme);
 router.get("/theme/get", getAllTheme);
 router.get("/country/get", countryCode);
-router.post("/theme/update-status/:id", updateStatus);
+router.patch("/theme/update-status/:id", updateStatus);
 
 
 
