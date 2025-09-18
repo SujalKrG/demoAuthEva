@@ -1,6 +1,7 @@
 import multer from "multer";
 import db from "../../models/index.js";
 import { Op } from "sequelize";
+import { logger  } from "../../utils/logger.js";
 import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import CountryModelFactory from "../../models/remote/country.js";
@@ -21,6 +22,12 @@ const CountryModel = CountryModelFactory(remoteSequelize, Sequelize.DataTypes);
 
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
+const normalizeDecimal = (val) => {
+  if (val === undefined || val === null || val === "" || val === "null") {
+    return null;
+  }
+  return Number(val);
+};
 
 export const createTheme = async (req, res) => {
   try {
@@ -140,6 +147,7 @@ export const createTheme = async (req, res) => {
     } else {
       console.log("[createTheme] No preview_video provided or category not video");
     }
+    logger.info("[createTheme] Theme created successfully")
 
     // Success response
     return res.status(201).json({
@@ -170,20 +178,10 @@ export const updateTheme = async (req, res) => {
       return res.status(404).json({ success: false, message: "Theme not found" });
     }
 
-    const {
-      occasion_id,
-      category_id,
-      name,
-      component_name,
-      config,
-      base_price,
-      offer_price,
-      currency,
-      status,
-    } = req.body;
+    const body = req.body;
 
     // validate category
-    const themeCategories = await db.ThemeCategory.findByPk(category_id ?? theme.category_id);
+    const themeCategories = await db.ThemeCategory.findByPk(body.category_id ?? theme.category_id);
     if (!themeCategories) {
       return res.status(400).json({
         success: false,
@@ -191,19 +189,30 @@ export const updateTheme = async (req, res) => {
       });
     }
 
+    const occasions = await OccasionModel.findByPk(body.occasion_id ?? theme.occasion_id);
+    if (!occasions){
+      return res.status(400).json({
+        success: false,
+        message: "Occasion not found",
+      });
+    }
+
+    // Prepare update object
+    const updateData = {
+      occasion_id: body.occasion_id ?? theme.occasion_id,
+      category_id: body.category_id ?? theme.category_id,
+      name: body.name ? capitalizeSentence(body.name) : theme.name,
+      slug: body.name ? slug(body.name) : theme.slug, // Update slug if name changes
+      component_name: body.component_name ?? theme.component_name,
+      config: body.config ?? theme.config,
+      base_price: normalizeDecimal(body.base_price) ?? theme.base_price,
+      offer_price: normalizeDecimal(body.offer_price) ?? theme.offer_price,
+      currency: body.currency ?? theme.currency,
+      status: body.status ?? theme.status,
+    };
+
     // update DB fields
-    await theme.update({
-      occasion_id: occasion_id ?? theme.occasion_id,
-      category_id: category_id ?? theme.category_id,
-      name: capitalizeSentence(name) ?? theme.name,
-      slug: name ? slug(name) : theme.slug,
-      component_name: component_name ?? theme.component_name,
-      config: config ?? theme.config,
-      base_price: base_price ?? theme.base_price,
-      offer_price: offer_price ?? theme.offer_price,
-      currency: currency ?? theme.currency,
-      status: status ?? theme.status,
-    });
+    await theme.update(updateData);
 
     console.log(`[updateTheme] Theme updated successfully: id=${theme.id}`);
 
