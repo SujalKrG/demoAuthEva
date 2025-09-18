@@ -11,8 +11,8 @@ dotenv.config();
 const { Worker } = BullMQ;
 
 const redisConfig = {
-  host: process.env.REDIS_HOST || "127.0.0.1",
-  port: process.env.REDIS_PORT || 6379,
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
 };
 
 export const imageWorker = new Worker(
