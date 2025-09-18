@@ -1,5 +1,5 @@
-import { cleanString } from "../../utils/occasionResource";
+import express from "express";
 
-export const createGuestGroup = async (req, res) => {
+const router = express.Router();
 
-};
+export default router;

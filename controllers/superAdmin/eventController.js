@@ -47,6 +47,8 @@ export const getAllEvents = async (req, res) => {
     });
   }
 };
+
+
 export const EventFiltration = async (req, res) => {
   try {
     const { q, occasion } = req.query;
@@ -63,18 +65,13 @@ export const EventFiltration = async (req, res) => {
         { venue_name: { [Op.like]: `%${q}%` } },
         { venue_address: { [Op.like]: `%${q}%` } },
         Sequelize.where(
-          Sequelize.fn(
-            "JSON_UNQUOTE",
-            Sequelize.col("occasion_name"),
-            "one",
-            `%${q}%`
-          ),
-          { [Op.not]: null }
+          Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_name")),
+          { [Op.like]: `%${q}%` }
         ),
       ];
     }
 
-    // 2️⃣ Occasion filter (using actual occasions table in DB-A)
+    // 2️⃣ Occasion filter
     if (occasion) {
       const foundOccasion = await RemoteOccasion.findOne({
         where: { name: { [Op.like]: `%${occasion}%` } },
@@ -91,8 +88,8 @@ export const EventFiltration = async (req, res) => {
       }
     }
 
-    // 3️⃣ Fetch Events (DB-B)
-    const events = await db.Event.findAll({
+    // 3️⃣ Fetch Events with count (DB-B)
+    const { rows: events, count: total } = await db.Event.findAndCountAll({
       where: eventConditions,
       attributes: [
         "id",
@@ -144,19 +141,15 @@ export const EventFiltration = async (req, res) => {
           "venue_name",
           "venue_address",
           "occasion_data",
-          [
-            Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_name"), "one"),
-            "occasion_name",
-          ],
         ],
       });
       filteredEvents = [...filteredEvents, ...userEvents];
     }
 
-    // Deduplicate
-    filteredEvents = filteredEvents.filter(
-      (event, index, self) => index === self.findIndex((e) => e.id === event.id)
-    );
+    // Deduplicate with Map
+    const eventMap = new Map();
+    filteredEvents.forEach((e) => eventMap.set(e.id, e));
+    filteredEvents = Array.from(eventMap.values());
 
     if (!filteredEvents.length) {
       return res.status(404).json({
@@ -206,8 +199,10 @@ export const EventFiltration = async (req, res) => {
 
     res.json({
       success: true,
+      total,
       count: response.length,
-      page,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
       limit,
       data: response,
     });

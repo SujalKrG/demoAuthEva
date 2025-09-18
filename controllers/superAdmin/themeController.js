@@ -1,7 +1,7 @@
 import multer from "multer";
 import db from "../../models/index.js";
-import { Op } from "sequelize";
-import { logger  } from "../../utils/logger.js";
+import { Op, where } from "sequelize";
+import { logger } from "../../utils/logger.js";
 import { sequelize, Sequelize, remoteSequelize } from "../../models/index.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
 import CountryModelFactory from "../../models/remote/country.js";
@@ -62,12 +62,16 @@ export const createTheme = async (req, res) => {
       });
     }
     const occasions = await OccasionModel.findByPk(occasion_id);
-    if (!occasions){
+    if (!occasions) {
       return res.status(400).json({
         success: false,
         message: "Occasion not found",
       });
     }
+    // const country_code = await CountryModel.findAll({
+    //   attributes: [`${currency}`],
+    // });
+    // logger.info(country_code);
 
     // Generate slug (safe + unique)
     const themeSlug = slug(name) + "-" + Date.now();
@@ -76,11 +80,11 @@ export const createTheme = async (req, res) => {
     const theme = await db.Theme.create({
       occasion_id,
       category_id,
-      name:capitalizeSentence(name),
+      name: capitalizeSentence(name),
       slug: slug(name),
       component_name: component_name || null,
       config: config || {},
-      base_price: base_price ||null,
+      base_price: base_price || null,
       offer_price: offer_price || 0,
       currency: currency || "INR",
       status: status ?? true,
@@ -88,7 +92,9 @@ export const createTheme = async (req, res) => {
       preview_video: null,
     });
 
-    console.log(`[createTheme] Theme created: id=${theme.id}, slug=${themeSlug}`);
+    console.log(
+      `[createTheme] Theme created: id=${theme.id}, slug=${themeSlug}`
+    );
 
     /**
      * Handle image upload (async via BullMQ)
@@ -145,9 +151,11 @@ export const createTheme = async (req, res) => {
         console.error("[createTheme] Failed to enqueue video job:", err);
       }
     } else {
-      console.log("[createTheme] No preview_video provided or category not video");
+      console.log(
+        "[createTheme] No preview_video provided or category not video"
+      );
     }
-    logger.info("[createTheme] Theme created successfully")
+    logger.info("[createTheme] Theme created successfully");
 
     // Success response
     return res.status(201).json({
@@ -165,23 +173,28 @@ export const createTheme = async (req, res) => {
   }
 };
 
-
 export const updateTheme = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ success: false, message: "Theme ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Theme ID is required" });
     }
 
     const theme = await db.Theme.findByPk(id);
     if (!theme) {
-      return res.status(404).json({ success: false, message: "Theme not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Theme not found" });
     }
 
     const body = req.body;
 
     // validate category
-    const themeCategories = await db.ThemeCategory.findByPk(body.category_id ?? theme.category_id);
+    const themeCategories = await db.ThemeCategory.findByPk(
+      body.category_id ?? theme.category_id
+    );
     if (!themeCategories) {
       return res.status(400).json({
         success: false,
@@ -189,8 +202,10 @@ export const updateTheme = async (req, res) => {
       });
     }
 
-    const occasions = await OccasionModel.findByPk(body.occasion_id ?? theme.occasion_id);
-    if (!occasions){
+    const occasions = await OccasionModel.findByPk(
+      body.occasion_id ?? theme.occasion_id
+    );
+    if (!occasions) {
       return res.status(400).json({
         success: false,
         message: "Occasion not found",
@@ -223,7 +238,9 @@ export const updateTheme = async (req, res) => {
     if (req.files?.preview_image?.[0]) {
       try {
         if (theme.preview_image) {
-          console.log(`[updateTheme] Deleting old image: ${theme.preview_image}`);
+          console.log(
+            `[updateTheme] Deleting old image: ${theme.preview_image}`
+          );
           await deleteFileFromS3(theme.preview_image);
         }
 
@@ -254,7 +271,9 @@ export const updateTheme = async (req, res) => {
     if (themeCategories.type === "video" && req.files?.preview_video?.[0]) {
       try {
         if (theme.preview_video) {
-          console.log(`[updateTheme] Deleting old video: ${theme.preview_video}`);
+          console.log(
+            `[updateTheme] Deleting old video: ${theme.preview_video}`
+          );
           await deleteFileFromS3(theme.preview_video);
         }
 
@@ -280,7 +299,9 @@ export const updateTheme = async (req, res) => {
         console.error("[updateTheme] Error handling video:", err);
       }
     } else if (themeCategories.type !== "video") {
-      console.log(`[updateTheme] Skipping video upload (type=${themeCategories.type})`);
+      console.log(
+        `[updateTheme] Skipping video upload (type=${themeCategories.type})`
+      );
     }
 
     // --- Final response ---
@@ -298,7 +319,6 @@ export const updateTheme = async (req, res) => {
     });
   }
 };
-
 
 export const deleteTheme = async (req, res) => {
   try {
@@ -320,10 +340,6 @@ export const deleteTheme = async (req, res) => {
 
 export const getAllTheme = async (req, res) => {
   try {
-    console.log("theme model ", db.Theme);
-    console.log("theme category model ", db.ThemeCategory);
-    console.log("occasion model ", OccasionModel.Occasion);
-
     // 1. Fetch themes from main DB
     const themes = await db.Theme.findAll({
       attributes: [
@@ -379,7 +395,6 @@ export const getAllTheme = async (req, res) => {
       thumbnail: t.preview_image,
       preview_video: t.preview_video,
       component_name: t.component_name,
-
       base_price: t.base_price,
       offer_price: t.offer_price,
       currency: t.currency,
@@ -406,6 +421,39 @@ export const countryCode = async (req, res) => {
     res.json(countries);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!id || !status) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid request" });
+    }
+
+    const theme = await db.Theme.findByPk(id);
+    if (!theme) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Theme not found" });
+    }
+
+    await theme.update({ status });
+    return res.status(200).json({
+      success: true,
+      message: "Status updated successfully",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to update status",
+        error: error.message,
+      });
   }
 };
 

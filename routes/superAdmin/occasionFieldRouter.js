@@ -6,13 +6,8 @@ import {
   updateOccasionField,
   deleteOccasionField,
 } from "../../controllers/superAdmin/occasionFieldController.js";
-import authenticate from "../../middlewares/authMiddleware.js";
-import authorize from "../../middlewares/authorizeMiddleware.js";
-import checkAdminStatus from "../../middlewares/statusMiddleware.js";
 
 const router = express.Router();
-
-// router.use(authenticate, authorize(["SUPER_ADMIN"]), checkAdminStatus);
 
 router.post("/occasion-field/store", createOccasionField);
 router.get("/occasion-field/get", getAllOccasionFields);
