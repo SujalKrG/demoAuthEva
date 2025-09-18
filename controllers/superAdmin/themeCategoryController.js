@@ -1,5 +1,7 @@
 import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
+import { cleanString } from "../../utils/occasionResource.js";
+import { capitalizeSentence, slug } from "../../utils/requiredMethods.js";
 
 const generateSlug = (name) => {
   // Slugify the name -> lowercase, spaces & special chars to hyphens
@@ -27,7 +29,7 @@ export const createThemeCategory = async (req, res) => {
     }
     const slug = generateSlug(name);
     const newCategory = await db.ThemeCategory.create({
-      name,
+      name:capitalizeSentence(name),
       slug,
       type,
       status: status ?? true,
@@ -135,3 +137,22 @@ export const deleteThemeCategory = async (req, res) => {
    
 }
 
+
+export const getAllThemeCategories = async (req, res) => {
+  try {
+    const themeCategories = await db.ThemeCategory.findAll();
+    return res.status(200).json({
+     
+      themeCategories
+
+      
+    });
+  } catch (error) {
+    console.log("Error retrieving theme categories:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve theme categories",
+      error: error.message,
+    });
+  }
+}
