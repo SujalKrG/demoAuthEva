@@ -1,6 +1,7 @@
 // jobs/workers/imageUploadWorker.js
 import BullMQ from "bullmq";
 import db from "../../models/index.js";
+import { redisConfig } from "../../config/redis.js";
 import {
   uploadFileToS3,
   sanitizeFileName,
@@ -10,10 +11,8 @@ dotenv.config();
 
 const { Worker } = BullMQ;
 
-const redisConfig = {
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-};
+
+
 
 export const imageWorker = new Worker(
   "imageUploadQueue",

@@ -340,22 +340,42 @@ export const deleteTheme = async (req, res) => {
 
 export const getAllTheme = async (req, res) => {
   try {
+    const { page = 1, limit = 10, category, occasion, q } = req.query;
+    const offset = (page - 1) * limit;
+    const whereConditions = {};
+    if (category) {
+      whereConditions.category_id = category;
+    }
+    if (occasion) {
+      whereConditions.occasion_id = occasion;
+    }
+    if (q && q.trim() !== "") {
+      whereConditions[Op.or] = [
+        { name: { [Op.like]: `%${q}%` } },
+        { slug: { [Op.like]: `%${q}%` } },
+        { component_name: { [Op.like]: `%${q}%` } },
+        { currency: { [Op.like]: `%${q}%` } },
+        { status: { [Op.like]: `%${q}%` } },
+        { base_price: { [Op.like]: `%${q}%` } }, // number fields can also be searched as string
+        { offer_price: { [Op.like]: `%${q}%` } },
+      ];
+    }
     // 1. Fetch themes from main DB
-    const themes = await db.Theme.findAll({
+    const { rows: themes, count: total } = await db.Theme.findAndCountAll({
+      where: whereConditions,
       attributes: [
         "id",
         "name",
         "slug",
         "occasion_id",
         "category_id",
+        "status",
         "preview_image",
         "preview_video",
-        "component_name",
-        "config",
         "base_price",
         "offer_price",
         "currency",
-        "status",
+        "component_name",
       ],
       include: [
         {
@@ -364,6 +384,9 @@ export const getAllTheme = async (req, res) => {
           attributes: ["id", "name"],
         },
       ],
+      limit: parseInt(limit),
+      offset,
+      order: [["created_at", "desc"]],
     });
 
     // 2. Fetch occasions from remote DB
@@ -402,7 +425,13 @@ export const getAllTheme = async (req, res) => {
     }));
 
     return res.status(200).json({
-      result,
+      success: true,
+      total,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      limit,
+      count: result.length,
+      data: result
     });
   } catch (error) {
     console.error("Error fetching themes:", error);
@@ -428,7 +457,7 @@ export const updateStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    if (!id || !status) {
+    if (!id) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid request" });
@@ -447,13 +476,11 @@ export const updateStatus = async (req, res) => {
       message: "Status updated successfully",
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update status",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update status",
+      error: error.message,
+    });
   }
 };
 

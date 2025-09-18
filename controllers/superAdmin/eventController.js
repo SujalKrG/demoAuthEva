@@ -15,20 +15,102 @@ const RemoteOccasion = OccasionModelFactory(
 
 export const getAllEvents = async (req, res) => {
   try {
+    const { page = 1, limit = 10, q, occasion, user } = req.query;
+    const offset = (page - 1) * limit;
+
     if (!db.Event) {
       throw new Error("Event model is not initialized");
     }
 
-    const events = await db.Event.findAll();
-    if (!events || events.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No events found", data: [] });
+    const whereConditions = {};
+    if (occasion) {
+      whereConditions.occasion_id = occasion;
     }
-    res.status(200).json({
+    if (user) {
+      whereConditions.user_id = user;
+    }
+
+    if (q && q.trim() !== "") {
+      whereConditions[Op.or] = [
+        { title: { [Op.like]: `%${q}%` } },
+        { slug: { [Op.like]: `%${q}%` } },
+        { venue_name: { [Op.like]: `%${q}%` } },
+        { venue_address: { [Op.like]: `%${q}%` } },
+        Sequelize.where(
+          Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_data")),
+          { [Op.like]: `%${q}%` }
+        ),
+      ];
+    }
+    const { rows: events, count: total } = await db.Event.findAndCountAll({
+      where: whereConditions,
+      attributes: [
+        "id",
+        "user_id",
+        "occasion_id",
+        "title",
+        "slug",
+        "event_datetime",
+        "venue_name",
+        "venue_address",
+        "occasion_data",
+        "created_at",
+        "deleted_at",
+      ],
+      order: [["created_at", "desc"]],
+      limit: parseInt(limit),
+      offset,
+    });
+
+    if (events.length === 0 || !events) {
+      return res.status(404).json({
+        success: false,
+        message: "Events not found",
+      });
+    }
+
+    const userIds = events.map((e) => e.user_id).filter(Boolean);
+    const occasionsIds = events.map((e) => e.occasion_id).filter(Boolean);
+
+    const users = await RemoteOccasion.findAll({
+      where: { id: { [Op.in]: occasionsIds } },
+      attributes: ["id", "name"],
+    });
+    const occasions = await RemoteUser.findAll({
+      where: { id: { [Op.in]: userIds } },
+      attributes: ["id", "name", "mobile"],
+    });
+    const userMap = users.reduce((acc, u) => {
+      acc[u.id] = u;
+      return acc;
+    }, {});
+
+    const occasionMap = occasions.reduce((acc, o) => {
+      acc[o.id] = o;
+      return acc;
+    }, {});
+
+    const result = events.map((e) => ({
+      id: e.id,
+      title: e.title,
+      slug: e.slug,
+      event_datetime: e.event_datetime,
+      venue_name: e.venue_name,
+      venue_address: e.venue_address,
+      occasion_data: e.occasion_data,
+      user: userMap[e.user_id] || null,
+      occasion: occasionMap[e.occasion_id] || null,
+      created_at: e.created_at,
+      deleted_at: e.deleted_at,
+    }));
+    return res.status(200).json({
       success: true,
-      message: "Events retrieved successfully",
-      data: events,
+      total,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      limit: parseInt(limit),
+      count: result.length,
+      data: result,
     });
   } catch (error) {
     console.log(error);
@@ -48,173 +130,3 @@ export const getAllEvents = async (req, res) => {
   }
 };
 
-
-export const EventFiltration = async (req, res) => {
-  try {
-    const { q, occasion } = req.query;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    // 1️⃣ Build Event Search Conditions
-    const eventConditions = {};
-    if (q && q.trim() !== "") {
-      eventConditions[Op.or] = [
-        { title: { [Op.like]: `%${q}%` } },
-        { slug: { [Op.like]: `%${q}%` } },
-        { venue_name: { [Op.like]: `%${q}%` } },
-        { venue_address: { [Op.like]: `%${q}%` } },
-        Sequelize.where(
-          Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_name")),
-          { [Op.like]: `%${q}%` }
-        ),
-      ];
-    }
-
-    // 2️⃣ Occasion filter
-    if (occasion) {
-      const foundOccasion = await RemoteOccasion.findOne({
-        where: { name: { [Op.like]: `%${occasion}%` } },
-        attributes: ["id"],
-      });
-
-      if (foundOccasion) {
-        eventConditions.occasion_id = foundOccasion.id;
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: `No occasion found with name: ${occasion}`,
-        });
-      }
-    }
-
-    // 3️⃣ Fetch Events with count (DB-B)
-    const { rows: events, count: total } = await db.Event.findAndCountAll({
-      where: eventConditions,
-      attributes: [
-        "id",
-        "user_id",
-        "occasion_id",
-        "title",
-        "slug",
-        "event_datetime",
-        "venue_name",
-        "venue_address",
-        "occasion_data",
-      ],
-      order: [["created_at", "desc"]],
-      limit,
-      offset,
-    });
-
-    // Collect User IDs
-    const userIds = events.map((e) => e.user_id);
-
-    // 4️⃣ Search Users (DB-A) if q provided
-    let matchingUserIds = [];
-    if (q && q.trim() !== "") {
-      const users = await RemoteUser.findAll({
-        where: {
-          [Op.or]: [
-            { name: { [Op.like]: `%${q}%` } },
-            { email: { [Op.like]: `%${q}%` } },
-            { mobile: { [Op.like]: `%${q}%` } },
-          ],
-        },
-        attributes: ["id"],
-      });
-      matchingUserIds = users.map((u) => u.id);
-    }
-
-    // 5️⃣ Merge results
-    let filteredEvents = [...events];
-    if (matchingUserIds.length > 0) {
-      const userEvents = await db.Event.findAll({
-        where: { user_id: { [Op.in]: matchingUserIds } },
-        attributes: [
-          "id",
-          "user_id",
-          "occasion_id",
-          "title",
-          "slug",
-          "event_datetime",
-          "venue_name",
-          "venue_address",
-          "occasion_data",
-        ],
-      });
-      filteredEvents = [...filteredEvents, ...userEvents];
-    }
-
-    // Deduplicate with Map
-    const eventMap = new Map();
-    filteredEvents.forEach((e) => eventMap.set(e.id, e));
-    filteredEvents = Array.from(eventMap.values());
-
-    if (!filteredEvents.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No events found matching your query",
-      });
-    }
-
-    // 6️⃣ Fetch user + occasion details
-    const finalUsers = await RemoteUser.findAll({
-      where: { id: { [Op.in]: filteredEvents.map((e) => e.user_id) } },
-      attributes: ["id", "name", "mobile"],
-    });
-
-    const finalOccasions = await RemoteOccasion.findAll({
-      where: { id: { [Op.in]: filteredEvents.map((e) => e.occasion_id) } },
-      attributes: ["id", "name"],
-    });
-
-    const userMap = finalUsers.reduce((acc, user) => {
-      acc[user.id] = user;
-      return acc;
-    }, {});
-
-    const occasionMap = finalOccasions.reduce((acc, occ) => {
-      acc[occ.id] = occ;
-      return acc;
-    }, {});
-
-    // 7️⃣ Final Response
-    const response = filteredEvents.map((event) => {
-      const user = userMap[event.user_id] || {};
-      const occ = occasionMap[event.occasion_id] || {};
-      return {
-        event_id: event.id,
-        user_name: user.name || null,
-        user_mobile: user.mobile || null,
-        occasion_name: occ.name || null,
-        title: event.title,
-        slug: event.slug,
-        event_datetime: event.event_datetime,
-        venue_name: event.venue_name,
-        venue_address: event.venue_address,
-        occasion_data: event.occasion_data,
-      };
-    });
-
-    res.json({
-      success: true,
-      total,
-      count: response.length,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      limit,
-      data: response,
-    });
-  } catch (error) {
-    console.error("Error searching events:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Unexpected server error",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal Server Error"
-          : error.message,
-    });
-  }
-};
