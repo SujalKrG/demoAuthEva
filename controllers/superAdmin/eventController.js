@@ -2,6 +2,7 @@ import { Sequelize, remoteSequelize } from "../../models/index.js";
 import db from "../../models/index.js";
 import { Op, where } from "sequelize";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
+import { sanitizeName } from "../../utils/requiredMethods.js";
 // Import remote User model factory
 import UserModelFactory from "../../models/remote/user.js";
 import OccasionModelFactory from "../../models/remote/occasion.js";
@@ -12,10 +13,9 @@ const RemoteOccasion = OccasionModelFactory(
   remoteSequelize,
   Sequelize.DataTypes
 );
-
 export const getAllEvents = async (req, res) => {
   try {
-    const { page = 1, limit = 10, q, occasion, user } = req.query;
+    const { page = 1, limit = 10, q, occasion } = req.query;
     const offset = (page - 1) * limit;
 
     if (!db.Event) {
@@ -26,22 +26,48 @@ export const getAllEvents = async (req, res) => {
     if (occasion) {
       whereConditions.occasion_id = occasion;
     }
-    if (user) {
-      whereConditions.user_id = user;
-    }
+
+    let userIds = [];
 
     if (q && q.trim() !== "") {
+      const searchValue = `%${q}%`;
+
+      // 🔍 Search in RemoteUser table (name & mobile)
+      const matchedUsers = await RemoteUser.findAll({
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: searchValue } },
+            { mobile: { [Op.like]: searchValue } },
+          ],
+        },
+        attributes: ["id"],
+      });
+
+      userIds = matchedUsers.map((u) => u.id);
+
+      // 🔍 Search inside Events fields
       whereConditions[Op.or] = [
-        { title: { [Op.like]: `%${q}%` } },
-        { slug: { [Op.like]: `%${q}%` } },
-        { venue_name: { [Op.like]: `%${q}%` } },
-        { venue_address: { [Op.like]: `%${q}%` } },
+        { id: { [Op.like]: searchValue } },
+        { user_id: { [Op.like]: searchValue } },
+        { occasion_id: { [Op.like]: searchValue } },
+        { title: { [Op.like]: searchValue } },
+        { slug: { [Op.like]: searchValue } },
+        { event_datetime: { [Op.like]: searchValue } },
+        { venue_name: { [Op.like]: searchValue } },
+        { venue_address: { [Op.like]: searchValue } },
+        { occasion_data: { [Op.like]: searchValue } },
+        { created_at: { [Op.like]: searchValue } },
+        { updated_at: { [Op.like]: searchValue } },
+        { deleted_at: { [Op.like]: searchValue } },
         Sequelize.where(
           Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_data")),
-          { [Op.like]: `%${q}%` }
+          { [Op.like]: searchValue }
         ),
+        // 🔍 Match events by user_ids from RemoteUser search
+        ...(userIds.length > 0 ? [{ user_id: { [Op.in]: userIds } }] : []),
       ];
     }
+
     const { rows: events, count: total } = await db.Event.findAndCountAll({
       where: whereConditions,
       attributes: [
@@ -55,31 +81,36 @@ export const getAllEvents = async (req, res) => {
         "venue_address",
         "occasion_data",
         "created_at",
+        "updated_at",
         "deleted_at",
       ],
       order: [["created_at", "desc"]],
       limit: parseInt(limit),
       offset,
+      paranoid: false, // ✅ include soft-deleted
     });
 
-    if (events.length === 0 || !events) {
+    if (!events || events.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Events not found",
       });
     }
 
-    const userIds = events.map((e) => e.user_id).filter(Boolean);
-    const occasionsIds = events.map((e) => e.occasion_id).filter(Boolean);
+    // ✅ Get full user + occasion details
+    const fetchedUserIds = events.map((e) => e.user_id).filter(Boolean);
+    const fetchedOccasionIds = events.map((e) => e.occasion_id).filter(Boolean);
 
-    const users = await RemoteOccasion.findAll({
-      where: { id: { [Op.in]: occasionsIds } },
-      attributes: ["id", "name"],
-    });
-    const occasions = await RemoteUser.findAll({
-      where: { id: { [Op.in]: userIds } },
+    const users = await RemoteUser.findAll({
+      where: { id: { [Op.in]: fetchedUserIds } },
       attributes: ["id", "name", "mobile"],
     });
+
+    const occasions = await RemoteOccasion.findAll({
+      where: { id: { [Op.in]: fetchedOccasionIds } },
+      attributes: ["id", "name"],
+    });
+
     const userMap = users.reduce((acc, u) => {
       acc[u.id] = u;
       return acc;
@@ -101,8 +132,10 @@ export const getAllEvents = async (req, res) => {
       user: userMap[e.user_id] || null,
       occasion: occasionMap[e.occasion_id] || null,
       created_at: e.created_at,
+      updated_at: e.updated_at,
       deleted_at: e.deleted_at,
     }));
+
     return res.status(200).json({
       success: true,
       total,
@@ -115,11 +148,9 @@ export const getAllEvents = async (req, res) => {
   } catch (error) {
     console.log(error);
 
-    // Handle Sequelize errors
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
-    // Handle generic Node.js / unexpected errors
     return res.status(500).json({
       message: "Unexpected server error",
       error:
@@ -129,4 +160,3 @@ export const getAllEvents = async (req, res) => {
     });
   }
 };
-
