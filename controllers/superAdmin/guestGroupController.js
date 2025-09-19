@@ -19,9 +19,6 @@ export const createGuestGroups = async (req, res) => {
       message: "Guest group created successfully",
       data: guestGroup,
     });
-
-    
-
   } catch (error) {
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
@@ -36,12 +33,14 @@ export const createGuestGroups = async (req, res) => {
   }
 };
 
-
 export const getAllGuestGroups = async (req, res) => {
   try {
-    const guestGroups = await db.GuestGroup.findAll();
+    const guestGroups = await db.GuestGroup.findAll({
+      attributes: ["id", "user_id", "name", "created_at", "updated_at"], // only needed fields
+      order: [["created_at", "DESC"]],
+    });
     res.json(guestGroups);
-  } catch (error) { 
+  } catch (error) {
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -53,5 +52,4 @@ export const getAllGuestGroups = async (req, res) => {
           : error.message,
     });
   }
-  
-}
+};
