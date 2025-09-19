@@ -79,7 +79,7 @@ jobs:
             # Start all PM2 apps
             pm2 start server.js --name myapp --update-env
             pm2 start jobs/workers/videoUploadWorker.js --name video-worker --update-env
-            pm2 start jobs/workers/imageWorker.js --name image-worker --update-env
+            pm2 start jobs/workers/imageUploadWorker.js --name image-worker --update-env
 
             # Save PM2 process list
             pm2 save
