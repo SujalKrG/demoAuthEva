@@ -7,7 +7,6 @@ import {
   sanitizeFileName,
 } from "../../middlewares/uploadS3.js";
 import dotenv from "dotenv";
-import { redisConfig } from "../../config/redis.js";
 dotenv.config();
 
 

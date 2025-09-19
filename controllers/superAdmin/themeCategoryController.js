@@ -143,7 +143,7 @@ export const getAllThemeCategories = async (req, res) => {
     const themeCategories = await db.ThemeCategory.findAll();
     return res.status(200).json({
      
-      themeCategories
+     themeCategories
 
       
     });

@@ -150,6 +150,28 @@ export default {
       },
     ];
     await queryInterface.bulkInsert("admin_roles", adminRoles, {});
+
+    const guestGroups = [
+      {
+        user_id: null,
+        name: "Friends",
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        user_id: null,
+        name: "Family",
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        user_id: null,
+        name: "Colleagues",
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ];
+    await queryInterface.bulkInsert("guest_groups", guestGroups, {});
   },
 
   async down(queryInterface, Sequelize) {
@@ -158,5 +180,6 @@ export default {
     await queryInterface.bulkDelete("admins", null, {});
     await queryInterface.bulkDelete("permissions", null, {});
     await queryInterface.bulkDelete("roles", null, {});
+    await queryInterface.bulkDelete("guest_groups", null, {});
   },
 };
