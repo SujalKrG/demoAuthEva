@@ -1,46 +1,47 @@
 import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
-import { cleanString } from "../../utils/occasionResource.js";
-import { capitalizeSentence, slug } from "../../utils/requiredMethods.js";
-
-const generateSlug = (name) => {
-  // Slugify the name -> lowercase, spaces & special chars to hyphens
-  let base = name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-
-  // ✅ Fix common typo: "data" → "date" (optional, only if that's your business rule)
-  base = base.replace(/\bdata\b/g, "date");
-
-  // Ensure "-invitation" is added if not already
-  const slugBase = base.endsWith("-invitation") ? base : `${base}-invitation`;
-
-  
-  return `${slugBase}`;
-};
-
+import {
+  capitalizeSentence,
+  generateSlug,
+} from "../../utils/requiredMethods.js";
+import { logger } from "../../utils/logger.js";
+import logActivity from "../../utils/logActivity.js";
+import { Sequelize } from "sequelize";
 
 export const createThemeCategory = async (req, res) => {
   try {
-    const { name,  type, status } = req.body;
+    const { name, type, status } = req.body;
 
     if (!name || !type) {
-      return res
-        .status(400)
-        .json({ message: "Name and type are required." });
+      logger.error("[createThemeCategory] Name and type are required");
+      return res.status(400).json({ message: "Name and type are required." });
     }
     const slug = generateSlug(name);
     const newCategory = await db.ThemeCategory.create({
-      name:capitalizeSentence(name),
+      name: capitalizeSentence(name),
       slug,
       type,
       status: status ?? true,
     });
+    logActivity({
+      created_by: req.admin.id,
+      action: `new Theme category created: ${newCategory.name}`,
+      module: "Theme Category",
+      details: {
+        newCategory,
+      },
+    });
+    logger.info("[createThemeCategory] Theme category created successfully");
 
     return res.status(201).json({
       message: "Theme category created successfully",
       data: newCategory,
     });
   } catch (error) {
-    console.error("Error creating theme category:", error);
+    logger.error(
+      "[createThemeCategory] Error creating theme category:]",
+      error
+    );
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -55,34 +56,48 @@ export const createThemeCategory = async (req, res) => {
   }
 };
 
-
 export const updateThemeCategory = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id || isNaN(id)) {
+      logger.error("[updateThemeCategory] invalid or missing theme id");
       return res
         .status(400)
         .json({ success: false, message: "invalid or missing theme id" });
     }
     const themeCategory = await db.ThemeCategory.findByPk(id);
     if (!themeCategory) {
+      logger.error("[updateThemeCategory] Theme category not found");
       return res
         .status(404)
         .json({ success: false, message: "Theme category not found" });
     }
     if (!req.body || Object.keys(req.body).length === 0) {
+      logger.error("[updateThemeCategory] no update data provided");
       return res
         .status(400)
         .json({ success: false, message: "no update data provided" });
     }
     const updatedThemeCategory = await themeCategory.update(req.body);
+    logActivity({
+      created_by: req.admin.id,
+      action: `Theme category updated`,
+      module: "Theme Category",
+      details: {
+        updatedThemeCategory,
+      },
+    });
+    logger.info("[updateThemeCategory] Theme category updated successfully");
     return res.status(200).json({
       success: true,
       message: "Theme category updated successfully",
       data: updatedThemeCategory,
     });
   } catch (error) {
-   console.log("Error updating theme category:", error);
+    logger.error(
+      "[updateThemeCategory] Error updating theme category:]",
+      error
+    );
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -97,11 +112,13 @@ export const updateThemeCategory = async (req, res) => {
   }
 };
 
-
 export const deleteThemeCategory = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id || isNaN(id)) {
+      logger.error(
+        "[deleteThemeCategory] Invalid or missing theme category ID"
+      );
       return res.status(400).json({
         success: false,
         message: "Invalid or missing theme category ID",
@@ -109,18 +126,31 @@ export const deleteThemeCategory = async (req, res) => {
     }
     const themeCategory = await db.ThemeCategory.findByPk(id);
     if (!themeCategory) {
+      logger.error("[deleteThemeCategory] Theme category not found");
       return res.status(404).json({
         success: false,
         message: "Theme category not found",
       });
     }
     await themeCategory.destroy();
+    logActivity({
+      created_by: req.admin.id,
+      action: `Theme category deleted`,
+      module: "Theme Category",
+      details: {
+        deletedThemeCategory: themeCategory,
+      },
+    });
+    logger.info("[deleteThemeCategory] Theme category deleted successfully");
     return res.status(200).json({
       success: true,
       message: "Theme category deleted successfully (soft delete)",
     });
   } catch (error) {
-    console.log("Error deleting theme category:", error);
+    logger.error(
+      "[deleteThemeCategory] Error deleting theme category:]",
+      error
+    );
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -133,26 +163,54 @@ export const deleteThemeCategory = async (req, res) => {
           : error.message,
     });
   }
-  
-   
-}
-
+};
 
 export const getAllThemeCategories = async (req, res) => {
   try {
-    const themeCategories = await db.ThemeCategory.findAll();
-    return res.status(200).json({
-     
-     themeCategories
+    const themeCategories = await db.ThemeCategory.findAll({
+      attributes: [
+        "id",
+        "name",
+        "type",
+        "status",
+        [
+          Sequelize.fn("COUNT", Sequelize.col("themes.id")),
+          "theme_count", // alias in response
+        ],
+      ],
+      include: [
+        {
+          model: db.Theme,
+          as: "themes",
+          attributes: [], // don’t pull all theme fields
+        },
+      ],
+      group: ["ThemeCategory.id"],
+      order: [["name", "ASC"]],
+    });
 
-      
+    logger.info(
+      "[getAllThemeCategories] Theme categories with counts fetched successfully"
+    );
+
+    return res.status(200).json({
+      themeCategories,
     });
   } catch (error) {
-    console.log("Error retrieving theme categories:", error);
+    logger.error(
+      "[getAllThemeCategories] Error fetching theme categories:",
+      error
+    );
+    const handled = handleSequelizeError(error, res);
+    if (handled) return handled;
+
     return res.status(500).json({
       success: false,
-      message: "Failed to retrieve theme categories",
-      error: error.message,
+      message: "Unexpected server error",
+      error:
+        process.env.NODE_ENV === "production"
+          ? "Internal Server Error"
+          : error.message,
     });
   }
-}
+};
