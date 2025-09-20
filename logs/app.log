@@ -1,0 +1,6 @@
+2025-09-20 17:05:11 error: [createThemeCategory] Error creating theme category:] Validation error
+2025-09-20 17:08:37 info: [getAllThemeCategories] Theme categories fetched successfully
+2025-09-20 17:08:54 error: [createThemeCategory] Error creating theme category:] Validation error
+2025-09-20 17:08:57 error: [createThemeCategory] Error creating theme category:] Cannot read properties of undefined (reading 'id')
+2025-09-20 17:19:21 error: [getAllThemeCategories] Error fetching theme categories:] Sequelize is not defined
+2025-09-20 17:19:54 info: [getAllThemeCategories] Theme categories fetched successfully
