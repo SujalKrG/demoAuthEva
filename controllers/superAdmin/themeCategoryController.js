@@ -1,12 +1,9 @@
 import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
-import {
-  capitalizeSentence,
-  generateSlug,
-} from "../../utils/requiredMethods.js";
+import {capitalizeSentence,generateSlug} from "../../utils/requiredMethods.js";
 import { logger } from "../../utils/logger.js";
 import logActivity from "../../utils/logActivity.js";
-import { Sequelize } from "sequelize";
+
 
 export const createThemeCategory = async (req, res) => {
   try {
@@ -30,7 +27,7 @@ export const createThemeCategory = async (req, res) => {
       details: {
         newCategory,
       },
-    });
+    })
     logger.info("[createThemeCategory] Theme category created successfully");
 
     return res.status(201).json({
@@ -38,10 +35,7 @@ export const createThemeCategory = async (req, res) => {
       data: newCategory,
     });
   } catch (error) {
-    logger.error(
-      "[createThemeCategory] Error creating theme category:]",
-      error
-    );
+    logger.error("[createThemeCategory] Error creating theme category:]",error);
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -86,7 +80,7 @@ export const updateThemeCategory = async (req, res) => {
       details: {
         updatedThemeCategory,
       },
-    });
+    })
     logger.info("[updateThemeCategory] Theme category updated successfully");
     return res.status(200).json({
       success: true,
@@ -94,10 +88,7 @@ export const updateThemeCategory = async (req, res) => {
       data: updatedThemeCategory,
     });
   } catch (error) {
-    logger.error(
-      "[updateThemeCategory] Error updating theme category:]",
-      error
-    );
+    logger.error("[updateThemeCategory] Error updating theme category:]",error);
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -116,9 +107,7 @@ export const deleteThemeCategory = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id || isNaN(id)) {
-      logger.error(
-        "[deleteThemeCategory] Invalid or missing theme category ID"
-      );
+      logger.error("[deleteThemeCategory] Invalid or missing theme category ID");
       return res.status(400).json({
         success: false,
         message: "Invalid or missing theme category ID",
@@ -140,17 +129,14 @@ export const deleteThemeCategory = async (req, res) => {
       details: {
         deletedThemeCategory: themeCategory,
       },
-    });
+    })
     logger.info("[deleteThemeCategory] Theme category deleted successfully");
     return res.status(200).json({
       success: true,
       message: "Theme category deleted successfully (soft delete)",
     });
   } catch (error) {
-    logger.error(
-      "[deleteThemeCategory] Error deleting theme category:]",
-      error
-    );
+    logger.error("[deleteThemeCategory] Error deleting theme category:]",error);
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
@@ -167,45 +153,17 @@ export const deleteThemeCategory = async (req, res) => {
 
 export const getAllThemeCategories = async (req, res) => {
   try {
-    const themeCategories = await db.ThemeCategory.findAll({
-      attributes: [
-        "id",
-        "name",
-        "type",
-        "status",
-        [
-          Sequelize.fn("COUNT", Sequelize.col("themes.id")),
-          "theme_count", // alias in response
-        ],
-      ],
-      include: [
-        {
-          model: db.Theme,
-          as: "themes",
-          attributes: [], // don’t pull all theme fields
-        },
-      ],
-      group: ["ThemeCategory.id"],
-      order: [["name", "ASC"]],
-    });
-
-    logger.info(
-      "[getAllThemeCategories] Theme categories with counts fetched successfully"
-    );
-
+    const themeCategories = await db.ThemeCategory.findAll();
+    logger.info("[getAllThemeCategories] Theme categories fetched successfully");
     return res.status(200).json({
       themeCategories,
     });
   } catch (error) {
-    logger.error(
-      "[getAllThemeCategories] Error fetching theme categories:",
-      error
-    );
+    logger.error("[getAllThemeCategories] Error fetching theme categories:]",error);
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
 
     return res.status(500).json({
-      success: false,
       message: "Unexpected server error",
       error:
         process.env.NODE_ENV === "production"
