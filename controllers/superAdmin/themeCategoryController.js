@@ -1,6 +1,6 @@
 import db from "../../models/index.js";
 import handleSequelizeError from "../../utils/handelSequelizeError.js";
-import {capitalizeSentence,generateSlug} from "../../utils/requiredMethods.js";
+import {capitalizeSentence} from "../../utils/requiredMethods.js";
 import { logger } from "../../utils/logger.js";
 import logActivity from "../../utils/logActivity.js";
 
@@ -13,7 +13,7 @@ export const createThemeCategory = async (req, res) => {
       logger.error("[createThemeCategory] Name and type are required");
       return res.status(400).json({ message: "Name and type are required." });
     }
-    const slug = generateSlug(name);
+    const slug = name;
     const newCategory = await db.ThemeCategory.create({
       name: capitalizeSentence(name),
       slug,
