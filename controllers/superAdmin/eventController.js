@@ -15,7 +15,15 @@ const RemoteOccasion = OccasionModelFactory(
 );
 export const getAllEvents = async (req, res) => {
   try {
-    const { page = 1, limit = 10, q, occasion } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      q,
+      occasion,
+      startDate,
+      endDate,
+      status,
+    } = req.query;
     const offset = (page - 1) * limit;
 
     if (!db.Event) {
@@ -25,6 +33,59 @@ export const getAllEvents = async (req, res) => {
     const whereConditions = {};
     if (occasion) {
       whereConditions.occasion_id = occasion;
+    }
+    // 🎯 Date range filter
+    if (startDate && endDate) {
+      whereConditions.event_datetime = {
+        [Op.between]: [new Date(startDate), new Date(endDate)],
+      };
+    } else if (startDate) {
+      whereConditions.event_datetime = { [Op.gte]: new Date(startDate) };
+    } else if (endDate) {
+      whereConditions.event_datetime = { [Op.lte]: new Date(endDate) };
+    }
+
+    // 🎯 Status filter
+    if (status) {
+      const today = new Date();
+      const startOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0,
+        0
+      );
+      const endOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        23,
+        59,
+        59
+      );
+
+      switch (status.toLowerCase()) {
+        case "today":
+          whereConditions.event_datetime = {
+            [Op.between]: [startOfDay, endOfDay],
+          };
+          break;
+
+        case "upcoming":
+          whereConditions.event_datetime = { [Op.gt]: endOfDay };
+          whereConditions.deleted_at = null;
+          break;
+
+        case "completed":
+          whereConditions.event_datetime = { [Op.lt]: startOfDay };
+          whereConditions.deleted_at = null;
+          break;
+
+        case "deleted":
+          whereConditions.deleted_at = { [Op.ne]: null };
+          break;
+      }
     }
 
     let userIds = [];
@@ -55,19 +116,29 @@ export const getAllEvents = async (req, res) => {
         { event_datetime: { [Op.like]: searchValue } },
         { venue_name: { [Op.like]: searchValue } },
         { venue_address: { [Op.like]: searchValue } },
-        { occasion_data: { [Op.like]: searchValue } },
+        // { occasion_data: { [Op.like]: searchValue } },
         { created_at: { [Op.like]: searchValue } },
         { updated_at: { [Op.like]: searchValue } },
         { deleted_at: { [Op.like]: searchValue } },
         Sequelize.where(
-          Sequelize.fn("JSON_UNQUOTE", Sequelize.col("occasion_data")),
+          Sequelize.fn(
+            "JSON_UNQUOTE",
+            Sequelize.json("occasion_data.bride_name")
+          ),
+          { [Op.like]: searchValue }
+        ),
+        Sequelize.where(
+          Sequelize.fn(
+            "JSON_UNQUOTE",
+            Sequelize.json("occasion_data.groom_name")
+          ),
           { [Op.like]: searchValue }
         ),
         // 🔍 Match events by user_ids from RemoteUser search
         ...(userIds.length > 0 ? [{ user_id: { [Op.in]: userIds } }] : []),
       ];
     }
-
+const fetchLimit = parseInt(limit)*parseInt(page)
     const { rows: events, count: total } = await db.Event.findAndCountAll({
       where: whereConditions,
       attributes: [
@@ -85,7 +156,7 @@ export const getAllEvents = async (req, res) => {
         "deleted_at",
       ],
       order: [["created_at", "desc"]],
-      limit: parseInt(limit),
+      limit: fetchLimit,
       offset,
       paranoid: false, // ✅ include soft-deleted
     });
@@ -121,20 +192,50 @@ export const getAllEvents = async (req, res) => {
       return acc;
     }, {});
 
-    const result = events.map((e) => ({
-      id: e.id,
-      title: e.title,
-      slug: e.slug,
-      event_datetime: e.event_datetime,
-      venue_name: e.venue_name,
-      venue_address: e.venue_address,
-      occasion_data: e.occasion_data,
-      user: userMap[e.user_id] || null,
-      occasion: occasionMap[e.occasion_id] || null,
-      created_at: e.created_at,
-      updated_at: e.updated_at,
-      deleted_at: e.deleted_at,
-    }));
+    const result = events.map((e) => {
+      let eventStatus = "upcoming";
+
+      const eventDate = new Date(e.event_datetime);
+      const today = new Date();
+
+      // Normalize both to YYYY-MM-DD (midnight)
+      const eventDay = new Date(
+        eventDate.getFullYear(),
+        eventDate.getMonth(),
+        eventDate.getDate()
+      );
+      const todayDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+
+      if (e.deleted_at) {
+        eventStatus = "deleted";
+      } else if (eventDay.getTime() === todayDay.getTime()) {
+        eventStatus = "today";
+      } else if (eventDay.getTime() > todayDay.getTime()) {
+        eventStatus = "upcoming";
+      } else if (eventDay.getTime() < todayDay.getTime()) {
+        eventStatus = "completed";
+      }
+
+      return {
+        id: e.id,
+        title: e.title,
+        slug: e.slug,
+        event_datetime: e.event_datetime,
+        venue_name: e.venue_name,
+        venue_address: e.venue_address,
+        occasion_data: e.occasion_data,
+        status: eventStatus, // ✅ only date matters now
+        user: userMap[e.user_id] || null,
+        occasion: occasionMap[e.occasion_id] || null,
+        created_at: e.created_at,
+        updated_at: e.updated_at,
+        deleted_at: e.deleted_at,
+      };
+    });
 
     return res.status(200).json({
       success: true,

@@ -13,7 +13,7 @@ import adminActivityLogRouter from "./superAdmin/adminActivityLogRouter.js";
 import themeRouter from "./superAdmin/themeRouter.js";
 import themeCategoryRouter from "./superAdmin/themeCategoryRouter.js";
 import guestGroupRouter from "./superAdmin/guestGroupRouter.js";
-import guestCategoriesRouter from "./superAdmin/guestDirectories.js";
+import guestCategoriesRouter from "./superAdmin/guestDirectoriesRouter.js";
 
 
 import authenticate from "../middlewares/authMiddleware.js";
