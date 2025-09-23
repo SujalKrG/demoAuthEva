@@ -1,6 +1,12 @@
 import db from "../models/index.js";
 
-const logActivity = async ({ created_by, user_id = null, action, module, details = {} }) => {
+const logActivity = async (
+  created_by,
+  user_id = null,
+  action,
+  module,
+  details = {},
+) => {
   try {
     await db.AdminActivityLog.create({
       created_by,

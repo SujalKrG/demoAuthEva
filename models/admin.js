@@ -36,7 +36,7 @@ export default (sequelize, DataTypes) => {
       },
       emp_id: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true,
       },
       address: {
@@ -53,7 +53,7 @@ export default (sequelize, DataTypes) => {
         defaultValue: true,
       },
       remember_token: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
       reset_password_OTP: {
