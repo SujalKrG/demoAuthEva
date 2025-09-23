@@ -1,28 +1,28 @@
 import express from "express";
 
-import adminRouter from "./superAdmin/adminRouter.js";
-import eventRouter from "./superAdmin/eventRouter.js";
-import occasionFormFieldRouter from "./superAdmin/occasionFieldRouter.js";
-import occasionRouter from "./superAdmin/occasionRouter.js";
-import permissionRouter from "./superAdmin/permissionRouter.js"
-import permissionToRoleRouter from './superAdmin/permissionToRoleRouter.js'
-import roleRouter from "./superAdmin/roleRouter.js";
-import roleToAdminRouter from "./superAdmin/roleToAdminRouter.js";
-import userRouter from "./superAdmin/userRouter.js";
-import adminActivityLogRouter from "./superAdmin/adminActivityLogRouter.js";
-import themeRouter from "./superAdmin/themeRouter.js";
-import themeCategoryRouter from "./superAdmin/themeCategoryRouter.js";
-import guestGroupRouter from "./superAdmin/guestGroupRouter.js";
-import guestCategoriesRouter from "./superAdmin/guestDirectoriesRouter.js";
+import adminRouter from "./adminRouter.js";
+import eventRouter from "./eventRouter.js";
+import occasionFormFieldRouter from "./occasionFieldRouter.js";
+import occasionRouter from "./occasionRouter.js";
+import permissionRouter from "./permissionRouter.js"
+import permissionToRoleRouter from './permissionToRoleRouter.js'
+import roleRouter from "./roleRouter.js";
+import roleToAdminRouter from "./roleToAdminRouter.js";
+import userRouter from "./userRouter.js";
+import adminActivityLogRouter from "./adminActivityLogRouter.js";
+import themeRouter from "./themeRouter.js";
+import themeCategoryRouter from "./themeCategoryRouter.js";
+import guestGroupRouter from "./guestGroupRouter.js";
+import guestCategoriesRouter from "./guestDirectoriesRouter.js";
+
 
 
 import authenticate from "../middlewares/authMiddleware.js";
-import authorize from "../middlewares/authorizeMiddleware.js";
 import checkStatus from "../middlewares/statusMiddleware.js";
 
 const router = express.Router();
 
-// router.use(authenticate, checkStatus,authorize(["SUPER_ADMIN"]));
+// router.use(authenticate, checkStatus)
 
 router.use("/", adminRouter);
 router.use("/", eventRouter);

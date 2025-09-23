@@ -4,3 +4,14 @@
 2025-09-20 17:08:57 error: [createThemeCategory] Error creating theme category:] Cannot read properties of undefined (reading 'id')
 2025-09-20 17:19:21 error: [getAllThemeCategories] Error fetching theme categories:] Sequelize is not defined
 2025-09-20 17:19:54 info: [getAllThemeCategories] Theme categories fetched successfully
+2025-09-20 17:20:28 info: [getAllThemeCategories] Theme categories fetched successfully
+2025-09-20 17:23:38 info: [createTheme] Theme created successfully
+2025-09-20 17:51:50 info: [createTheme] Theme created successfully
+2025-09-22 10:52:59 error: Cannot read properties of undefined (reading 'id')
+2025-09-22 10:53:59 error: Cannot read properties of undefined (reading 'id')
+2025-09-22 10:54:34 error: Cannot read properties of undefined (reading 'id')
+2025-09-22 16:22:56 info: [createTheme] Theme created successfully
+2025-09-23 11:40:08 info: [createTheme] Theme created successfully
+2025-09-23 15:33:10 info: [createTheme] Theme created successfully
+2025-09-23 15:34:16 info: [createTheme] Theme created successfully
+2025-09-23 15:34:30 info: [createTheme] Theme created successfully

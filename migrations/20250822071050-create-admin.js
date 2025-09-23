@@ -45,7 +45,7 @@ export default {
         defaultValue: true,
       },
       remember_token: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       reset_password_OTP: {
