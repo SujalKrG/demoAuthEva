@@ -22,7 +22,7 @@ import checkStatus from "../middlewares/statusMiddleware.js";
 
 const router = express.Router();
 
-router.use(authenticate, checkStatus)
+// router.use(authenticate, checkStatus)
 
 router.use("/", adminRouter);
 router.use("/", eventRouter);
