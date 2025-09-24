@@ -32,7 +32,7 @@ export default {
         unique: true,
       },
       address: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       city: {

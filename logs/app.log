@@ -15,3 +15,26 @@
 2025-09-23 15:33:10 info: [createTheme] Theme created successfully
 2025-09-23 15:34:16 info: [createTheme] Theme created successfully
 2025-09-23 15:34:30 info: [createTheme] Theme created successfully
+2025-09-24 10:35:19 error: [updateAdminController] Unexpected non-whitespace character after JSON at position 1 (line 1 column 2)
+2025-09-24 10:35:40 error: [updateAdminController] Unexpected non-whitespace character after JSON at position 1 (line 1 column 2)
+2025-09-24 10:36:04 error: [updateAdminController] Unexpected non-whitespace character after JSON at position 1 (line 1 column 2)
+2025-09-24 10:38:14 error: [updateAdminController] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`admin_roles`, CONSTRAINT `admin_roles_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+2025-09-24 10:45:30 error: [updateAdminStatusController] updateAdminStatusService is not defined
+2025-09-24 10:45:44 error: [updateAdminStatusController] updateAdminStatusService is not defined
+2025-09-24 10:46:02 error: [updateAdminStatusController] updateAdminStatusService is not defined
+2025-09-24 10:46:26 error: [updateAdminStatusController] updateAdminStatusService is not defined
+2025-09-24 10:46:55 error: [updateAdminStatusController] updateAdminStatus is not defined
+2025-09-24 12:01:01 error: [updateRoleController] updateRoleWithPermissionsService is not defined
+2025-09-24 12:01:10 error: [updateRoleController] updateRoleWithPermissionsService is not defined
+2025-09-24 15:52:08 error: [createRoleService] p.trim is not a function
+2025-09-24 15:53:39 error: [createRoleService] Role code already exists
+2025-09-24 15:59:26 error: [createRoleService] p.trim is not a function
+2025-09-24 15:59:45 error: [createRoleService] No valid permissions found to assign
+2025-09-24 16:12:26 error: [createRoleService] Role code already exists
+2025-09-24 16:12:34 error: [createRoleService] findPermissionsByIds is not defined
+2025-09-24 16:29:14 error: [createRoleService] Name and Code are required
+2025-09-24 16:29:21 error: [createRoleService] Name and Code are required
+2025-09-24 16:29:44 error: [createRoleService] Name and Code are required
+2025-09-24 16:30:10 error: [createRoleService] Name and Code are required
+2025-09-24 16:32:02 error: [createRoleService] Name and Code are required
+2025-09-24 16:32:45 error: [createRoleService] Name and Code are required

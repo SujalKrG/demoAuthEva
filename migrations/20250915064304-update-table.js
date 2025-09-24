@@ -3,13 +3,16 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.changeColumn("admins", "remember_token", {
-      type: Sequelize.TEXT,
+    await queryInterface.changeColumn("user_themes", "theme_id", {
+      type: Sequelize.BIGINT,
       allowNull: true,
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.addColumn("admins", "remember_token");
+    await queryInterface.changeColumn("user_themes", "theme_id", {
+      type: Sequelize.BIGINT,
+      allowNull: false,
+    });
   },
 };

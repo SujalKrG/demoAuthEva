@@ -1,10 +1,20 @@
-
-import { loginService, logoutService, changePasswordService } from "../services/authService.js";
+import {
+  loginService,
+  logoutService,
+  changePasswordService,
+} from "../services/authService.js";
 
 export const login = async (req, res) => {
   try {
     const result = await loginService(req.body);
-    res.status(200).json({ success: true, message: "Login successful", accessToken: result.accessToken, admin: result.admin });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Login successful",
+        accessToken: result.accessToken,
+        admin: result.admin,
+      });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -16,13 +26,16 @@ export const logout = async (req, res) => {
     const message = await logoutService(token);
     res.status(200).json({ success: true, message });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Logout failed", error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Logout failed", error: error.message });
   }
 };
 
 export const changePassword = async (req, res) => {
   try {
-    if (!req.admin?.id) return res.status(401).json({ success: false, message: "Unauthorized" });
+    if (!req.admin?.id)
+      return res.status(401).json({ success: false, message: "Unauthorized" });
 
     const message = await changePasswordService({
       adminId: req.admin.id,
@@ -35,6 +48,7 @@ export const changePassword = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
 
 
 
