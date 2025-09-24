@@ -40,7 +40,7 @@ export default (sequelize, DataTypes) => {
         unique: true,
       },
       address: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
       city: {

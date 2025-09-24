@@ -2,28 +2,33 @@ import express from "express";
 const router = express.Router();
 import {
   createTheme,
-    updateTheme,
-    updateStatus,
-    deleteTheme,
-    getAllTheme,
-    // getThemeBySlug,
-    countryCode,
+  updateTheme,
+  updateStatus,
+  deleteTheme,
+  getAllTheme,
+  // getThemeBySlug,
+  countryCode,
 } from "../controllers/themeController.js";
 // import { upload } from "../utils/requiredMethods.js";
 
 import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
+import authorize from "../middlewares/authorizeMiddleware.js";
 
 router.post(
   "/theme/store",
-  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),
+  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([4]),
   createTheme
 );
-router.patch("/theme/update/:id",upload.fields([{ name: "preview_image" }, { name: "preview_video" }]), updateTheme);
-router.delete("/theme/delete/:id", deleteTheme);
-router.get("/theme/get", getAllTheme);
+router.patch(
+  "/theme/update/:id",
+  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([6]),
+  updateTheme
+);
+router.delete("/theme/delete/:id",authorize([6]), deleteTheme);
+router.get("/theme/get",authorize([5]), getAllTheme);
 router.get("/country/get", countryCode);
-router.patch("/theme/update-status/:id", updateStatus);
+router.patch("/theme/update-status/:id",authorize([6]), updateStatus);
 
 export default router;
