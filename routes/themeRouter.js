@@ -18,17 +18,17 @@ import authorize from "../middlewares/authorizeMiddleware.js";
 
 router.post(
   "/theme/store",
-  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([4]),
+  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([2]),
   createTheme
 );
 router.patch(
   "/theme/update/:id",
-  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([6]),
+  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([2]),
   updateTheme
 );
-router.delete("/theme/delete/:id",authorize([6]), deleteTheme);
-router.get("/theme/get",authorize([5]), getAllTheme);
+router.delete("/theme/delete/:id",authorize([3]), deleteTheme);
+router.get("/theme/get",authorize([10]), getAllTheme);
 router.get("/country/get", countryCode);
-router.patch("/theme/update-status/:id",authorize([6]), updateStatus);
+router.patch("/theme/update-status/:id",authorize([5]), updateStatus);
 
 export default router;
