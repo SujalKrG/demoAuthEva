@@ -58,6 +58,7 @@ jobs:
             export DB_NAME="${{ secrets.DB_NAME }}"
             export DB_PORT="${{ secrets.DB_PORT }}"
 
+
             export DB2_HOST="${{ secrets.DB2_HOST }}"
             export DB2_PORT="${{ secrets.DB2_PORT }}"
             export DB2_DATABASE="${{ secrets.DB2_DATABASE }}"
@@ -72,6 +73,17 @@ jobs:
             export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
             export AWS_REGION="${{ secrets.AWS_REGION }}"
 
+            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            export JWT_ACCESS_SECRET="${{ secrets.JWT_ACCESS_SECRET }}"
+            export JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}"
+            export SUPERADMIN_EMAIL="${{ secrets.SUPERADMIN_EMAIL }}"
+            export SUPERADMIN_PASSWORD="${{ secrets.SUPERADMIN_PASSWORD }}"
+
+            export NODE_ENV="${{ secrets.NODE_ENV }}"
+            export FRONTEND_URL="${{ secrets.FRONTEND_URL }}"            
+            export EMAIL_PASS="${{ secrets.EMAIL_PASS }}"
+            export EMAIL_USER="${{ secrets.EMAIL_USER }}"
+            
             # Start Redis in passless mode if not running
             if ! pgrep redis-server > /dev/null; then
               redis-server --daemonize yes
