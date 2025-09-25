@@ -36,12 +36,12 @@ const authorize = (permissionsToCheck = []) => {
       if (!admin) {
         return res
           .status(403)
-          .json({ success: false, message: "User not found" });
+          .json({ success: false, message: "admin not found" });
       }
 
       // superAdmin bypass → has all permissions
       const isSuper = (admin.roles || []).some(
-        (r) => r.code.toUpperCase() === "SA"
+        (r) => r.code.toUpperCase() === "SUPER_ADMIN"
       );
       if (isSuper) return next();
 
