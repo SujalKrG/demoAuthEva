@@ -12,7 +12,7 @@ export default {
       },
       user_id: {
         type: Sequelize.BIGINT,
-        allowNull: true,
+        allowNull: false,
 
       },
       event_id: {
@@ -27,13 +27,17 @@ export default {
       },
       theme_id: {
         type: Sequelize.BIGINT,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "themes",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
+      },
+      occasion_id: {
+        type: Sequelize.BIGINT,
+        allowNull: true,
       },
       extra_data: {
         type: Sequelize.JSON,
@@ -44,9 +48,13 @@ export default {
         allowNull: false,
         defaultValue: 0.0,
       },
+      upload_meta:{
+        type: Sequelize.JSON,
+        allowNull: true,
+      },
       file_url: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       created_at: {
         type: Sequelize.DATE,

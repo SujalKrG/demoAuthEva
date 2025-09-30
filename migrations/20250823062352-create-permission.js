@@ -1,7 +1,7 @@
 "use strict";
 
 /** @type {import('sequelize-cli').Migration} */
-export default{
+export default {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("permissions", {
       id: {
@@ -14,6 +14,20 @@ export default{
         allowNull: false,
         unique: true,
       },
+      permission_code: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      router: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      method: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

@@ -14,12 +14,16 @@ const env = process.env.NODE_ENV || "development";
 const db = {};
 
 // Remote DB #1 (use "development" block from config)
-const config1 = configFile[env];  // 👈 now this matches your config
+const config1 = configFile[env]; // 👈 now this matches your config
 const sequelize = new Sequelize(
   config1.database,
   config1.username,
   config1.password,
-  config1
+
+  {
+    ...config1,
+    timezone: "+05:30", // forces IST for reads/writes
+  }
 );
 
 // Remote DB #2 (use "remote" block from config)
@@ -28,17 +32,22 @@ const remoteSequelize = new Sequelize(
   config2.database,
   config2.username,
   config2.password,
-  config2
+  {
+    ...config2,
+    timezone: "+05:30", // forces IST for reads/writes
+  }
 );
 
 // Load models dynamically into Remote DB #1
-for (const file of fs.readdirSync(__dirname).filter(
-  (file) =>
-    file.indexOf(".") !== 0 &&
-    file !== basename &&
-    file.slice(-3) === ".js" &&
-    !file.includes(".test.js")
-)) {
+for (const file of fs
+  .readdirSync(__dirname)
+  .filter(
+    (file) =>
+      file.indexOf(".") !== 0 &&
+      file !== basename &&
+      file.slice(-3) === ".js" &&
+      !file.includes(".test.js")
+  )) {
   const modelPath = path.join(__dirname, file);
   const modelModule = await import(pathToFileURL(modelPath).href);
   const modelFactory = modelModule.default || modelModule;
@@ -53,7 +62,7 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-db.sequelize = sequelize;         // Remote DB #1
+db.sequelize = sequelize; // Remote DB #1
 db.remoteSequelize = remoteSequelize; // Remote DB #2
 db.Sequelize = Sequelize;
 

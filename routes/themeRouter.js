@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+import authorizeDynamic from "../middlewares/dynamicAuthorizeMiddleware.js";
 import {
   createTheme,
   updateTheme,
@@ -14,21 +15,22 @@ import {
 import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
-import authorize from "../middlewares/authorizeMiddleware.js";
+router.use(authorizeDynamic());
+
 
 router.post(
   "/theme/store",
-  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([2]),
+  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),
   createTheme
 );
 router.patch(
   "/theme/update/:id",
-  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),authorize([2]),
+  upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),
   updateTheme
 );
-router.delete("/theme/delete/:id",authorize([3]), deleteTheme);
-router.get("/theme/get",authorize([10]), getAllTheme);
+router.delete("/theme/delete/:id", deleteTheme);
+router.get("/theme/get", getAllTheme);
 router.get("/country/get", countryCode);
-router.patch("/theme/update-status/:id",authorize([5]), updateStatus);
+router.patch("/theme/update-status/:id", updateStatus);
 
 export default router;

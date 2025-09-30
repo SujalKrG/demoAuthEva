@@ -1,13 +1,22 @@
-[
-  { "occasion_id": 1, "field_key": "bride_name", "label": "Bride Name", "type": "text", "required": true, "order_no": 1 },
-  { "occasion_id": 1, "field_key": "groom_name", "label": "Groom Name", "type": "text", "required": true, "order_no": 2 },
-  { "occasion_id": 1, "field_key": "wedding_date", "label": "Wedding Date", "type": "date", "required": true, "order_no": 3 },
-  { "occasion_id": 1, "field_key": "venue", "label": "Venue Name", "type": "text", "required": true, "order_no": 4 },
-  { "occasion_id": 1, "field_key": "guest_count", "label": "Expected Guest Count", "type": "number", "required": false, "order_no": 5 },
-
-  { "occasion_id": 2, "field_key": "bride_name", "label": "Bride Name", "type": "text", "required": true, "order_no": 1 },
-  { "occasion_id": 2, "field_key": "groom_name", "label": "Groom Name", "type": "text", "required": true, "order_no": 2 },
-  { "occasion_id": 2, "field_key": "engagement_date", "label": "Engagement Date", "type": "date", "required": true, "order_no": 3 },
-  { "occasion_id": 2, "field_key": "venue", "label": "Venue Name", "type": "text", "required": true, "order_no": 4 },
-  { "occasion_id": 2, "field_key": "ring_size", "label": "Ring Size", "type": "text", "required": false, "order_no": 5 }
-]
+{
+    "success": true,
+    "data": {
+        "id": 35,
+        "created_by": 1,
+        "user_id": null,
+        "action": "Theme status updated by alice (EMP25001)",
+        "module": "theme",
+        "details": {
+            "id": 130,
+            "name": "Hgfjhgffghj",
+            "status": true
+        },
+        "created_at": "2025-09-27T04:50:46.000Z",
+        "updated_at": "2025-09-27T04:50:46.000Z",
+        "admin": {
+            "id": 1,
+            "name": "alice",
+            "email": "alice@test.com"
+        }
+    }
+}

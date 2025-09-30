@@ -41,7 +41,7 @@ const authorize = (permissionsToCheck = []) => {
 
       // superAdmin bypass → has all permissions
       const isSuper = (admin.roles || []).some(
-        (r) => r.code.toUpperCase() === "SUPER_ADMIN"
+        (r) => r.code.toUpperCase() === "SA"
       );
       if (isSuper) return next();
 

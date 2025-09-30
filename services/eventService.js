@@ -4,7 +4,7 @@ import {
   getOccasionsByIds,
   searchRemoteUsers,
 } from "../repositories/eventRepository.js";
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 
 export const getAllEventsService = async (query) => {
   const {
@@ -20,71 +20,130 @@ export const getAllEventsService = async (query) => {
   const offset = (page - 1) * limit;
   const whereConditions = {};
 
-  // Event filters (applies to event_datetime)
+  // Occasion filter
   if (occasion) whereConditions.occasion_id = occasion;
-  if (startDate && endDate) {
-    whereConditions.event_datetime = { [Op.between]: [new Date(startDate), new Date(endDate)] };
-  } else if (startDate) {
-    whereConditions.event_datetime = { [Op.gte]: new Date(startDate) };
-  } else if (endDate) {
-    whereConditions.event_datetime = { [Op.lte]: new Date(endDate) };
+
+  // --- Build user-supplied date range (inclusive)
+  let rangeStart = null;
+  let rangeEnd = null;
+
+  if (startDate) {
+    const sd = new Date(startDate);
+    rangeStart = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), 0, 0, 0, 0);
+  }
+  if (endDate) {
+    const ed = new Date(endDate);
+    rangeEnd = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), 23, 59, 59, 999);
   }
 
-  // Status filter
-  if (status) {
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0,0,0,0));
-    const endOfDay = new Date(today.setHours(23,59,59,999));
+  // --- Status-based constraints (expressed as a date-range or deleted flag)
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
-    switch (status.toLowerCase()) {
+  // Status-derived min/max (null means "no bound from status side")
+  let statusStart = null;
+  let statusEnd = null;
+
+  if (status) {
+    switch (status.toString().toLowerCase()) {
       case "today":
-        whereConditions.event_datetime = { [Op.between]: [startOfDay, endOfDay] };
+        statusStart = startOfToday;
+        statusEnd = endOfToday;
         break;
+
       case "upcoming":
-        whereConditions.event_datetime = { [Op.gt]: endOfDay };
+        // events strictly after today
+        statusStart = new Date(endOfToday.getTime() + 1);
+        // keep only non-deleted for upcoming
         whereConditions.deleted_at = null;
         break;
+
       case "completed":
-        whereConditions.event_datetime = { [Op.lt]: startOfDay };
+        // events strictly before today
+        statusEnd = new Date(startOfToday.getTime() - 1);
+        // keep only non-deleted for completed
         whereConditions.deleted_at = null;
         break;
+
       case "deleted":
+        // deleted events only — do NOT force any event_datetime range
         whereConditions.deleted_at = { [Op.ne]: null };
+        break;
+
+      default:
+        // unknown status - ignore
         break;
     }
   }
 
-  // Search filter
-  let userIds = [];
+  // --- Intersect user date-range and status date-range
+  // finalStart = max(rangeStart, statusStart)
+  // finalEnd = min(rangeEnd, statusEnd)
+  let finalStart = rangeStart ?? null;
+  let finalEnd = rangeEnd ?? null;
+
+  if (statusStart) {
+    finalStart = finalStart ? (finalStart > statusStart ? finalStart : statusStart) : statusStart;
+  }
+  if (statusEnd) {
+    finalEnd = finalEnd ? (finalEnd < statusEnd ? finalEnd : statusEnd) : statusEnd;
+  }
+
+  // If intersection is impossible (start > end) -> return empty early
+  if (finalStart && finalEnd && finalStart.getTime() > finalEnd.getTime()) {
+    return {
+      total: 0,
+      currentPage: parseInt(page, 10),
+      totalPages: 0,
+      limit: parseInt(limit, 10),
+      count: 0,
+      data: [],
+    };
+  }
+
+  // Attach effective event_datetime filter
+  if (finalStart && finalEnd) {
+    whereConditions.event_datetime = { [Op.between]: [finalStart, finalEnd] };
+  } else if (finalStart) {
+    whereConditions.event_datetime = { [Op.gte]: finalStart };
+  } else if (finalEnd) {
+    whereConditions.event_datetime = { [Op.lte]: finalEnd };
+  }
+
+  // --- Search filter (kept intact)
   if (q && q.trim() !== "") {
-    userIds = await searchRemoteUsers(q);
+    const term = q.trim();
+    const userIds = await searchRemoteUsers(term);
+
     whereConditions[Op.or] = [
-      { title: { [Op.like]: `%${q}%` } },
-      { slug: { [Op.like]: `%${q}%` } },
-      { venue_name: { [Op.like]: `%${q}%` } },
-      { venue_address: { [Op.like]: `%${q}%` } },
+      { title: { [Op.like]: `%${term}%` } },
+      { slug: { [Op.like]: `%${term}%` } },
+      { venue_name: { [Op.like]: `%${term}%` } },
+      { venue_address: { [Op.like]: `%${term}%` } },
       ...(userIds.length > 0 ? [{ user_id: { [Op.in]: userIds } }] : []),
     ];
   }
 
+  // --- Fetch events
   const { rows: events, count: total } = await getEventsRepo({
     whereConditions,
-    limit: parseInt(limit),
+    limit: parseInt(limit, 10),
     offset,
   });
 
-  // Fetch related user & occasion data
-  const fetchedUserIds = events.map(e => e.user_id).filter(Boolean);
-  const fetchedOccasionIds = events.map(e => e.occasion_id).filter(Boolean);
+  // --- Fetch and attach related data
+  const fetchedUserIds = events.map((e) => e.user_id).filter(Boolean);
+  const fetchedOccasionIds = events.map((e) => e.occasion_id).filter(Boolean);
 
-  const users = await getUsersByIds(fetchedUserIds);
-  const occasions = await getOccasionsByIds(fetchedOccasionIds);
+  const users = fetchedUserIds.length ? await getUsersByIds(fetchedUserIds) : [];
+  const occasions = fetchedOccasionIds.length ? await getOccasionsByIds(fetchedOccasionIds) : [];
 
-  const userMap = Object.fromEntries(users.map(u => [u.id, u]));
-  const occasionMap = Object.fromEntries(occasions.map(o => [o.id, o]));
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
+  const occasionMap = Object.fromEntries(occasions.map((o) => [o.id, o]));
 
-  // Map event status
-  const result = events.map(e => {
+  // --- Compute status for each event (for display)
+  const result = events.map((e) => {
     let eventStatus = "upcoming";
     const eventDate = new Date(e.event_datetime);
     const today = new Date();
@@ -94,7 +153,7 @@ export const getAllEventsService = async (query) => {
     if (e.deleted_at) eventStatus = "deleted";
     else if (eventDay.getTime() === todayDay.getTime()) eventStatus = "today";
     else if (eventDay.getTime() > todayDay.getTime()) eventStatus = "upcoming";
-    else if (eventDay.getTime() < todayDay.getTime()) eventStatus = "completed";
+    else eventStatus = "completed";
 
     return {
       ...e.toJSON(),
@@ -106,9 +165,9 @@ export const getAllEventsService = async (query) => {
 
   return {
     total,
-    currentPage: parseInt(page),
+    currentPage: parseInt(page, 10),
     totalPages: Math.ceil(total / limit),
-    limit: parseInt(limit),
+    limit: parseInt(limit, 10),
     count: result.length,
     data: result,
   };

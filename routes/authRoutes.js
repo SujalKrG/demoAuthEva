@@ -4,6 +4,7 @@ import { requestPasswordOTP,resetPasswordWithOTP } from "../controllers/forgotPa
 
 const router = express.Router();
 
+
 router.post("/login", login);
 // router.get("/protected", authenticate, (req, res) => {
 //   res.json({ message: "This is a protected route", admin: req.admin });

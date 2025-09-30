@@ -7,6 +7,7 @@ import {
 const router = express.Router();
 
 router.get("/admin-activity-log/get", getAdminActivityLogs);
-router.get("/admin-activity-log/show/:id", showDetailsById);
+router.get("/admin-activity-log/:module/:id", showDetailsById);
+
 
 export default router;

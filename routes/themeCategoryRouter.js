@@ -6,13 +6,12 @@ import {
 } from "../controllers/themeCategoryController.js";
 import express from "express";
 
-
 const router = express.Router();
 // router.use(authenticate, checkStatus);
 
 router.post(
   "/theme-category/store",
- 
+
   createThemeCategory
 );
 router.patch(

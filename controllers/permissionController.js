@@ -1,43 +1,36 @@
-import {
-  createPermissionsService,
-  getAllPermissionsService,
-} from "../services/permissionService.js";
+import PermissionService from "../services/permissionService.js";
 
+const permissionService = new PermissionService();
+
+// POST /permissions
 export const createPermission = async (req, res) => {
   try {
-    const result = await createPermissionsService(req.body.names);
-
+    const permission = await permissionService.createPermission(req.body);
     res.status(201).json({
       success: true,
-      message: result.message,
-      added: result.added,
-      skipped: result.skipped,
+      message: "Permission created successfully",
+      permission,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message || "Server error",
+      message: error.message,
     });
   }
 };
 
-export const getAllPermissions = async (req, res) => {
+// GET /permissions
+export const getPermissions = async (req, res) => {
   try {
-    const result = await getAllPermissionsService();
-    return res.status(200).json({ success: true, result });
+    const permissions = await permissionService.getAllPermissions();
+    res.status(200).json({
+      success: true,
+      permissions,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server error",
-      error: error.message,
+      message: error.message,
     });
   }
 };
-
-
-
-
-
-
-
-

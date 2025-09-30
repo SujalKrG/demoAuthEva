@@ -1,25 +1,27 @@
+// services/adminRoleService.js
 import { sequelize } from "../models/index.js";
-import { findAdminById, findRoleById } from "../repositories/adminRoleRepository.js";
+import { findAdminWithRoles } from "../repositories/adminRoleRepository.js";
 
 export const assignRoleToAdminService = async ({ adminId, roleId }) => {
   const t = await sequelize.transaction();
   try {
-    const admin = await findAdminById(adminId, t);
-    const role = await findRoleById(roleId, t);
+    const admin = await findAdminWithRoles(adminId, t);
 
-    if (!admin || !role) {
-      throw new Error("Admin or Role not found");
+    if (!admin) {
+      throw new Error("Admin not found");
     }
 
-    const alreadyHasRole = await admin.hasRole(role, { transaction: t });
+    // check role in one go
+    const alreadyHasRole = admin.Roles.some((role) => role.id === roleId);
     if (alreadyHasRole) {
       throw new Error("Admin already has this role");
     }
 
-    await admin.addRole(role, { transaction: t });
+    // we don't need to fetch role separately, just attach by id
+    await admin.addRole(roleId, { transaction: t });
     await t.commit();
 
-    return { message: `Role ${role.code} assigned to ${admin.name}` };
+    return { message: `Role ${roleId} assigned to ${admin.name}` };
   } catch (error) {
     await t.rollback();
     throw error;

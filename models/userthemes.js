@@ -15,11 +15,15 @@ export default (sequelize, DataTypes) => {
       },
       event_id: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
       },
       theme_id: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
+      },
+      occasion_id: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
       },
       extra_data: {
         type: DataTypes.JSON,
@@ -30,9 +34,13 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0.0,
       },
+      upload_meta: {
+        type: DataTypes.JSON,
+        allowNull: true,
+      },
       file_url: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
     },
     {

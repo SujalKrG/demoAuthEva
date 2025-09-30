@@ -1,13 +1,24 @@
 import db from "../models/index.js";
-import { Op } from "sequelize";
 
-export const findPermissionsByNames = (names) =>
-  db.Permission.findAll({
-    where: { name: { [Op.in]: names } },
-  });
+export default class PermissionRepository {
+  constructor() {
+    this.model = db.Permission;
+  }
 
-export const bulkCreatePermissions = (names) =>
-  db.Permission.bulkCreate(names.map((n) => ({ name: n })));
+  // Create a permission
+  async create(data) {
+    return this.model.create(data);
+  }
 
-export const getAllPermissions = () =>
-  db.Permission.findAll({ attributes: ["id", "name"] });
+  // Find by name
+  async findByName(name) {
+    return this.model.findOne({attributes:['id',"permission_code"], where: { name } });
+  }
+
+  // Get all permissions
+  async findAll() {
+    return this.model.findAll({
+      attributes: ["id", "name", "permission_code", ],
+    });
+  }
+}

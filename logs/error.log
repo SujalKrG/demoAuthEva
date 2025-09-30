@@ -28,3 +28,39 @@
 2025-09-24 16:30:10 error: [createRoleService] Name and Code are required
 2025-09-24 16:32:02 error: [createRoleService] Name and Code are required
 2025-09-24 16:32:45 error: [createRoleService] Name and Code are required
+2025-09-26 12:30:44 error: [updateAdminController] Transaction cannot be rolled back because it has been finished with state: rollback
+2025-09-26 12:32:27 error: [updateAdminController] Transaction cannot be rolled back because it has been finished with state: rollback
+2025-09-26 12:33:31 error: [updateAdminController] Cannot read properties of undefined (reading 'destroy')
+2025-09-26 12:33:46 error: [updateAdminController] Cannot read properties of undefined (reading 'destroy')
+2025-09-26 12:34:34 error: [updateAdminController] Unknown column 'adminId' in 'where clause'
+2025-09-26 12:34:56 error: [updateAdminController] Cannot read properties of undefined (reading 'bulkCreate')
+2025-09-26 12:35:11 error: [updateAdminController] Field 'role_id' doesn't have a default value
+2025-09-26 12:43:59 error: [updateAdminStatusController] Transaction cannot be rolled back because it has been finished with state: commit
+2025-09-26 12:47:09 error: [updateAdminStatusController] Transaction cannot be rolled back because it has been finished with state: commit
+2025-09-26 12:47:47 error: [updateAdminStatusController] updatedAdmin.reload is not a function
+2025-09-26 12:52:56 error: [updateAdminStatusController] number 1 is not iterable (cannot read property Symbol(Symbol.iterator))
+2025-09-26 18:20:10 error: [createAdmin] Error: Email already exists
+2025-09-26 18:20:59 error: [createAdmin] Error: Email already exists
+2025-09-26 18:21:05 error: [createAdmin] Error: Incorrect integer value: 'TA' for column 'role_id' at row 1
+2025-09-26 18:29:25 error: [updateAdminController] r.trim is not a function
+2025-09-26 18:37:13 error: [createAdmin] Email already exists
+2025-09-27 13:04:20 error: Error creating theme: Cannot destructure property 'created_by' of 'undefined' as it is undefined.
+2025-09-27 13:05:04 error: Error creating theme: Cannot destructure property 'created_by' of 'undefined' as it is undefined.
+2025-09-27 13:05:47 error: Error creating theme: Cannot destructure property 'created_by' of 'undefined' as it is undefined.
+2025-09-27 13:09:31 error: Error updating theme status: Cannot destructure property 'created_by' of 'undefined' as it is undefined.
+2025-09-27 15:22:55 error: updateThemeStatus error: logActivity is not defined
+2025-09-27 15:23:07 error: updateThemeStatus error: admin is not defined
+2025-09-27 15:23:08 error: updateThemeStatus error: admin is not defined
+2025-09-29 15:40:12 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:40:21 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:40:32 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:40:32 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:41:37 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:41:37 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:41:55 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:41:55 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:51:20 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:52:39 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:52:40 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:53:35 error: Error fetching themes: OccasionModel is not defined
+2025-09-29 15:56:00 error: Error fetching themes: Argument passed to findByPk is invalid: 1,1,1,1,1,1,1,21,1,1

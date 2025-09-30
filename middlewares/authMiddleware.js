@@ -1,63 +1,91 @@
 import jwt from "jsonwebtoken";
 import db from "../models/index.js";
-
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return res
         .status(401)
-        .json({success: false, message: "Authorization header missing or malformed" });
+        .json({
+          success: false,
+          message: "Authorization header missing or malformed",
+        });
     }
-    const token = authHeader.split(" ")[1];
 
-    if (!token) {
-      return res
-        .status(401)
-        .json({success: false, message: "No token provided in authMiddleware" });
-    }
+    const token = authHeader.split(" ")[1];
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
+    } catch {
       return res
         .status(401)
-        .json({success: false, message: "Invalid or expired token", error: error.message });
+        .json({ success: false, message: "Invalid or expired token" });
     }
 
-    const admin = await db.Admin.findByPk(decoded.id);
-    if (!admin) {
-      return res.status(401).json({success: false, message: "admin not found" });
-    }
+    // Fetch admin along with roles & permissions in one query
+    const admin = await db.Admin.findByPk(decoded.id, {
+      attributes: ["id","name", "emp_id", "email", "status", "remember_token"],
+      include: [
+        {
+          model: db.Role,
+          as: "roles",
+          attributes: ["id", "code"],
+          through: { attributes: [] },
+          include: [
+            {
+              model: db.Permission,
+              as: "permissions",
+              attributes: ["id", "name"],
+              through: { attributes: [] },
+            },
+          ],
+        },
+      ],
+    });
 
-    if (admin.remember_token !== token) {
+    if (!admin)
       return res
         .status(401)
-        .json({success: false, message: "Token mismatch. Please login again." });
-    }
+        .json({ success: false, message: "Admin not found" });
 
-    // Case 2: admin inactive (status = 0)
-    if (admin.status === false) {
-      try {
-        admin.remember_token = null;
-        await admin.save();
-      } catch (error) {
-        res.json({success: false, message: "db update error", error: error.message });
-      }
-      return res.status(401).json({
-        success: false,
-        message: "Your account is inactive. Logged out automatically.",
-      });
-    }
-    // ✅ Attach user info
-    req.admin = admin;
-    return next();
-  } catch (error) {
-    console.log(error);
+    // if (admin.remember_token && admin.remember_token !== token) {
+    //   return res
+    //     .status(401)
+    //     .json({
+    //       success: false,
+    //       message: "Token mismatch. Please login again.",
+    //     });
+    // }
 
+    if (!admin.status)
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Your account is inactive. Please contact support.",
+        });
+
+    // Precompute permission set for faster authorization
+    const permissionSet = new Set();
+    (admin.roles || []).forEach((r) =>
+      (r.permissions || []).forEach((p) => permissionSet.add(p.id))
+    );
+    console.log("--------------------------------------------");
+    console.log({ ...admin.get(), permissionsSet: permissionSet} );
+    
+    
+    req.admin = { ...admin.get(), permissionsSet: permissionSet };
+
+    next();
+  } catch (err) {
+    console.error("[authenticate] error:", err);
     return res
       .status(401)
-      .json({success: false, message: "authentication failed", error: error.message });
+      .json({
+        success: false,
+        message: "Authentication failed",
+        error: err.message,
+      });
   }
 };
 
