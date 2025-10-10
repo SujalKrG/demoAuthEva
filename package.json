@@ -10,7 +10,7 @@
     "migrate:run": "node --unhandled-rejections=strict scripts/runMigrations.js",
     "seed:run": "node --unhandled-rejections=strict scripts/runSeeders.js",
     "migrate-and-seed": "npm run migrate:run && npm run seed:run",
-    "test": "cross-env NODE_ENV=test JWT_SECRET=test_secret jest --runInBand"
+    "test": "jest --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",

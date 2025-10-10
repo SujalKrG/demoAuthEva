@@ -6,8 +6,9 @@ import {
   saveAdmin,
   findAdminById1,
 } from "../repositories/authRepository.js";
-import logActivity from "../utils/logActivity.js";
+// import logActivity from "../utils/logActivity.js";
 import { generateToken } from "../utils/requiredMethods.js";
+
 
 export const loginService = async ({ email, password }) => {
   if (!email || !password) throw new Error("Email and password are required");
@@ -31,7 +32,6 @@ export const loginService = async ({ email, password }) => {
     roles,
     // permissions,
   });
-
   // admin.remember_token = accessToken;
   // await saveAdmin(admin);
 
@@ -41,7 +41,6 @@ export const loginService = async ({ email, password }) => {
   //   module: "Admin",
   //   details: {},
   // });
-
   return { admin, accessToken };
 };
 

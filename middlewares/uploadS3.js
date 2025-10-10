@@ -1,8 +1,7 @@
 import { PutObjectCommand , DeleteObjectCommand} from "@aws-sdk/client-s3";
 import { s3Client } from "../config/s3.js";
 import multer from "multer";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 export const uploadFileToS3 = async (buffer, folder, filename, mimetype) => {
   const key = `${folder}/${Date.now()}-${filename}`;
