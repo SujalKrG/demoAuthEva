@@ -13,7 +13,7 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      user_id:{
+      user_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
@@ -29,14 +29,12 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.JSON,
         allowNull: true,
       },
-      
     },
     {
       tableName: "admin_activity_logs",
       timestamps: true, // will auto-create createdAt & updatedAt
-      createdAt:"created_at",
-      updatedAt:"updated_at",
-      
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     }
   );
 

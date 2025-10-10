@@ -56,26 +56,25 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      reset_password_OTP: {
+      reset_password_otp: {
         type: DataTypes.STRING,
         allowNull: true,
-        field: 'reset_password_otp',
-        
+        field: "reset_password_OTP", // <-- match DB
       },
-      reset_password_OTP_expire: {
+      reset_password_otp_expire: {
         type: DataTypes.DATE,
         allowNull: true,
-        field: 'reset_password_otp_expire'
+        field: "reset_password_OTP_expire", // <-- match DB
       },
     },
     {
       tableName: "admins",
       timestamps: true,
-       underscored: true,
-       paranoid: true,
-      createdAt:"created_at",
-      updatedAt:"updated_at",
-      deletedAt: 'deleted_at',
+      underscored: true,
+      paranoid: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
     }
   );
 
@@ -91,7 +90,6 @@ export default (sequelize, DataTypes) => {
       as: "admin_activity_logs",
     });
   };
-  
 
   // Instance method
   Admin.prototype.getPermissions = async function () {

@@ -2,7 +2,7 @@
 
 export default (sequelize, DataTypes) => {
   const EventConversations = sequelize.define(
-    "event_conversations",
+    "EventConversations",
     {
       id: {
         type: DataTypes.BIGINT,

@@ -15,9 +15,15 @@ export const createRole = async (req, res) => {
       role,
     });
   } catch (error) {
-    res.status(400).json({
+    logger.error(`[role][create] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
   }
 };
@@ -27,10 +33,15 @@ export const getAllRoles = async (req, res) => {
     const roles = await getAllRolesService();
     res.status(200).json({ success: true, roles });
   } catch (error) {
-    res.status(500).json({
+    logger.error(`[role][getAll] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
+    return res.status(500).json({
       success: false,
-      message: "Server error",
-      error: error.message,
+      message: "Internal Server Error",
     });
   }
 };
@@ -55,10 +66,15 @@ export const updateRole = async (req, res) => {
       changes: result.permissionUpdateResult, // { added: [], removed: [], alreadyAssigned: [] }
     });
   } catch (error) {
+    logger.error(`[role][update] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: error.message,
     });
   }
 };

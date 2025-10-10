@@ -1,11 +1,18 @@
 import bcrypt from "bcryptjs";
-import { findAdminByEmail, findAdminsWithValidOTP, saveAdmin } from "../repositories/forgotPassRepository.js";
+import {
+  findAdminByEmail,
+  findAdminWithValidOTP,
+  saveAdmin,
+} from "../repositories/forgotPassRepository.js";
 import nodemailer from "nodemailer";
 
 const sendOTPEmail = async (email, otp) => {
   const transporter = nodemailer.createTransport({
     service: process.env.EMAIL_SERVICE || "gmail",
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS, // ⚠️ Use App Password for Gmail
+    },
   });
 
   await transporter.sendMail({
@@ -19,38 +26,38 @@ export const requestPasswordOTPService = async (email) => {
   if (!email) throw new Error("Email is required");
 
   const admin = await findAdminByEmail(email);
-  if (!admin) return { message: "Email does not exist" }; // generic response for security
+  if (!admin) return { message: "If the email exists, an OTP was sent" }; // generic for security
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  admin.resetPasswordOTP = await bcrypt.hash(otp, 10);
-  admin.resetPasswordOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
-  await saveAdmin(admin);
+  admin.reset_password_OTP = await bcrypt.hash(otp, 10);
+  admin.reset_password_OTP_expire = new Date(Date.now() + 10 * 60 * 1000);
 
+  await saveAdmin(admin);
   await sendOTPEmail(email, otp);
 
-  return { message: "OTP sent to your email" };
+  return { message: "If the email exists, an OTP was sent" };
 };
 
-export const resetPasswordWithOTPService = async ({ otp, newPassword }) => {
-  if (!otp || !newPassword) throw new Error("OTP and new password are required");
-
-  const candidates = await findAdminsWithValidOTP();
-  if (!candidates || candidates.length === 0) throw new Error("Invalid or expired OTP");
-
-  let matchedUser = null;
-  for (const user of candidates) {
-    if (await bcrypt.compare(otp, user.resetPasswordOTP || "")) {
-      matchedUser = user;
-      break;
-    }
+export const resetPasswordWithOTPService = async ({
+  email,
+  otp,
+  newPassword,
+}) => {
+  if (!email || !otp || !newPassword) {
+    throw new Error("Email, OTP, and new password are required");
   }
-  if (!matchedUser) throw new Error("Invalid or expired OTP");
 
-  matchedUser.password = await bcrypt.hash(newPassword, 10);
-  matchedUser.resetPasswordOTP = null;
-  matchedUser.resetPasswordOTPExpires = null;
+  const admin = await findAdminWithValidOTP(email);
+  if (!admin) throw new Error("Invalid or expired OTP");
 
-  await saveAdmin(matchedUser);
+  const isMatch = await bcrypt.compare(otp, admin.reset_password_OTP || "");
+  if (!isMatch) throw new Error("Invalid or expired OTP");
+
+  admin.password = await bcrypt.hash(newPassword, 10);
+  admin.reset_password_OTP = null;
+  admin.reset_password_OTP_expire = null;
+
+  await saveAdmin(admin);
 
   return { message: "Password reset successful" };
 };

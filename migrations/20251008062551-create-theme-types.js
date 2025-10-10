@@ -3,31 +3,31 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("permissions", {
+    await queryInterface.createTable("theme_types", {
       id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.TINYINT,
         autoIncrement: true,
         primaryKey: true,
+      },
+      category_id: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+        references: {
+          model: "theme_categories",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
-      permission_code: {
-        type: Sequelize.STRING,
+      status: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        unique: true,
+        defaultValue: true,
       },
-      router: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      method: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -40,10 +40,14 @@ export default {
           "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         ),
       },
+      deleted_at: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("permissions");
+    await queryInterface.dropTable("theme_types");
   },
 };

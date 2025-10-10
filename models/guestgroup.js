@@ -2,7 +2,7 @@
 
 export default (sequelize, DataTypes) => {
   const GuestGroup = sequelize.define(
-    "guest_groups",
+    "GuestGroup",
     {
       id: {
         type: DataTypes.BIGINT,

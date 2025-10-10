@@ -3,21 +3,19 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("user_themes", {
+    await queryInterface.createTable("carts", {
       id: {
         type: Sequelize.BIGINT,
-        primaryKey: true,
         autoIncrement: true,
-        allowNull: false,
+        primaryKey: true,
       },
       user_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
-
       },
       event_id: {
         type: Sequelize.BIGINT,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: "events",
           key: "id",
@@ -25,36 +23,24 @@ export default {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      theme_id: {
+      user_theme_id: {
         type: Sequelize.BIGINT,
-        allowNull: true,
+        allowNull: false,
         references: {
-          model: "themes",
+          model: "user_themes",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      occasion_id: {
-        type: Sequelize.BIGINT,
-        allowNull: true,
-      },
-      extra_data: {
+      guest_with_schedules: {
         type: Sequelize.JSON,
-        allowNull: true,
-      },
-      purchased_price: {
-        type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
-        defaultValue: 0.0,
       },
-      upload_meta:{
-        type: Sequelize.JSON,
-        allowNull: true,
-      },
-      file_url: {
-        type: Sequelize.STRING,
-        allowNull: true,
+      buy_now: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
       created_at: {
         type: Sequelize.DATE,
@@ -64,18 +50,13 @@ export default {
       updated_at: {
         type: Sequelize.DATE,
         allowNull: true,
-        defaultValue: Sequelize.literal(
-          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-        ),
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
-      deleted_at: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
+     
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("user_themes");
+    await queryInterface.dropTable("carts");
   },
 };

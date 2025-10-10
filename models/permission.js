@@ -14,6 +14,19 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
+      permission_code:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      router: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      method: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
     },
     {
       tableName: "permissions",

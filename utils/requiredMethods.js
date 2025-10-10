@@ -1,7 +1,10 @@
 import slugify from "slugify";
-import multer from "multer";
+import path from "path";
+import jwt from "jsonwebtoken";
+import { sequelize } from "../models/index.js";
 
-//this method capitalize the sentence(first letter of each word is capital)
+
+// Capitalize each word
 export const capitalizeSentence = (sentence = "") => {
   return sentence
     .toLowerCase()
@@ -11,7 +14,7 @@ export const capitalizeSentence = (sentence = "") => {
     .join(" ");
 };
 
-//this method slugify the sentence (convert the sentence to a unique code including by replacing the space into '-' and add a unique code at the end. e.g admin dashboard -> admin-dashboard-823762)
+// Slugify name with unique suffix
 export const slug = (name) => {
   return (
     slugify(name, { lower: true, strict: true }) +
@@ -20,23 +23,53 @@ export const slug = (name) => {
   );
 };
 
+// Sanitize file name
 export const sanitizeName = (name) => {
   const ext = path.extname(name) || "";
   const base = path.basename(name, ext);
   return slugify(base, { lower: true, strict: true }) + ext.toLowerCase();
 };
 
-const storage = multer.memoryStorage();
-export const upload = multer({ storage });
+// Validation error helper
+export const validationError1 = async (t, message) => {
+  if (t) await t.rollback();
+  throw new Error(message);
+};
 
+// Generate sequential emp_id: EMP<YY><SEQ>
+export const generateEmpId = async (transaction) => {
+  // Lock the admins table to prevent race conditions
+  const lastAdmin = await sequelize.models.Admin.findOne({
+    order: [["created_at", "DESC"]],
+    transaction,
+    lock: transaction.LOCK.UPDATE, // <--- prevents concurrent inserts from duplicating emp_id
+  });
+
+  let lastId = lastAdmin ? parseInt(lastAdmin.emp_id?.split("-")[1]) : 0;
+  let newId = lastId + 1;
+  return `adm-${newId.toString().padStart(4, "0")}`;
+};
+
+// JWT generator
+export const generateToken = (payload) =>
+  jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+
+// Generate permission code
+export const generatePermissionCode = (name) =>
+  name.trim().toLowerCase().replace(/\s+/g, "-");
+
+// utils/formatDate.js
+export const formatToIST = (date) => {
+  if (!date) return null;
+  return new Date(date).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+};
 export const normalizeDecimal = (val) => {
   if (val === undefined || val === null || val === "" || val === "null") {
     return null;
   }
   return Number(val);
 };
-
-export const validationError = async (res, t, message) => {
-  if (t) await t.rollback();
-  return res.status(400).json({ success: false, message });
+export const sanitizeFileName = (filename) => {
+  return filename.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
 };
+

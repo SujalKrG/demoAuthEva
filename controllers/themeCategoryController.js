@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
 
-import handleSequelizeError from "../utils/handelSequelizeError.js";
 import { logger } from "../utils/logger.js";
 import logActivity from "../utils/logActivity.js";
 import {
@@ -34,16 +33,17 @@ export const createThemeCategory = async (req, res) => {
       data: newCategory,
     });
   } catch (error) {
-    logger.error("[]theme category", error.message);
-    console.log(error);
     const handled = handleSequelizeError(error, res);
     if (handled) return handled;
+    logger.error(`[ThemeCategory][Create] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
     return res.status(500).json({
-      message: "Unexpected server error",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal Server Error"
-          : error.message,
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };
@@ -75,16 +75,15 @@ export const updateThemeCategory = async (req, res) => {
       data: updatedCategory,
     });
   } catch (error) {
-    logger.error("[]theme category", error.message);
-    console.log(error);
-    const handled = handleSequelizeError(error, res);
-    if (handled) return handled;
+    logger.error(`[ThemeCategory][update] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
     return res.status(500).json({
-      message: "Unexpected server error",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal Server Error"
-          : error.message,
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };
@@ -119,17 +118,15 @@ export const deleteThemeCategory = async (req, res) => {
       data: deletedCategory,
     });
   } catch (error) {
-    logger.error("[theme category]", error.message);
-    console.log(error);
-    console.log(error);
-    const handled = handleSequelizeError(error, res);
-    if (handled) return handled;
+    logger.error(`[ThemeCategory][delete] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
     return res.status(500).json({
-      message: "Unexpected server error",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal Server Error"
-          : error.message,
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };
@@ -143,16 +140,15 @@ export const getAllThemeCategories = async (req, res) => {
       data: themeCategories,
     });
   } catch (error) {
-    logger.error("[theme category]", error.message);
-    console.log(error);
-    const handled = handleSequelizeError(error, res);
-    if (handled) return handled;
+    logger.error(`[ThemeCategory][getAll] ${error.message}`, {
+      name: error.name,
+      stack: error.stack,
+      body: req.body,
+    });
+    console.error(error);
     return res.status(500).json({
-      message: "Unexpected server error",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal Server Error"
-          : error.message,
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };
