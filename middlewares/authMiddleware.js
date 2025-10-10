@@ -70,8 +70,8 @@ const authenticate = async (req, res, next) => {
     (admin.roles || []).forEach((r) =>
       (r.permissions || []).forEach((p) => permissionSet.add(p.id))
     );
-    console.log("--------------------------------------------");
-    console.log({ ...admin.get(), permissionsSet: permissionSet} );
+    // console.log("--------------------------------------------");
+    // console.log({ ...admin.get(), permissionsSet: permissionSet} );
     
     
     req.admin = { ...admin.get(), permissionsSet: permissionSet };

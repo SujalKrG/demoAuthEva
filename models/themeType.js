@@ -1,39 +1,32 @@
 "use strict";
 
 export default (sequelize, DataTypes) => {
-  const GuestDirectories = sequelize.define(
-    "GuestDirectories",
+  const ThemeType = sequelize.define(
+    "ThemeType",
     {
       id: {
         type: DataTypes.BIGINT,
         autoIncrement: true,
         primaryKey: true,
       },
-      user_id: {
-        type: DataTypes.BIGINT,
+      category_id: {
+        type: DataTypes.TINYINT,
         allowNull: false,
-      },
-      group_id: {
-        type: DataTypes.BIGINT,
-        allowNull: true,
       },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      country_code: {
-        type: DataTypes.STRING,
+
+      status: {
+        type: DataTypes.BOOLEAN,
         allowNull: false,
-      },
-      phone: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        defaultValue: true,
       },
     },
     {
-      tableName: "guest_directories",
+      tableName: "theme_types",
       timestamps: true,
-      underscored: true,
       paranoid: true,
       createdAt: "created_at",
       updatedAt: "updated_at",
@@ -41,5 +34,12 @@ export default (sequelize, DataTypes) => {
     }
   );
 
-  return GuestDirectories;
+  ThemeType.associate = (models) => {
+    ThemeType.belongsTo(models.ThemeCategory, {
+      foreignKey: "category_id",
+      as: "themeCategory",
+    });
+  };
+
+  return ThemeType;
 };

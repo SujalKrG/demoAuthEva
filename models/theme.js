@@ -17,6 +17,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
+      theme_type_id: {
+        type: DataTypes.TINYINT,
+        allowNull: true,
+      },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -76,6 +80,10 @@ export default (sequelize, DataTypes) => {
     Theme.belongsTo(models.ThemeCategory, {
       foreignKey: "category_id",
       as: "themeCategory",
+    });
+    Theme.belongsTo(models.ThemeType, {
+      foreignKey: "theme_type_id",
+      as: "themeType",
     });
   };
 

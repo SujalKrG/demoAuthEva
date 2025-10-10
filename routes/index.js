@@ -14,6 +14,7 @@ import themeRouter from "./themeRouter.js";
 import themeCategoryRouter from "./themeCategoryRouter.js";
 import guestGroupRouter from "./guestGroupRouter.js";
 import guestCategoriesRouter from "./guestDirectoriesRouter.js";
+import themeTypeRouter from "./themeTypeRouter.js"
 
 
 
@@ -38,5 +39,6 @@ router.use("/", themeRouter);
 router.use("/", themeCategoryRouter);
 router.use("/", guestGroupRouter);
 router.use("/", guestCategoriesRouter);
+router.use("/", themeTypeRouter)
 
 export default router;

@@ -1,40 +1,75 @@
+import { HasMany } from "sequelize";
 import db from "../models/index.js";
+import { match } from "path-to-regexp"; // ✅ npm install path-to-regexp
+
+const defaultPermissions = [
+  { method: "get", router: "/api/v1/get-profile" },
+  { method: "post", router: "/api/v1/login" },
+  { method: "get", router: "/api/v1/logout" },
+  { method: "post", router: "/api/v1/request-password-otp" },
+  { method: "post", router: "/api/v1/reset-password-otp" },
+  { method: "post", router: "/api/v1/get-occasion" },
+  { method: "get", router: "/api/v1/country/get" },
+  { method: "get", router: "/api/v1/theme-category/get" },
+  { method: "get", router: "/api/v1/admin-activity-log/get" },
+  { method: "get", router: "/api/v1/admin-activity-log/:module/:id" },
+];
 
 export default function authorizeDynamic() {
   return async (req, res, next) => {
     try {
       const admin = req.admin;
       if (!admin?.id) {
-        return res.status(401).json({ success: false, message: "Unauthorized" });
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
       }
 
+      // Normalize request info
+      const method = req.method.toLowerCase();
+      const path = req.baseUrl + req.path;
+
       // SuperAdmin bypass
-      if ((admin.roles || []).some(r => r.code.toUpperCase() === "SA")) {
+      if ((admin.roles || []).some((r) => r.code.toUpperCase() === "SA")) {
         return next();
       }
 
-      // Normalize route safely
-      const method = req.method.toLowerCase();
-      const path = req.baseUrl + req.path;  // ✅ safer than req.route.path
-      console.log(method,"----------------------")
-      console.log(path);
-      
+      // ✅ Check default permissions (with path-to-regexp support)
+      const isDefaultAllowed = defaultPermissions.some((p) => {
+        if (p.method !== method) return false;
+        const matcher = match(p.router, { decode: decodeURIComponent });
+        return matcher(path) !== false;
+      });
 
-      // Lookup permission in DB
-      const permission = await db.Permission.findOne({ where: { method, router: path } });
+      if (isDefaultAllowed) {
+        return next();
+      }
+
+      // DB lookup
+      const permission = await db.Permission.findOne({
+        where: { method, router: path },
+      });
+
       if (!permission) {
-        return res.status(403).json({ success: false, message: "Access denied" });
+        return res
+          .status(403)
+          .json({ success: false, message: "Access denied" });
       }
 
       // In-memory check
       if (!admin.permissionsSet.has(permission.id)) {
-        return res.status(403).json({ success: false, message: "Forbidden: insufficient permission" });
+        return res.status(403).json({
+          success: false,
+          message: "Forbidden: insufficient permission",
+        });
       }
 
       next();
     } catch (err) {
       console.error("Authorization middleware error:", err);
-      return res.status(500).json({ success: false, message: "Internal server error" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
   };
 }

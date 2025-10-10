@@ -108,7 +108,7 @@ export const showDetailsById = async (req, res) => {
     if (!activities || activities.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `No activity found for theme(s) with id ${ids.join(",")}`,
+        message: `No activity found`,
       });
     }
 

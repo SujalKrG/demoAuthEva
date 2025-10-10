@@ -1,4 +1,4 @@
-import  db from "../models/index.js";
+import db from "../models/index.js";
 
 const checkAdminStatus = async (req, res, next) => {
   try {
@@ -9,7 +9,9 @@ const checkAdminStatus = async (req, res, next) => {
         .json({ message: "Access denied, no adminId found" });
     }
 
-    const admin = await db.Admin.findByPk(adminId);
+    const admin = await db.Admin.findByPk(adminId, {
+      attributes: ["id", "status"],
+    });
     if (!admin) {
       return res.status(403).json({ message: "admin not found" });
     }

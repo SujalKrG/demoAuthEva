@@ -7,6 +7,7 @@ import {
   findOccasionById,
   findThemeCategoryById,
   updateThemeRepo,
+  findThemeTypeRepo,
 } from "../repositories/themeRepository.js";
 import OccasionModelFactory from "../models/remote/occasion.js";
 const OccasionModel = OccasionModelFactory(
@@ -22,7 +23,6 @@ import {
 } from "../utils/requiredMethods.js";
 import { remoteSequelize, Sequelize } from "../models/index.js";
 
-import logActivity from "../utils/logActivity.js";
 import { Op } from "sequelize";
 
 export const countryCodeService = async () => countryCodeRepo();
@@ -37,12 +37,12 @@ export const updateThemeStatusService = async (id, status, admin) => {
   await updateThemeStatusRepo(theme, status);
 
   // Logging for audit trail
-  await logActivity({
-    created_by: admin.id,
-    action: `Theme status updated by ${admin.name} (${admin.emp_id})`,
-    module: "theme",
-    details: { id: theme.id, name: theme.name, status },
-  });
+  // await logActivity({
+  //   created_by: admin.id,
+  //   action: `Theme status updated by ${admin.name} (${admin.emp_id})`,
+  //   module: "theme",
+  //   details: { id: theme.id, name: theme.name, status },
+  // });
 
   return theme;
 };
@@ -54,6 +54,7 @@ export const getAllThemeService = async (query) => {
   const whereConditions = {};
   if (category) whereConditions.category_id = category;
   if (occasion) whereConditions.occasion_id = occasion;
+  // if(themeType) whereConditions.theme_type_id = themeType;
 
   if (q && q.trim() !== "") {
     whereConditions[Op.or] = [
@@ -99,6 +100,10 @@ export const getAllThemeService = async (query) => {
       id: t.category_id,
       name: t.themeCategory ? t.themeCategory.name : null,
     },
+    theme_type:{
+      id: t.theme_type_id,
+      name: t.themeType ? t.themeType.name : null,
+    },
     thumbnail: t.preview_image,
     preview_video: t.preview_video,
     component_name: t.component_name,
@@ -122,6 +127,7 @@ export const createThemeService = async (data, files) => {
   const {
     occasion_id,
     category_id,
+    theme_type_id,
     name,
     component_name,
     config,
@@ -138,6 +144,10 @@ export const createThemeService = async (data, files) => {
   if (!themeCategory) {
     throw new Error("Theme category not found");
   }
+  const themeType = await findThemeTypeRepo(theme_type_id);
+  if (!themeType) {
+    throw new Error("Theme type not found");
+  }
 
   const occasions = await findOccasionById(occasion_id);
   if (!occasions) {
@@ -146,6 +156,7 @@ export const createThemeService = async (data, files) => {
   const theme = await createThemeRepo({
     occasion_id,
     category_id,
+    theme_type_id,
     name: capitalizeSentence(name),
     slug: slug(name),
     component_name: component_name || null,
@@ -236,6 +247,7 @@ export const updateThemeService = async (id, body, files) => {
   const updateData = {
     occasion_id: body.occasion_id ?? theme.occasion_id,
     category_id: body.category_id ?? theme.category_id,
+    theme_type_id: body.theme_type_id ?? theme.theme_type_id,
     name: body.name ? capitalizeSentence(body.name) : theme.name,
     slug: body.name ? slug(body.name) : theme.slug,
     component_name: body.component_name ?? theme.component_name,

@@ -13,7 +13,6 @@ import multer from "multer";
 const upload = multer();
 import authorizeDynamic from "../middlewares/dynamicAuthorizeMiddleware.js";
 
-import authorize from "../middlewares/authorizeMiddleware.js";
 
 
 const router = express.Router();

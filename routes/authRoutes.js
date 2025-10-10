@@ -15,7 +15,7 @@ router.post("/login", login);
 // });
 
 router.post("/request-password-otp", requestPasswordOTP);
-router.post("/reset-password-otp", resetPasswordWithOTP);
+router.post("/reset-password", resetPasswordWithOTP);
 
 
 // router.post("/change-password",authenticate,authorize(["SUPER_ADMIN"]),  changePassword);

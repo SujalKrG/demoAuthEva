@@ -29,18 +29,18 @@ export const loginService = async ({ email, password }) => {
     id: admin.id,
     email: admin.email,
     roles,
-    permissions,
+    // permissions,
   });
 
   // admin.remember_token = accessToken;
   // await saveAdmin(admin);
 
-  await logActivity({
-    created_by: admin.id,
-    action: "LOGIN",
-    module: "Admin",
-    details: {},
-  });
+  // await logActivity({
+  //   created_by: admin.id,
+  //   action: "LOGIN",
+  //   module: "Admin",
+  //   details: {},
+  // });
 
   return { admin, accessToken };
 };

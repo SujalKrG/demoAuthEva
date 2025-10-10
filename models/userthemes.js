@@ -2,7 +2,7 @@
 
 export default (sequelize, DataTypes) => {
   const UserTheme = sequelize.define(
-    "user_themes",
+    "UserTheme",
     {
       id: {
         type: DataTypes.BIGINT,

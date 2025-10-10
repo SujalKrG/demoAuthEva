@@ -2,8 +2,7 @@ import slugify from "slugify";
 import path from "path";
 import jwt from "jsonwebtoken";
 import { sequelize } from "../models/index.js";
-import db from "../models/index.js";
-import { Op } from "sequelize";
+
 
 // Capitalize each word
 export const capitalizeSentence = (sentence = "") => {
@@ -73,3 +72,4 @@ export const normalizeDecimal = (val) => {
 export const sanitizeFileName = (filename) => {
   return filename.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
 };
+

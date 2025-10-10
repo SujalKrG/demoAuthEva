@@ -14,6 +14,19 @@ export const countryCodeRepo = async () => {
   });
 };
 
+export const findThemeTypeRepo = async (id) => {
+  return await db.ThemeType.findByPk(id,{
+    include:[
+      {
+        model:db.ThemeCategory,
+        as:"themeCategory",
+        attributes:["id","name"]
+      }
+    ]
+  });
+};
+
+
 export const findThemeWithCategory = async (id) => {
   return await db.Theme.findByPk(id, {
     include: [
@@ -43,6 +56,7 @@ export const getThemesRepo = async (whereConditions, limit, offset) => {
       "slug",
       "occasion_id",
       "category_id",
+      "theme_type_id",
       "status",
       "preview_image",
       "preview_video",
@@ -57,6 +71,11 @@ export const getThemesRepo = async (whereConditions, limit, offset) => {
         as: "themeCategory",
         attributes: ["id", "name"],
       },
+      {
+        model:db.ThemeType,
+        as:"themeType",
+        attributes:["id","name"]
+      }
     ],
     limit,
     offset,

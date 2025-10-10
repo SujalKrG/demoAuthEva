@@ -5,7 +5,10 @@ import {
   createTheme,
   updateTheme,
   updateStatus,
-  deleteTheme,
+  // generateAIThemeImage,
+  // generateThemeAI,
+  // rephraseTheme,
+  // deleteTheme,
   getAllTheme,
   // getThemeBySlug,
   countryCode,
@@ -17,7 +20,6 @@ import multer from "multer";
 const upload = multer({ storage: multer.memoryStorage() });
 router.use(authorizeDynamic());
 
-
 router.post(
   "/theme/store",
   upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),
@@ -28,9 +30,13 @@ router.patch(
   upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),
   updateTheme
 );
-router.delete("/theme/delete/:id", deleteTheme);
+// router.delete("/theme/delete/:id", deleteTheme);
 router.get("/theme/get", getAllTheme);
 router.get("/country/get", countryCode);
 router.patch("/theme/update-status/:id", updateStatus);
+// router.post("/theme/generate-ai", generateThemeAI);
+// router.post("/theme/rephrase", rephraseTheme);
+
+// router.post("/theme/generate-ai-image", generateAIThemeImage);
 
 export default router;
