@@ -15,7 +15,8 @@ export const AdminService = {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const random = Math.floor(1000 + Math.random() * 9000);
-      const emp_id = `EMP${new Date().toISOString()
+      const emp_id = `EMP${new Date()
+        .toISOString()
         .slice(0, 10)
         .replace(/-/g, "")}-${random}`;
 
@@ -42,8 +43,14 @@ export const AdminService = {
       filters
     );
     if (!admins || admins.length === 0) throw new Error("Admin not found");
+    const filteredAdmins = admins.filter(
+      (admin) => !admin.roles.some((role) => role.code === "SA")
+    );
 
-    return admins.map((admin) => ({
+    if (filteredAdmins.length === 0)
+      throw new Error("No admins found excluding Super Admins");
+
+    return filteredAdmins.map((admin) => ({
       id: admin.id,
       name: admin.name,
       email: admin.email,

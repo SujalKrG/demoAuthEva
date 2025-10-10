@@ -6,13 +6,15 @@ import {
   uploadFileToS3,
   sanitizeFileName,
 } from "../../middlewares/uploadS3.js";
-import dotenv from "dotenv";
-dotenv.config();
 
 
 const { Worker } = BullMQ;
 
-
+console.log(
+  "Redis connection =>",
+  process.env.REDIS_HOST,
+  process.env.REDIS_PORT
+);
 
 export const videoWorker = new Worker(
   "videoUploadQueue",
