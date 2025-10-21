@@ -9,6 +9,10 @@ export default (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
       },
+      uuid:{
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       user_id: {
         type: DataTypes.BIGINT,
         allowNull: false,
@@ -44,7 +48,7 @@ export default (sequelize, DataTypes) => {
       foreignKey: "event_id",
       as: "event",
     });
-    Cart.belongsTo(models.Theme, {
+    Cart.belongsTo(models.UserTheme, {
       foreignKey: "user_theme_id",
       as: "user_theme",
     });

@@ -13,6 +13,7 @@ const defaultPermissions = [
   { method: "get", router: "/api/v1/theme-category/get" },
   { method: "get", router: "/api/v1/admin-activity-log/get" },
   { method: "get", router: "/api/v1/admin-activity-log/:module/:id" },
+  {method: "get", router: "/api/v1/cart-summary/get"}
 ];
 
 export default function authorizeDynamic() {
@@ -22,7 +23,7 @@ export default function authorizeDynamic() {
       if (!admin?.id) {
         return res
           .status(401)
-          .json({ success: false, message: "Unauthorized" });
+          .json({ success: false, message: "Unauthorized access" });
       }
 
       // Normalize request info

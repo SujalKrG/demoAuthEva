@@ -3,60 +3,61 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("carts", {
+    await queryInterface.createTable("message_pricings", {
       id: {
         type: Sequelize.BIGINT,
         autoIncrement: true,
         primaryKey: true,
       },
-      user_id: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-      },
-      event_id: {
+      channel_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: {
-          model: "events",
+          model: "message_channels",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      user_theme_id: {
+      country_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
-        references: {
-          model: "user_themes",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
       },
-      guest_with_schedules: {
-        type: Sequelize.JSON,
+      base_price: {
+        type: Sequelize.DECIMAL(8, 2),
         allowNull: false,
+        defaultValue: 0.0,
       },
-      buy_now: {//checked for remove
-        type: Sequelize.BOOLEAN,
+      final_price: {
+        type: Sequelize.DECIMAL(8, 2),
+        allowNull: true,
+      },
+      currency: {
+        type: Sequelize.STRING(10),
         allowNull: false,
-        defaultValue: false,
+        defaultValue: "INR",
+      },
+      status: {
+        type: Sequelize.TINYINT,
+        allowNull: false,
+        defaultValue: 1,
       },
       created_at: {
         type: Sequelize.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updated_at: {
         type: Sequelize.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        allowNull: false,
+        defaultValue: Sequelize.literal(
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        ),
       },
-     
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("carts");
+    await queryInterface.dropTable("message_pricings");
   },
 };

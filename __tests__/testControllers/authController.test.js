@@ -1,24 +1,22 @@
 // tests/controllers/authController.test.js
+import { jest } from "@jest/globals";
 
-jest.mock("../services/authService.js", () => ({
+jest.unstable_mockModule("../../services/authService.js", () => ({
   loginService: jest.fn(),
   logoutService: jest.fn(),
   changePasswordService: jest.fn(),
   getProfileService: jest.fn(),
 }));
 
-import {
-  login,
-  logout,
-  changePassword,
-  getProfile,
-} from "../controllers/authController.js";
-import {
+const { login, logout, changePassword, getProfile } = await import(
+  "../../controllers/authController.js"
+);
+const {
   loginService,
   logoutService,
   changePasswordService,
   getProfileService,
-} from "../services/authService.js";
+} = await import("../../services/authService.js");
 
 const makeRes = () => {
   const res = {};
@@ -35,8 +33,7 @@ describe("authController", () => {
     const res = makeRes();
 
     loginService.mockResolvedValue({
-      admin: { id: 1,  },
-   
+      admin: { id: 1 },
     });
 
     await login(req, res);
@@ -49,7 +46,6 @@ describe("authController", () => {
         // accessToken: "tok"
         admin: {
           id: 1,
-        
         },
       })
     );
@@ -84,7 +80,7 @@ describe("authController", () => {
   test("getProfile - success", async () => {
     const req = { admin: { id: 5 } };
     const res = makeRes();
-    getProfileService.mockResolvedValue({ id: 5});
+    getProfileService.mockResolvedValue({ id: 5 });
 
     await getProfile(req, res);
 

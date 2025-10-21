@@ -1,46 +1,52 @@
-
-
-
 "use strict";
 
 /** @type {import('sequelize-cli').Migration} */
- export default {
+export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("guest_groups", {
+    await queryInterface.createTable("message_channels", {
       id: {
         type: Sequelize.BIGINT,
         autoIncrement: true,
         primaryKey: true,
       },
-      user_id: {
-        type: Sequelize.BIGINT,
+      name: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+      },
+      code: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+        unique:true
+      },
+      provider: {
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
-      name: {
-        type: Sequelize.STRING(30),
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      status: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        
+        defaultValue: true,
       },
       created_at: {
         type: Sequelize.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updated_at: {
         type: Sequelize.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: Sequelize.literal(
           "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         ),
-      },
-      deleted_at: {
-        type: Sequelize.DATE,
-        allowNull: true,
       },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("guest_groups");
+    await queryInterface.dropTable("message_channels");
   },
 };

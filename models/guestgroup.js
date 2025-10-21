@@ -14,7 +14,7 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
       },
       name: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(30),
         allowNull: false,
       },
     },

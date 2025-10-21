@@ -1,17 +1,23 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import AppError from "../utils/AppError.js";
 dotenv.config();
+
+
+if (!process.env.REDIS_HOST) {
+  console.error("❌ Missing REDIS_HOST environment variable!");
+  process.exit(1);
+}
+
 export const redisConfig = {
   host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  port: process.env.REDIS_PORT||6379,
+  // password: process.env.REDIS_PASSWORD||undefined,
   maxRetriesPerRequest: null,
+  enableReadyCheck: true,
   retryStrategy: (times) => {
     if (times > 10) {
-      throw new Error("Redis: Failed to connect after 5 retries!");
+      throw new AppError("Redis: Failed to connect after 5 retries!");
     }
     return Math.min(times * 2000, 10000);
   },
-  
-  // username: process.env.REDIS_USERNAME,
-  // password: process.env.REDIS_PASSWORD,
 };
-
