@@ -34,6 +34,10 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0.0,
       },
+      purchased_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
       upload_meta: {
         type: DataTypes.JSON,
         allowNull: true,

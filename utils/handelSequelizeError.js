@@ -1,3 +1,6 @@
+import { logger } from "../utils/logger.js";
+import AppError from "./AppError.js";
+
 const handleSequelizeError = (error, res) => {
   // Log everything for developers
   logger.error(`[Sequelize Error] ${error.message}`, {
@@ -9,38 +12,26 @@ const handleSequelizeError = (error, res) => {
   // Return only safe, minimal responses
   switch (error.name) {
     case "SequelizeValidationError":
-      return res.status(400).json({
-        success: false,
-        message: "Invalid input data.",
-      });
+      return new AppError("Invalid input data.", 400);
 
     case "SequelizeUniqueConstraintError":
-      return res.status(409).json({
-        success: false,
-        message: "Duplicate entry. This record already exists.",
-      });
+      return new AppError("Duplicate entry. This record already exists.", 409);
 
     case "SequelizeForeignKeyConstraintError":
-      return res.status(400).json({
-        success: false,
-        message: "Invalid reference. Please check related data.",
-      });
+      return new AppError("Invalid reference. Please check related data.", 400);
 
     case "SequelizeConnectionError":
     case "SequelizeConnectionRefusedError":
     case "SequelizeHostNotFoundError":
     case "SequelizeHostNotReachableError":
     case "SequelizeInvalidConnectionError":
-      return res.status(503).json({
-        success: false,
-        message: "Service temporarily unavailable. Please try again later.",
-      });
+      return new AppError(
+        "Service temporarily unavailable. Please try again later.",
+        503
+      );
 
     default:
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-      });
+      return new AppError("Internal Server Error", 500);
   }
 };
 

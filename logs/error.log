@@ -1,1 +1,48 @@
 2025-10-09 18:24:02 error: [Theme][create] Theme type not found
+2025-10-11 17:15:53 error: [message channel][create] Channel code already exists.
+2025-10-11 17:22:54 error: [createAdmin] Email already exists
+2025-10-11 17:23:04 error: [createAdmin] Email already exists
+2025-10-11 17:23:48 error: [createAdmin] Email already exists u can't be created
+2025-10-11 17:24:01 error: [createAdmin] Email already exists u can't be created
+2025-10-11 17:24:12 error: [createAdmin] Email already exists u can't be created
+2025-10-11 17:24:26 error: [createAdmin] Email already exists
+2025-10-11 17:27:49 error: [message channel][create] Channel code already exists.
+2025-10-13 10:16:31 error: [Sequelize Error] connect ETIMEDOUT
+2025-10-13 12:22:52 error: [Theme][create] Cannot read properties of undefined (reading 'id')
+2025-10-13 12:22:52 error: [Theme][create] DB error
+2025-10-13 12:22:52 error: [Theme][update] Cannot read properties of undefined (reading 'id')
+2025-10-13 12:22:52 error: [Theme][update status] Cannot destructure property 'id' of 'req.params' as it is undefined.
+2025-10-13 16:05:00 error: [updateAdminController] DB error
+2025-10-13 16:05:00 error: [updateAdminStatusController] Status is required
+2025-10-13 16:05:00 error: [updateAdminStatusController] DB error
+2025-10-13 16:27:54 error: [updateAdminController] DB error
+2025-10-13 16:27:54 error: [updateAdminStatusController] Status is required
+2025-10-13 16:27:54 error: [updateAdminStatusController] DB error
+2025-10-13 16:28:31 error: [updateAdminController] DB error
+2025-10-13 16:28:31 error: [updateAdminStatusController] Status is required
+2025-10-13 16:28:31 error: [updateAdminStatusController] DB error
+2025-10-16 12:17:01 error: [message channel][create] Channel code already exists.
+2025-10-16 18:35:14 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+2025-10-16 18:35:39 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+2025-10-16 18:47:19 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+2025-10-17 10:49:32 error: [Theme][update] Incorrect integer value: '' for column 'theme_type_id' at row 1
+2025-10-17 10:52:17 error: [Theme][update] Theme not found
+2025-10-17 10:53:59 error: [Theme][update] Incorrect integer value: '' for column 'theme_type_id' at row 1
+2025-10-17 11:11:15 error: [Theme][update] Incorrect integer value: '' for column 'theme_type_id' at row 1
+2025-10-17 11:18:19 error: [Theme][getAll] connect ETIMEDOUT
+2025-10-17 16:33:48 error: Cart price calculation failed
+2025-10-17 16:34:13 error: Cart price calculation failed
+2025-10-17 16:35:22 error: Cart price calculation failed
+2025-10-17 16:35:37 error: Cart price calculation failed
+2025-10-18 11:14:03 error: Cart summary calculation error: UserTheme is not defined
+2025-10-18 11:14:26 error: Cart summary calculation error: Cart not found
+2025-10-18 11:14:56 error: Cart summary calculation error: Cart not found
+2025-10-18 11:14:59 error: Cart summary calculation error: Cart not found
+2025-10-18 11:15:14 error: Cart summary calculation error: Cannot destructure property 'guest_with_schedules' of 'cart' as it is null.
+2025-10-18 11:16:48 error: Cart summary calculation error: UserTheme is associated to Cart using an alias. You must use the 'as' keyword to specify the alias within your include statement.
+2025-10-18 11:18:04 error: Cart summary calculation error: "[object Object]" is not valid JSON
+2025-10-18 11:19:26 error: Cart summary calculation error: Unknown column 'MessagePricing.channel_type' in 'where clause'
+2025-10-18 11:20:06 error: Cart summary calculation error: Unknown column 'MessagePricing.country_code' in 'where clause'
+2025-10-18 11:36:33 error: Cart summary calculation error: No carts found
+2025-10-18 14:49:07 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+2025-10-18 14:49:21 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)

@@ -1,45 +1,53 @@
-// tests/services/authService.test.js
-// mocks must come before the module under test is imported
+// __tests__/services/authService.test.js
+import { jest } from "@jest/globals";
 
-jest.mock("../repositories/authRepository.js", () => ({
+// ===================== Mocks =====================
+jest.unstable_mockModule("../../repositories/authRepository.js", () => ({
   findAdminByEmail: jest.fn(),
   findAdminById: jest.fn(),
   saveAdmin: jest.fn(),
   findAdminById1: jest.fn(),
 }));
 
-jest.mock("bcryptjs", () => ({
-  compare: jest.fn(),
-  hash: jest.fn(),
+jest.unstable_mockModule("bcryptjs", () => ({
+  default: {
+    compare: jest.fn(),
+    hash: jest.fn(),
+  },
 }));
 
-jest.mock("../utils/requiredMethods.js", () => ({
+jest.unstable_mockModule("../../utils/requiredMethods.js", () => ({
   generateToken: jest.fn(() => "MOCK_TOKEN"),
 }));
 
-jest.mock("jsonwebtoken", () => ({
-  verify: jest.fn(),
-  decode: jest.fn(),
+jest.unstable_mockModule("jsonwebtoken", () => ({
+  default: {
+    verify: jest.fn(),
+    decode: jest.fn(),
+  },
 }));
 
-// now import what we want to test and the mocks
+// ===================== Imports =====================
+const { findAdminByEmail, findAdminById, saveAdmin, findAdminById1 } =
+  await import("../../repositories/authRepository.js");
 
-import {
-  findAdminByEmail,
-  findAdminById,
-  saveAdmin,
-  findAdminById1,
-} from "../repositories/authRepository.js";
-import {
+const {
   loginService,
   logoutService,
   changePasswordService,
   getProfileService,
-} from "../services/authService.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { generateToken } from "../utils/requiredMethods.js";
+} = await import("../../services/authService.js");
 
+// Import mocked modules with .default to match service's default import
+const bcryptModule = await import("bcryptjs");
+const bcrypt = bcryptModule.default;
+
+const jwtModule = await import("jsonwebtoken");
+const jwt = jwtModule.default;
+
+const { generateToken } = await import("../../utils/requiredMethods.js");
+
+// ===================== Tests =====================
 describe("authService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -160,7 +168,6 @@ describe("authService", () => {
       status: true,
     });
 
-    // permissions should be flattened to an array of permission objects
     expect(profile.permissions).toEqual([{ name: "p1" }, { name: "p2" }]);
   });
 });

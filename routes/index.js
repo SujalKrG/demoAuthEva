@@ -15,6 +15,9 @@ import themeCategoryRouter from "./themeCategoryRouter.js";
 import guestGroupRouter from "./guestGroupRouter.js";
 import guestCategoriesRouter from "./guestDirectoriesRouter.js";
 import themeTypeRouter from "./themeTypeRouter.js"
+import messageChannelRouter from "./messageChannelRouter.js"
+import messagePricing from "./messagePricingRouter.js"
+import cartSummary from "./cartRouter.js"
 
 
 
@@ -40,5 +43,8 @@ router.use("/", themeCategoryRouter);
 router.use("/", guestGroupRouter);
 router.use("/", guestCategoriesRouter);
 router.use("/", themeTypeRouter)
+router.use("/", messageChannelRouter)
+router.use("/", messagePricing)
+router.use("/", cartSummary)
 
 export default router;

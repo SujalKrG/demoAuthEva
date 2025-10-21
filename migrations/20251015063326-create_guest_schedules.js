@@ -3,60 +3,64 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("carts", {
+    await queryInterface.createTable("guest_schedules", {
       id: {
         type: Sequelize.BIGINT,
-        autoIncrement: true,
         primaryKey: true,
+        autoIncrement: true,
+      },
+      invitation_schedule_id: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+        references: {
+          model: "invitation_schedules",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       user_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
       },
-      event_id: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-        references: {
-          model: "events",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
-      },
-      user_theme_id: {
-        type: Sequelize.BIGINT,
-        allowNull: false,
-        references: {
-          model: "user_themes",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
-      },
-      guest_with_schedules: {
-        type: Sequelize.JSON,
+      name: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
-      buy_now: {//checked for remove
+      country_code: {
+        type: Sequelize.STRING(5),
+        allowNull: false,
+      },
+      
+      mobile: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+      },
+      with_family: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
       },
+      group_name:{
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       created_at: {
         type: Sequelize.DATE,
-        allowNull: true,
+        allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updated_at: {
         type: Sequelize.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        allowNull: false,
+        defaultValue: Sequelize.literal(
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        ),
       },
-     
     });
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("carts");
+  async down(queryInterface) {
+    await queryInterface.dropTable("guest_schedules");
   },
 };
