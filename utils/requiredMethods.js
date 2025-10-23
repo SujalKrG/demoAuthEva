@@ -73,3 +73,9 @@ export const sanitizeFileName = (filename) => {
   return filename.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
 };
 
+
+export const normalizeCountryCode = (code) => {
+  if (!code) return null;
+  const digits = String(code).replace(/\D/g, "").replace(/^0+/, "");
+  return digits ? `+${digits}` : null;
+};

@@ -46,3 +46,128 @@
 2025-10-18 11:36:33 error: Cart summary calculation error: No carts found
 2025-10-18 14:49:07 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
 2025-10-18 14:49:21 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+2025-10-22 17:28:25 error: [updateAdminController] DB error
+2025-10-22 17:28:25 error: [updateAdminStatusController] Status is required
+2025-10-22 17:28:25 error: [updateAdminStatusController] DB error
+2025-10-22 17:29:29 error: [updateAdminController] DB error
+2025-10-22 17:29:29 error: [updateAdminStatusController] Status is required
+2025-10-22 17:29:29 error: [updateAdminStatusController] DB error
+2025-10-22 17:31:24 error: [updateAdminController] DB error
+2025-10-22 17:31:24 error: [updateAdminStatusController] Status is required
+2025-10-22 17:31:24 error: [updateAdminStatusController] DB error
+2025-10-22 17:34:26 error: [updateAdminController] DB error
+2025-10-22 17:34:26 error: [updateAdminStatusController] Status is required
+2025-10-22 17:34:26 error: [updateAdminStatusController] DB error
+2025-10-22 17:35:47 error: [updateAdminController] DB error
+2025-10-22 17:35:47 error: [updateAdminStatusController] Status is required
+2025-10-22 17:35:47 error: [updateAdminStatusController] DB error
+2025-10-22 17:41:43 error: [updateAdminController] DB error
+2025-10-22 17:41:43 error: [updateAdminStatusController] Status is required
+2025-10-22 17:41:43 error: [updateAdminStatusController] DB error
+2025-10-22 17:45:00 error: [updateAdminController] DB error
+2025-10-22 17:45:00 error: [updateAdminStatusController] Status is required
+2025-10-22 17:45:00 error: [updateAdminStatusController] DB error
+2025-10-22 17:45:01 error: [Theme][create] DB Error
+2025-10-22 17:45:01 error: [Theme][update] DB Error
+2025-10-22 17:45:01 error: [country code(theme controller)][getAll] DB Error
+2025-10-22 17:45:01 error: [Theme][update status] DB Error
+2025-10-22 17:45:01 error: [Theme][getAll] DB Error
+2025-10-22 17:47:24 error: [Theme][create] DB Error
+2025-10-22 17:47:24 error: [Theme][update] DB Error
+2025-10-22 17:47:24 error: [country code(theme controller)][getAll] DB Error
+2025-10-22 17:47:24 error: [Theme][update status] DB Error
+2025-10-22 17:47:24 error: [Theme][getAll] DB Error
+2025-10-22 17:47:25 error: [updateAdminController] DB error
+2025-10-22 17:47:25 error: [updateAdminStatusController] Status is required
+2025-10-22 17:47:25 error: [updateAdminStatusController] DB error
+2025-10-22 17:49:53 error: [Theme][create] DB Error
+2025-10-22 17:49:53 error: [Theme][update] DB Error
+2025-10-22 17:49:53 error: [Theme][update status] DB Error
+2025-10-22 17:49:53 error: [Theme][getAll] DB Error
+2025-10-22 17:49:53 error: [country code(theme controller)][getAll] DB Error
+2025-10-22 17:49:54 error: [updateAdminController] DB error
+2025-10-22 17:49:54 error: [updateAdminStatusController] Status is required
+2025-10-22 17:49:54 error: [updateAdminStatusController] DB error
+2025-10-22 17:50:52 error: [Theme][create] DB Error
+2025-10-22 17:50:52 error: [Theme][update] DB Error
+2025-10-22 17:50:52 error: [Theme][update status] DB Error
+2025-10-22 17:50:52 error: [Theme][getAll] DB Error
+2025-10-22 17:50:52 error: [country code(theme controller)][getAll] DB Error
+2025-10-22 17:50:52 error: [updateAdminController] DB error
+2025-10-22 17:50:52 error: [updateAdminStatusController] Status is required
+2025-10-22 17:50:52 error: [updateAdminStatusController] DB error
+2025-10-22 17:52:34 error: [updateAdminController] DB error
+2025-10-22 17:52:34 error: [updateAdminStatusController] Status is required
+2025-10-22 17:52:34 error: [updateAdminStatusController] DB error
+2025-10-22 17:52:55 error: [updateAdminController] DB error
+2025-10-22 17:52:55 error: [updateAdminStatusController] Status is required
+2025-10-22 17:52:55 error: [updateAdminStatusController] DB error
+2025-10-22 17:53:19 error: [updateAdminController] DB error
+2025-10-22 17:53:19 error: [updateAdminStatusController] Status is required
+2025-10-22 17:53:19 error: [updateAdminStatusController] DB error
+2025-10-22 17:55:19 error: [updateAdminController] DB error
+2025-10-22 17:55:19 error: [updateAdminStatusController] Status is required
+2025-10-22 17:55:19 error: [updateAdminStatusController] DB error
+2025-10-22 17:59:31 error: [updateAdminController] DB error
+2025-10-22 17:59:31 error: [updateAdminStatusController] Status is required
+2025-10-22 17:59:31 error: [updateAdminStatusController] DB error
+2025-10-22 18:04:54 error: [updateAdminController] DB error
+2025-10-22 18:04:54 error: [updateAdminStatusController] Status is required
+2025-10-22 18:04:54 error: [updateAdminStatusController] DB error
+2025-10-22 18:08:45 error: [updateAdminController] DB error
+2025-10-22 18:08:45 error: [updateAdminStatusController] Status is required
+2025-10-22 18:08:45 error: [updateAdminStatusController] DB error
+2025-10-22 18:13:53 error: [updateAdminController] DB error
+2025-10-22 18:13:53 error: [updateAdminStatusController] Status is required
+2025-10-22 18:13:53 error: [updateAdminStatusController] DB error
+2025-10-22 18:14:16 error: [updateAdminController] DB error
+2025-10-22 18:14:16 error: [updateAdminStatusController] Status is required
+2025-10-22 18:14:16 error: [updateAdminStatusController] DB error
+2025-10-22 18:15:21 error: [updateAdminController] DB error
+2025-10-22 18:15:21 error: [updateAdminStatusController] Status is required
+2025-10-22 18:15:21 error: [updateAdminStatusController] DB error
+2025-10-22 18:15:33 error: [updateAdminController] DB error
+2025-10-22 18:15:33 error: [updateAdminStatusController] Status is required
+2025-10-22 18:15:33 error: [updateAdminStatusController] DB error
+2025-10-22 18:16:49 error: [updateAdminController] DB error
+2025-10-22 18:16:49 error: [updateAdminStatusController] Status is required
+2025-10-22 18:16:49 error: [updateAdminStatusController] DB error
+2025-10-22 18:18:01 error: [updateAdminController] DB error
+2025-10-22 18:18:01 error: [updateAdminStatusController] Status is required
+2025-10-22 18:18:01 error: [updateAdminStatusController] DB error
+2025-10-22 18:22:33 error: [updateAdminController] DB error
+2025-10-22 18:22:33 error: [updateAdminStatusController] Status is required
+2025-10-22 18:22:33 error: [updateAdminStatusController] DB error
+2025-10-22 18:23:01 error: [updateAdminController] DB error
+2025-10-22 18:23:01 error: [updateAdminStatusController] Status is required
+2025-10-22 18:23:01 error: [updateAdminStatusController] DB error
+2025-10-22 18:27:44 error: [updateAdminController] DB error
+2025-10-22 18:27:44 error: [updateAdminStatusController] Status is required
+2025-10-22 18:27:44 error: [updateAdminStatusController] DB error
+2025-10-22 18:29:07 error: [updateAdminController] DB error
+2025-10-22 18:29:07 error: [updateAdminStatusController] Status is required
+2025-10-22 18:29:07 error: [updateAdminStatusController] DB error
+2025-10-22 18:30:16 error: [updateAdminController] DB error
+2025-10-22 18:30:17 error: [updateAdminStatusController] Status is required
+2025-10-22 18:30:17 error: [updateAdminStatusController] DB error
+2025-10-22 18:31:24 error: [updateAdminController] DB error
+2025-10-22 18:31:24 error: [updateAdminStatusController] Status is required
+2025-10-22 18:31:24 error: [updateAdminStatusController] DB error
+2025-10-22 18:39:21 error: [updateAdminController] DB error
+2025-10-22 18:39:21 error: [updateAdminStatusController] Status is required
+2025-10-22 18:39:21 error: [updateAdminStatusController] DB error
+2025-10-22 18:40:41 error: [updateAdminController] DB error
+2025-10-22 18:40:41 error: [updateAdminStatusController] Status is required
+2025-10-22 18:40:41 error: [updateAdminStatusController] DB error
+2025-10-22 18:40:58 error: [updateAdminController] DB error
+2025-10-22 18:40:58 error: [updateAdminStatusController] Status is required
+2025-10-22 18:40:58 error: [updateAdminStatusController] DB error
+2025-10-22 18:42:13 error: [updateAdminController] DB error
+2025-10-22 18:42:13 error: [updateAdminStatusController] Status is required
+2025-10-22 18:42:13 error: [updateAdminStatusController] DB error
+2025-10-22 18:42:35 error: [updateAdminController] DB error
+2025-10-22 18:42:35 error: [updateAdminStatusController] Status is required
+2025-10-22 18:42:35 error: [updateAdminStatusController] DB error
+2025-10-22 18:43:35 error: [updateAdminController] DB error
+2025-10-22 18:43:35 error: [updateAdminStatusController] Status is required
+2025-10-22 18:43:35 error: [updateAdminStatusController] DB error

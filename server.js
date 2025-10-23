@@ -7,6 +7,9 @@ import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
 import { sequelize, remoteSequelize } from "./models/index.js";
 import { errorHandler}  from "./middlewares/errorHandler.js";
+import { testS3Connection } from "./utils/s3Test.js";
+import { testRedisConnection } from "./utils/redisTest.js";
+
 
 dotenv.config();
 
@@ -99,4 +102,6 @@ process.on("uncaughtException", (err) => {
 app.listen(PORT, "0.0.0.0", async () => {
   console.log("Server running on port", PORT);
   await testDBConnections();
+  await testS3Connection();
+  await testRedisConnection();
 });

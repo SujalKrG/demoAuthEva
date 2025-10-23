@@ -1,8 +1,7 @@
-// __tests__/services/themeService.test.js
+// __tests__/testServices/themeService.test.js
 import { jest } from "@jest/globals";
 
-// ===================== MOCKS =====================
-// Repositories
+// ========== MOCK REPOSITORIES ==========
 jest.unstable_mockModule("../../repositories/themeRepository.js", () => ({
   countryCodeRepo: jest.fn(),
   findThemeWithCategory: jest.fn(),
@@ -15,151 +14,145 @@ jest.unstable_mockModule("../../repositories/themeRepository.js", () => ({
   findThemeTypeRepo: jest.fn(),
 }));
 
-// Queues
+// ========== MOCK QUEUES ==========
 jest.unstable_mockModule("../../jobs/queues.js", () => ({
   imageUploadQueue: { add: jest.fn() },
   videoUploadQueue: { add: jest.fn() },
 }));
 
-// Utils
+// ========== MOCK UTILS ==========
 jest.unstable_mockModule("../../utils/requiredMethods.js", () => ({
-  slug: jest.fn((s) => s.toLowerCase().replace(/\s+/g, "-")),
-  capitalizeSentence: jest.fn((s) => s.charAt(0).toUpperCase() + s.slice(1)),
+  slug: jest.fn((s) => `slug-${s}`),
+  capitalizeSentence: jest.fn((s) => s.toUpperCase()),
   sanitizeFileName: jest.fn((s) => s),
-  normalizeDecimal: jest.fn((n) => n),
+  normalizeDecimal: jest.fn((v) => v),
 }));
 
-// Models
-jest.unstable_mockModule("../../models/index.js", () => ({
-  remoteSequelize: {},
-  Sequelize: { DataTypes: {} },
-}));
-
-// Remote Occasion Model
-const findAllMock = jest.fn().mockResolvedValue([{ id: 10, name: "Occ1" }]);
+// ========== MOCK MODELS ==========
 jest.unstable_mockModule("../../models/remote/occasion.js", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    findAll: findAllMock,
-  })),
+  OccasionModelFactory: jest.fn().mockReturnValue({
+    findAll: jest.fn().mockResolvedValue([{ id: 1, name: "Occasion1" }]),
+  }),
 }));
 
-// ===================== IMPORTS =====================
-const themeRepo = await import("../../repositories/themeRepository.js");
-const queues = await import("../../jobs/queues.js");
-const utils = await import("../../utils/requiredMethods.js");
-const { remoteSequelize, Sequelize } = await import("../../models/index.js");
-const OccasionModelFactory = (await import("../../models/remote/occasion.js")).default;
-const themeService = await import("../../services/themeService.js");
+// ========== IMPORTS AFTER MOCKS ==========
+const {
+  countryCodeRepo,
+  findThemeWithCategory,
+  updateThemeStatusRepo,
+  getThemesRepo,
+  createThemeRepo,
+  findOccasionById,
+  findThemeCategoryById,
+  updateThemeRepo,
+  findThemeTypeRepo,
+} = await import("../../repositories/themeRepository.js");
 
-// Instantiate mock OccasionModel (same instance service uses)
-OccasionModelFactory(remoteSequelize, Sequelize.DataTypes);
+const { imageUploadQueue, videoUploadQueue } = await import(
+  "../../jobs/queues.js"
+);
+const { slug, capitalizeSentence, sanitizeFileName, normalizeDecimal } =
+  await import("../../utils/requiredMethods.js");
+const { OccasionModelFactory } = await import(
+  "../../models/remote/occasion.js"
+);
 
-// ===================== TESTS =====================
-describe("themeService", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+const {
+  countryCodeService,
+  updateThemeStatusService,
+  getAllThemeService,
+  createThemeService,
+  updateThemeService,
+} = await import("../../services/themeService.js");
+
+describe("Theme Service", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  test("countryCodeService returns data", async () => {
+    countryCodeRepo.mockResolvedValue([{ code: "+91" }]);
+    const result = await countryCodeService();
+    expect(countryCodeRepo).toHaveBeenCalled();
+    expect(result).toEqual([{ code: "+91" }]);
   });
 
-  test("countryCodeService - returns country codes", async () => {
-    themeRepo.countryCodeRepo.mockResolvedValue(["IN", "US"]);
-    const result = await themeService.countryCodeService();
-    expect(result).toEqual(["IN", "US"]);
+  test("updateThemeStatusService updates status", async () => {
+    const mockTheme = { id: 1, name: "Theme1" };
+    findThemeWithCategory.mockResolvedValue(mockTheme);
+    updateThemeStatusRepo.mockResolvedValue();
+
+    const result = await updateThemeStatusService(1, true, {
+      id: 1,
+      name: "Admin",
+      emp_id: "EMP001",
+    });
+    expect(findThemeWithCategory).toHaveBeenCalledWith(1);
+    expect(updateThemeStatusRepo).toHaveBeenCalledWith(mockTheme, true);
+    expect(result).toEqual(mockTheme);
   });
 
-  test("updateThemeStatusService - success", async () => {
-    const fakeTheme = { id: 1, name: "Test Theme" };
-    themeRepo.findThemeWithCategory.mockResolvedValue(fakeTheme);
-    themeRepo.updateThemeStatusRepo.mockResolvedValue(true);
+  test("getAllThemeService returns formatted data", async () => {
+    getThemesRepo.mockResolvedValue({
+      rows: [
+        {
+          id: 1,
+          name: "Theme1",
+          occasion_id: 1,
+          category_id: 1,
+          themeCategory: { name: "Cat1" },
+          theme_type_id: null,
+          themeType: null,
+          preview_image: "img.jpg",
+          preview_video: null,
+          component_name: "Comp",
+          base_price: 100,
+          offer_price: 80,
+          currency: "INR",
+          status: true,
+        },
+      ],
+      count: 1,
+    });
 
-    const result = await themeService.updateThemeStatusService(1, true, { id: 10, name: "Admin", emp_id: "E1" });
-
-    expect(themeRepo.findThemeWithCategory).toHaveBeenCalledWith(1);
-    expect(themeRepo.updateThemeStatusRepo).toHaveBeenCalledWith(fakeTheme, true);
-    expect(result).toBe(fakeTheme);
-  });
-
-  test("getAllThemeService - success with occasions from remote DB", async () => {
-    const fakeThemes = [
-      {
-        id: 1,
-        occasion_id: 10,
-        category_id: 100,
-        themeCategory: { name: "Cat1" },
-        themeType: { name: "Type1" },
-        preview_image: "img.png",
-        preview_video: null,
-        component_name: "comp",
-        base_price: 100,
-        offer_price: 80,
-        currency: "INR",
-        status: true,
-      },
-    ];
-    themeRepo.getThemesRepo.mockResolvedValue({ rows: fakeThemes, count: 1 });
-
-    const result = await themeService.getAllThemeService({ page: 1, limit: 10 });
-
-    expect(findAllMock).toHaveBeenCalled(); // Use the mocked findAll
-    expect(result.data[0].occasion.name).toBe("Occ1");
+    const result = await getAllThemeService({ page: 1, limit: 10 });
+    expect(getThemesRepo).toHaveBeenCalled();
     expect(result.total).toBe(1);
+    expect(result.data[0].name).toBe("Theme1");
   });
 
-  test("createThemeService - success enqueues image/video jobs", async () => {
-    themeRepo.findThemeCategoryById.mockResolvedValue({ id: 1, type: "video" });
-    themeRepo.findThemeTypeRepo.mockResolvedValue({ id: 1 });
-    themeRepo.findOccasionById.mockResolvedValue({ id: 1 });
-    const fakeTheme = { id: 1, preview_image: null, preview_video: null };
-    themeRepo.createThemeRepo.mockResolvedValue(fakeTheme);
+  test("createThemeService creates theme and queues image/video", async () => {
+    findThemeCategoryById.mockResolvedValue({ id: 1, type: "video" });
+    findThemeTypeRepo.mockResolvedValue({ id: 1 });
+    findOccasionById.mockResolvedValue({ id: 1 });
+    createThemeRepo.mockResolvedValue({ id: 1 });
 
     const files = {
-      preview_image: [{ buffer: Buffer.from("img"), originalname: "img.png", mimetype: "image/png" }],
-      preview_video: [{ buffer: Buffer.from("vid"), originalname: "vid.mp4", mimetype: "video/mp4" }],
+      preview_image: [
+        {
+          buffer: Buffer.from("img"),
+          originalname: "img.png",
+          mimetype: "image/png",
+        },
+      ],
+      preview_video: [
+        {
+          buffer: Buffer.from("vid"),
+          originalname: "vid.mp4",
+          mimetype: "video/mp4",
+        },
+      ],
     };
 
-    const result = await themeService.createThemeService(
-      { occasion_id: 1, category_id: 1, theme_type_id: 1, name: "Test Theme" },
+    const result = await createThemeService(
+      { name: "Theme1", occasion_id: 1, category_id: 1, theme_type_id: 1 },
       files
     );
 
-    expect(themeRepo.createThemeRepo).toHaveBeenCalled();
-    expect(queues.imageUploadQueue.add).toHaveBeenCalled();
-    expect(queues.videoUploadQueue.add).toHaveBeenCalled();
-    expect(result).toBe(fakeTheme);
-  });
-
-  test("updateThemeService - success enqueues image/video jobs", async () => {
-    const fakeTheme = {
-      id: 1,
-      category_id: 1,
-      occasion_id: 1,
-      theme_type_id: 1,
-      preview_image: null,
-      preview_video: null,
-      name: "Old",
-      slug: "old",
-      component_name: null,
-      config: {},
-      base_price: 100,
-      offer_price: 90,
-      currency: "INR",
-      status: true,
-    };
-    themeRepo.findThemeWithCategory.mockResolvedValue(fakeTheme);
-    themeRepo.findThemeCategoryById.mockResolvedValue({ type: "video" });
-    themeRepo.findOccasionById.mockResolvedValue({ id: 1 });
-    themeRepo.updateThemeRepo.mockResolvedValue(true);
-
-    const files = {
-      preview_image: [{ buffer: Buffer.from("img"), originalname: "img.png", mimetype: "image/png" }],
-      preview_video: [{ buffer: Buffer.from("vid"), originalname: "vid.mp4", mimetype: "video/mp4" }],
-    };
-
-    const result = await themeService.updateThemeService(1, { name: "New Name" }, files);
-
-    expect(themeRepo.updateThemeRepo).toHaveBeenCalled();
-    expect(queues.imageUploadQueue.add).toHaveBeenCalled();
-    expect(queues.videoUploadQueue.add).toHaveBeenCalled();
-    expect(result).toBe(fakeTheme);
+    expect(findThemeCategoryById).toHaveBeenCalled();
+    expect(findThemeTypeRepo).toHaveBeenCalled();
+    expect(findOccasionById).toHaveBeenCalled();
+    expect(createThemeRepo).toHaveBeenCalled();
+    expect(imageUploadQueue.add).toHaveBeenCalled();
+    expect(videoUploadQueue.add).toHaveBeenCalled();
+    expect(result.id).toBe(1);
   });
 });

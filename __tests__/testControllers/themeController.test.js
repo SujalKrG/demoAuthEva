@@ -1,56 +1,118 @@
-import { expect, jest } from "@jest/globals";
+// __tests__/controllers/themeController.test.js
+import { jest } from "@jest/globals";
 
+// ========== MOCK SERVICES ==========
 jest.unstable_mockModule("../../services/themeService.js", () => ({
+  updateThemeService: jest.fn(),
   createThemeService: jest.fn(),
+  countryCodeService: jest.fn(),
+  updateThemeStatusService: jest.fn(),
+  getAllThemeService: jest.fn(),
 }));
-jest.unstable_mockModule("../../utils/logActivity.js", () => jest.fn());
 
-const { createTheme } = await import("../../controllers/themeController.js");
-const { createTheme: createThemeService } = await import(
-  "../../services/themeService.js"
-);
+jest.unstable_mockModule("../../utils/logActivity.js", () => ({
+  default: jest.fn(),
+}));
 
-const makeRes = () => {
-  const res = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  return res;
-};
+jest.unstable_mockModule("../../utils/logger.js", () => ({
+  logger: { error: jest.fn() },
+}));
 
-test("should create a theme successfully", async () => {
-  const req = {
-    body: { name: "alice", file: {}, admin: { admin: mockAdmin } },
-  };
-  const res = makeRes();
+const {
+  updateThemeService,
+  createThemeService,
+  countryCodeService,
+  updateThemeStatusService,
+  getAllThemeService,
+} = await import("../../services/themeService.js");
 
-  createThemeService.mockResolvedValue({ id: 1, name: "alice" });
+const logActivity = (await import("../../utils/logActivity.js")).default;
+const { logger } = await import("../../utils/logger.js");
 
-  await createTheme(req, res);
+const {
+  updateTheme,
+  createTheme,
+  countryCode,
+  updateStatus,
+  getAllTheme,
+} = await import("../../controllers/themeController.js");
 
-  expect(createAdminService).toHaveBeenCalledWith(req.body);
-  expect(res.status).toHaveBeenCalledWith(201);
-  expect(res.json).toHaveBeenCalledWith({
-    success: true,
-    message: "Theme created successfully",
-    data: { id: 1, name: "alice" },
+describe("ThemeController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = { body: {}, params: {}, query: {}, files: [], admin: { id: 1, name: "Admin", emp_id: "EMP001" } };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
   });
-});
 
-test("should return 400 if field missing", async () => {
-  const req = { body: { email: "" } };
-  const res = makeRes();
+  test("updateTheme - success", async () => {
+    updateThemeService.mockResolvedValue({ id: 1, name: "Theme1" });
+    await updateTheme(req, res);
 
-  expect(res.status).toHaveBeenCalledWith(400);
-  expect(res.json).toHaveBeenCalledWith(
-    expect.objectContaining({ success: false, message: "missing fields" })
-  );
-});
+    expect(updateThemeService).toHaveBeenCalledWith(req.params.id, req.body, req.files);
+    expect(logActivity).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Theme updated successfully",
+    });
+  });
 
-test("should return 500 if server fails", async () => {
-    const req = { body: { name: "alice" } };
-    const res = makeRes()
+  test("createTheme - success", async () => {
+    createThemeService.mockResolvedValue({ id: 1, name: "Theme1" });
+    await createTheme(req, res);
 
-    createAdminService.mockRejectedValue(new Error("DB Error"));
+    expect(createThemeService).toHaveBeenCalledWith(req.body, req.files);
+    expect(logActivity).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Theme created successfully",
+      data: { id: 1, name: "Theme1" },
+    });
+  });
 
-    await createTheme(req)
+  test("countryCode - success", async () => {
+    countryCodeService.mockResolvedValue([{ code: "+91" }]);
+    await countryCode(req, res);
+
+    expect(countryCodeService).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([{ code: "+91" }]);
+  });
+
+  test("updateStatus - success", async () => {
+    updateThemeStatusService.mockResolvedValue({ id: 1, status: true });
+    req.params.id = 1;
+    req.body.status = true;
+
+    await updateStatus(req, res);
+
+    expect(updateThemeStatusService).toHaveBeenCalledWith(1, true, req.admin);
+    expect(logActivity).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Theme status updated successfully",
+      data: { id: 1, status: true },
+    });
+  });
+
+  test("getAllTheme - success", async () => {
+    getAllThemeService.mockResolvedValue({ count: 1, rows: [{ id: 1 }] });
+    await getAllTheme(req, res);
+
+    expect(getAllThemeService).toHaveBeenCalledWith(req.query);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      count: 1,
+      rows: [{ id: 1 }],
+    });
+  });
 });

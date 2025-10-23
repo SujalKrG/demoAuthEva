@@ -1,125 +1,161 @@
-import db from "../models/index.js";
+// services/cartService.js
+import * as cartRepo from "../repositories/cartRepository.js";
 import {
-  safeParseGuestJson,
-  computeMessageCounts,
-  findCountryByDialCode,
-  getMessageUnitPrice,
-} from "../utils/priceHelpers.js";
+  normalizeCountryCode,
+  calculateGuestCost,
+  pickPrice,
+} from "../utils/pricingUtils.js";
 
-export const getCartSummaryByUser = async (userId) => {
-  // ✅ Fetch all active carts for this user
-  const carts = await db.Cart.findAll({
-    where: { user_id: userId },
-    order: [["created_at", "DESC"]],
-    include: [
-      {
-        model: db.UserTheme,
-        as: "user_theme",
-        include: [
-          {
-            model: db.Theme,
-            as: "theme",
-            include: [
-              { model: db.ThemeCategory, as: "themeCategory", required: false },
-              { model: db.ThemeType, as: "themeType", required: false },
-            ],
-          },
-        ],
-      },
-      {
-        model: db.Event,
-        as: "event",
-      },
-    ],
+export const getCartSummary = async (userId) => {
+  const carts = await cartRepo.getCartsByUserId(userId);
+  if (!carts.length) throw new Error("No carts found");
+
+  // Collect all country codes from all carts in one pass
+  const allCountryCodes = new Set();
+  const collectCountryCodes = (guestData) => {
+    const addCode = (raw) => {
+      const norm = normalizeCountryCode(raw);
+      if (norm) allCountryCodes.add(norm);
+    };
+    guestData.groups?.forEach((grp) =>
+      grp.guests?.forEach((g) => addCode(g.countryCode))
+    );
+    guestData.individuals?.guests?.forEach((g) => addCode(g.countryCode));
+  };
+  carts.forEach((cart) => {
+    const guestData =
+      typeof cart.guest_with_schedules === "string"
+        ? JSON.parse(cart.guest_with_schedules)
+        : cart.guest_with_schedules || {};
+    collectCountryCodes(guestData);
   });
 
-  if (!carts?.length) return { carts: [], summary: {} };
+  // Fetch countries once
+  const countries = await cartRepo.getCountriesByCodes(
+    Array.from(allCountryCodes)
+  );
+  const countryMap = {};
+  countries.forEach((c) => (countryMap[normalizeCountryCode(c.code)] = c.id));
 
-  let globalSubtotal = 0;
-  const cartResults = [];
+  // Collect all channel & country IDs once
+  const allChannelIds = new Set();
+  const allCountryIds = new Set();
+  carts.forEach((cart) => {
+    const guestData =
+      typeof cart.guest_with_schedules === "string"
+        ? JSON.parse(cart.guest_with_schedules)
+        : cart.guest_with_schedules || {};
 
-  for (const cart of carts) {
-    const guestJson = safeParseGuestJson(cart.guest_with_schedules);
-    const { breakdown } = computeMessageCounts(guestJson);
-    const pricingBreakdown = [];
+    const collectRefs = (guests, schedules) => {
+      guests?.forEach((g) => {
+        const cId = countryMap[normalizeCountryCode(g.countryCode)];
+        if (cId) allCountryIds.add(cId);
+      });
+      schedules?.forEach((s) => allChannelIds.add(Number(s.channelType)));
+    };
 
-    let cartTotal = 0;
+    guestData.groups?.forEach((grp) => collectRefs(grp.guests, grp.schedules));
+    guestData.individuals?.guests?.forEach((g) =>
+      collectRefs([g], g.schedules)
+    );
+  });
 
-    // 🧮 Calculate message pricing by channel & country
-    for (const [channelType, countries] of Object.entries(breakdown)) {
-      for (const [countryCode, messageCount] of Object.entries(countries)) {
-        const country = await findCountryByDialCode(countryCode);
-        const countryId = country ? country.id : null;
-        const unitPrice = await getMessageUnitPrice(channelType, countryId);
-        const subtotal = unitPrice * messageCount;
+  // Fetch all pricing once
+  const pricingData = await cartRepo.getMessagePricing(
+    Array.from(allChannelIds),
+    Array.from(allCountryIds)
+  );
 
-        pricingBreakdown.push({
-          channelType: Number(channelType),
-          countryCode,
-          messageCount,
-          unitPrice: Number(unitPrice.toFixed(2)),
-          subtotal: Number(subtotal.toFixed(2)),
-        });
+  // Build cart summaries
+  let userTotal = {
+    totalGuestCount: 0,
+    totalMessages: 0,
+    totalGuestPrice: 0,
+    totalThemePrice: 0,
+    grandTotal: 0,
+  };
+  const cartSummaries = carts.map((cart) => {
+    const guestData =
+      typeof cart.guest_with_schedules === "string"
+        ? JSON.parse(cart.guest_with_schedules)
+        : cart.guest_with_schedules || {};
 
-        cartTotal += subtotal;
-      }
-    }
-
-    // 🎨 Add theme cost if not purchased
     let themePrice = 0;
-    let themeDetails = null;
-    const userTheme = cart?.user_theme;
-    const theme = userTheme?.theme;
+    let themeStatus = "unpurchased";
+    const theme = cart.user_theme?.theme;
 
-    if (theme) {
-      themePrice =
-        !userTheme.purchased_price || userTheme.purchased_price === 0
-          ? Number(theme.offer_price || theme.base_price || 0)
-          : 0;
+    if (cart.user_theme?.purchased_price > 0) themeStatus = "purchased";
+    else if (theme?.offer_price > 0) themePrice = Number(theme.offer_price);
+    else if (theme?.base_price > 0) themePrice = Number(theme.base_price);
 
-      themeDetails = {
-        id: theme.id,
-        name: theme.name,
-        category: theme.themeCategory?.name || null,
-        type: theme.themeType?.name || null,
-        price: Number(themePrice.toFixed(2)),
-        isPurchased: themePrice === 0 ? true : false,
-      };
-    }
+    let totalGuestCount = 0,
+      totalMessages = 0,
+      totalGuestPrice = 0;
+    const guestBreakdown = [];
 
-    const messageTotal = pricingBreakdown.reduce(
-      (sum, i) => sum + i.subtotal,
-      0
+    const processGuest = (guest, schedules, groupName = null) => {
+      const cId = countryMap[normalizeCountryCode(guest.countryCode)];
+      if (!cId) return;
+
+      const { totalPrice, totalMessages: guestMsgCount } = calculateGuestCost(
+        pricingData,
+        cId,
+        schedules
+      );
+      guestBreakdown.push({
+        type: groupName ? "group" : "individual",
+        groupName,
+        guestId: guest.id,
+        guestName: guest.name,
+        mobile: guest.mobile,
+        totalMessages: guestMsgCount,
+        totalPrice: Number(totalPrice.toFixed(2)),
+      });
+
+      totalGuestCount++;
+      totalMessages += guestMsgCount;
+      totalGuestPrice += totalPrice;
+    };
+
+    guestData.groups?.forEach((g) =>
+      g.guests?.forEach((guest) =>
+        processGuest(guest, g.schedules, g.group_name)
+      )
+    );
+    guestData.individuals?.guests?.forEach((guest) =>
+      processGuest(guest, guest.schedules)
     );
 
-    const totalCartPrice = messageTotal + themePrice;
-    globalSubtotal += totalCartPrice;
+    const subtotal = themePrice + totalGuestPrice;
+    const grandTotal = subtotal;
 
-    cartResults.push({
-      cartId: cart.id,
-      event: {
-        id: cart.event?.id,
-        name: cart.event?.name || "Untitled Event",
+    userTotal.totalGuestCount += totalGuestCount;
+    userTotal.totalMessages += totalMessages;
+    userTotal.totalGuestPrice += totalGuestPrice;
+    userTotal.totalThemePrice += themePrice;
+    userTotal.grandTotal += grandTotal;
+
+    return {
+      cart_id: cart.id,
+      user_id: cart.user_id,
+      theme_summary: {
+        id: theme?.id,
+        name: theme?.name,
+        themeStatus,
+        themePrice: Number(themePrice.toFixed(2)),
       },
-      theme: themeDetails,
-      messagePricingBreakdown: pricingBreakdown,
-      messageTotal: Number(messageTotal.toFixed(2)),
-      themePrice: Number(themePrice.toFixed(2)),
-      cartTotal: Number(totalCartPrice.toFixed(2)),
-    });
-  }
+      guest_summary: {
+        totalGuestCount,
+        totalMessages,
+        totalGuestPrice: Number(totalGuestPrice.toFixed(2)),
+        breakdown: guestBreakdown,
+      },
+      total_summary: {
+        subtotal: Number(subtotal.toFixed(2)),
+        grandTotal: Number(grandTotal.toFixed(2)),
+      },
+    };
+  });
 
-  // 🧾 Calculate global summary
-  const gst = Number((globalSubtotal * 0.18).toFixed(2));
-  const totalAmount = Number((globalSubtotal + gst).toFixed(2));
-
-  const summary = {
-    subtotal: Number(globalSubtotal.toFixed(2)),
-    gst,
-    designFee: 0,
-    digitalDelivery: "FREE",
-    totalAmount,
-  };
-
-  return { carts: cartResults, summary };
+  return { cartSummaries, userTotal };
 };
