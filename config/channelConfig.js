@@ -1,39 +1,10 @@
-import db from "../models/index.js";
-
-let channelConfigCache = null;
-
+// config/channelConfig.js
 /**
- * Loads all message channels dynamically and caches them
+ * Static mapping for channels and composite channels
  */
-export const loadChannelConfig = async () => {
-  if (channelConfigCache) return channelConfigCache;
-
-  const channels = await db.MessageChannel.findAll({
-    attributes: ["id", "code", "name", "provider", "description"],
-    where: { status: 1 },
-    raw: true,
-  });
-
-  const mapById = {};
-  const mapByCode = {};
-
-  channels.forEach((c) => {
-    const code = c.code.toUpperCase();
-    mapById[c.id] = c;
-    mapByCode[code] = c;
-  });
-
-  channelConfigCache = {
-    all: channels,
-    byId: mapById,
-    byCode: mapByCode,
-  };
-
-  return channelConfigCache;
-};
-
-/** Optional utility to refresh cache if DB updated */
-export const refreshChannelConfig = async () => {
-  channelConfigCache = null;
-  return loadChannelConfig();
+export const loadChannelConfig = {
+  1: { id: 1, code: "WA", name: "WhatsApp" },
+  2: { id: 2, code: "RCS", name: "RCS Message" },
+  3: { id: 3, code: "WA|RCS",ids:[1,2], name: "WhatsApp OR RCS", mode: "fallback" },
+  4: { id: 4, code: "WA&RCS",ids:[1,2], name: "WhatsApp AND RCS", mode: "multi" },
 };

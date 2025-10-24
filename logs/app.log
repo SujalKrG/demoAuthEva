@@ -171,3 +171,5 @@
 2025-10-22 18:43:35 error: [updateAdminController] DB error
 2025-10-22 18:43:35 error: [updateAdminStatusController] Status is required
 2025-10-22 18:43:35 error: [updateAdminStatusController] DB error
+2025-10-24 13:13:41 error: Cart summary calculation error: No carts found
+2025-10-24 13:40:06 error: Cart summary calculation error: Unknown column 'user_theme->theme.file_url' in 'field list'

@@ -1,4 +1,4 @@
-// utils/pricingUtils.js
+import { loadChannelConfig } from "../config/channelConfig.js";
 
 /** Normalize country codes like "+91" */
 export const normalizeCountryCode = (code) => {
@@ -15,23 +15,50 @@ export const pickPrice = (entry) => {
   return finalPrice > 0 ? finalPrice : basePrice;
 };
 
-/** Calculate cost per guest per schedule */
-export const calculateGuestCost = (pricingData, countryId, schedules) => {
+/** Calculate guest message cost dynamically */
+export const calculateGuestCost = async (pricingData, countryId, schedules) => {
+  const channelConfig = await loadChannelConfig();
+  const { byId, byCode } = channelConfig;
+
   let totalPrice = 0;
   let totalMessages = 0;
 
-  const waPrice = pickPrice(pricingData.find(p => Number(p.channel_id) === 1 && Number(p.country_id) === countryId)) || 0;
-  const rcsPrice = pickPrice(pricingData.find(p => Number(p.channel_id) === 2 && Number(p.country_id) === countryId)) || 0;
+  const getPrice = (channelId) => {
+    const entry = pricingData.find(
+      (p) => Number(p.channel_id) === channelId && Number(p.country_id) === countryId
+    );
+    return pickPrice(entry);
+  };
 
-  schedules?.forEach((s) => {
-    const type = Number(s.channelType);
-    switch (type) {
-      case 1: totalPrice += waPrice; totalMessages += 1; break;
-      case 2: totalPrice += rcsPrice; totalMessages += 1; break;
-      case 3: totalPrice += Math.max(waPrice, rcsPrice); totalMessages += 1; break;
-      case 4: totalPrice += waPrice + rcsPrice; totalMessages += 2; break;
+  for (const schedule of schedules || []) {
+    const channelId = Number(schedule.channelType);
+    const channel = byId[channelId];
+    if (!channel) continue;
+
+    const code = channel.code.toUpperCase();
+
+    // Single channel
+    if (!code.includes("|") && !code.includes("&")) {
+      totalPrice += getPrice(channelId);
+      totalMessages += 1;
+      continue;
     }
-  });
+
+    const parts = code.split(/[|&]/).map((c) => c.trim().toUpperCase());
+    const channelParts = parts.map((part) => byCode[part]).filter(Boolean);
+
+    if (!channelParts.length) continue;
+
+    const prices = channelParts.map((ch) => getPrice(ch.id));
+
+    if (code.includes("|")) {
+      totalPrice += Math.min(...prices);
+      totalMessages += 1;
+    } else if (code.includes("&")) {
+      totalPrice += prices.reduce((a, b) => a + b, 0);
+      totalMessages += prices.length;
+    }
+  }
 
   return { totalPrice, totalMessages };
 };

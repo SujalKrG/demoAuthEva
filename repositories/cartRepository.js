@@ -1,14 +1,13 @@
-// repositories/cartRepository.js
 import db from "../models/index.js";
 import { Op } from "sequelize";
 import { Sequelize, remoteSequelize } from "../models/index.js";
 import countryFactoryModel from "../models/remote/country.js";
-
 const CountryModel = countryFactoryModel(remoteSequelize, Sequelize.DataTypes);
 
-export const getCartsByUserId = async (userId) => {
+export const fetchCarts = async (userId) => {
+  const cartFilter = userId ? { user_id: userId } : {};
   return db.Cart.findAll({
-    where: { ...(userId && { user_id: userId }) },
+    where: cartFilter,
     include: [
       {
         model: db.UserTheme,
@@ -19,19 +18,19 @@ export const getCartsByUserId = async (userId) => {
   });
 };
 
-export const getCountriesByCodes = async (codes) => {
-  return CountryModel.findAll({
-    where: { code: { [Op.in]: codes } },
-    attributes: ["id", "code"],
-  });
-};
-
-export const getMessagePricing = async (channelIds, countryIds) => {
+export const fetchPricingData = async (channelIds, countryIds) => {
   return db.MessagePricing.findAll({
     where: {
       channel_id: { [Op.in]: channelIds },
       country_id: { [Op.in]: countryIds },
       status: 1,
     },
+  });
+};
+
+export const fetchCountriesByCodes = async (codes) => {
+  return CountryModel.findAll({
+    where: { code: { [Op.in]: codes } },
+    attributes: ["id", "code"],
   });
 };
