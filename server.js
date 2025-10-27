@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+import bodyParser from "body-parser";
 
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
@@ -56,6 +57,15 @@ app.use(
 
     methods: ["GET", "PUT", "PATCH", "POST", "DELETE"],
     credentials: true,
+  })
+);
+
+
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
   })
 );
 

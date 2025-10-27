@@ -18,6 +18,8 @@ import themeTypeRouter from "./themeTypeRouter.js"
 import messageChannelRouter from "./messageChannelRouter.js"
 import messagePricing from "./messagePricingRouter.js"
 import cartSummary from "./cartRouter.js"
+import messageTemplateRouter from "./messageTemplateRouter.js";
+import webhookRouter from "./webhookRouter.js";
 
 
 
@@ -46,5 +48,7 @@ router.use("/", themeTypeRouter)
 router.use("/", messageChannelRouter)
 router.use("/", messagePricing)
 router.use("/", cartSummary)
+router.use("/", messageTemplateRouter)
+router.use("/", webhookRouter)
 
 export default router;
