@@ -79,10 +79,15 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+
+      remarks: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        defaultValue: null,
+        comment: "Optional remarks for payment (notes, refund reason, etc.)",
+      },
     },
     {
-      sequelize,
-      modelName: "InvitationPayment",
       tableName: "invitation_payments",
       timestamps: true,
       underscored: true,
@@ -91,12 +96,6 @@ export default (sequelize, DataTypes) => {
       paranoid: false, // No deleted_at in this table
     }
   );
-  InvitationPayment.associate = (models) => {
-    InvitationPayment.belongsTo(models.Theme, {
-      foreignKey: "reference_id",
-      as: "theme",
-    });
-  };
 
   return InvitationPayment;
 };

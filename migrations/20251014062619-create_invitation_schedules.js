@@ -72,13 +72,13 @@ export default {
       // --- Tax / Charges ---
       tax_amount: {
         type: Sequelize.DECIMAL(8, 2),
-        allowNull: false,
-        defaultValue: 0.0,
+        allowNull: true,
+        // defaultValue: 0.0,
       },
       service_charge: {
         type: Sequelize.DECIMAL(8, 2),
-        allowNull: false,
-        defaultValue: 0.0,
+        allowNull: true,
+        // defaultValue: 0.0,
       },
       net_amount: {
         type: Sequelize.DECIMAL(8, 2),
@@ -92,10 +92,11 @@ export default {
         allowNull: false,
         defaultValue: 0.0,
       },
-      // wallet_transaction_id: {  //ref to wallet transaction table
-      //   type: Sequelize.BIGINT,
-      //   allowNull: true,
-      // },
+      wallet_transaction_id: {
+        //ref to wallet transaction table
+        type: Sequelize.BIGINT,
+        allowNull: true,
+      },
       payable_after_wallet: {
         type: Sequelize.DECIMAL(8, 2),
         allowNull: false,

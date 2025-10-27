@@ -31,7 +31,8 @@ export default (sequelize, DataTypes) => {
           "topup",
           "invitation",
           "refund",
-          "admin_adjustment"
+          "admin_adjustment",
+          "promotional"
         ),
         allowNull: false,
       },
@@ -64,13 +65,6 @@ export default (sequelize, DataTypes) => {
       updatedAt: "updated_at",
     }
   );
-  WalletTransaction.associate = (models) => {
-    // A wallet transaction can be associated with an invitation schedule
-    WalletTransaction.belongsTo(models.InvitationSchedule, {
-      foreignKey: "reference_id",
-      as: "invitationSchedule",
-    });
-  };
 
   return WalletTransaction;
 };
