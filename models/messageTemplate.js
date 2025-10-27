@@ -62,7 +62,7 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
       },
       status: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.TINYINT,
         allowNull: false,
         defaultValue: true,
       },

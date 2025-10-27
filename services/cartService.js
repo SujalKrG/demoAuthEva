@@ -1,48 +1,50 @@
+import { loadChannelConfig } from "../config/channelConfig.js";
+import { pickPrice, normalizeCountryCode } from "../utils/requiredMethods.js";
 import * as cartRepo from "../repositories/cartRepository.js";
-import { normalizeCountryCode, calculateGuestCost } from "../utils/pricingUtils.js";
 
-export const getCartSummaryService = async (userId) => {
-  const carts = await cartRepo.fetchCarts(userId);
-  if (!carts.length) return [];
+export const PricingService = {
+  async calculateGuestCost(pricingData, countryId, schedules) {
+    const channelConfig = loadChannelConfig;
+    let totalPrice = 0;
+    let totalMessages = 0;
 
-  // Collect country codes
-  const allCountryCodes = new Set();
-  carts.forEach((cart) => {
-    const guestData =
-      typeof cart.guest_with_schedules === "string"
-        ? JSON.parse(cart.guest_with_schedules)
-        : cart.guest_with_schedules || {};
+    for (const schedule of schedules || []) {
+      const scheduleChannel = channelConfig[schedule.channelType];
+      if (!scheduleChannel) continue;
 
-    const addCode = (raw) => {
-      const norm = normalizeCountryCode(raw);
-      if (norm) allCountryCodes.add(norm);
-    };
+      const subChannelIds = scheduleChannel.ids || [scheduleChannel.id];
+      const prices = subChannelIds
+        .map((id) => {
+          const entry = pricingData.find(
+            (p) =>
+              Number(p.channel_id) === id && Number(p.country_id) === countryId
+          );
+          return pickPrice(entry);
+        })
+        .filter((p) => p > 0);
 
-    guestData.groups?.forEach((grp) =>
-      grp.guests?.forEach((g) => addCode(g.countryCode))
-    );
-    guestData.individuals?.guests?.forEach((g) => addCode(g.countryCode));
-  });
+      if (!prices.length) continue;
 
-  const countries = await cartRepo.fetchCountriesByCodes(Array.from(allCountryCodes));
-  const countryMap = {};
-  countries.forEach((c) => {
-    const norm = normalizeCountryCode(c.code);
-    if (norm) countryMap[norm] = c.id;
-  });
+      if (scheduleChannel.mode === "fallback") {
+        totalPrice += Math.max(...prices);
+        totalMessages += 1;
+      } else if (scheduleChannel.mode === "multi") {
+        totalPrice += prices.reduce((a, b) => a + b, 0);
+        totalMessages += prices.length;
+      } else {
+        totalPrice += prices[0];
+        totalMessages += 1;
+      }
+    }
 
-  const userTotal = {
-    totalGuestCount: 0,
-    totalMessages: 0,
-    totalGuestPrice: 0,
-    totalThemePrice: 0,
-    grandTotal: 0,
-  };
+    return { totalPrice, totalMessages };
+  },
+};
 
-  const cartSummaries = [];
 
-  for (const cart of carts) {
-    const { guest_with_schedules } = cart;
+
+export const CartService = {
+  async processCart(cart, countryMap) {
     const theme = cart.user_theme?.theme;
     let themePrice = 0;
     let themeStatus = "unpurchased";
@@ -52,9 +54,9 @@ export const getCartSummaryService = async (userId) => {
     else if (theme?.base_price > 0) themePrice = Number(theme.base_price);
 
     const guestData =
-      typeof guest_with_schedules === "string"
-        ? JSON.parse(guest_with_schedules)
-        : guest_with_schedules || {};
+      typeof cart.guest_with_schedules === "string"
+        ? JSON.parse(cart.guest_with_schedules)
+        : cart.guest_with_schedules || {};
 
     const allChannelIds = new Set();
     const allCountryIds = new Set();
@@ -65,13 +67,21 @@ export const getCartSummaryService = async (userId) => {
         const cId = countryMap[norm];
         if (cId) allCountryIds.add(cId);
       });
-      schedules?.forEach((s) => allChannelIds.add(Number(s.channelType)));
+      schedules?.forEach((s) => {
+        const cfg = loadChannelConfig[s.channelType];
+        if (cfg?.ids) cfg.ids.forEach((id) => allChannelIds.add(id));
+        else allChannelIds.add(s.channelType);
+      });
     };
 
-    guestData.groups?.forEach((grp) => collectRefs(grp.guests, grp.schedules));
-    guestData.individuals?.guests?.forEach((g) => collectRefs([g], g.schedules));
+    guestData.groups?.forEach((grp) =>
+      collectRefs(grp.guests, grp.schedules)
+    );
+    guestData.individuals?.guests?.forEach((g) =>
+      collectRefs([g], g.schedules)
+    );
 
-    const pricingData = await cartRepo.fetchPricingData(
+    const pricingData = await cartRepo.MessagePricingRepository.getPricing(
       Array.from(allChannelIds),
       Array.from(allCountryIds)
     );
@@ -86,8 +96,8 @@ export const getCartSummaryService = async (userId) => {
       const countryId = countryMap[norm];
       if (!countryId) return;
 
-      const { totalPrice: guestPrice, totalMessages: guestMsgCount } =
-        await calculateGuestCost(pricingData, countryId, schedules);
+      const { totalPrice, totalMessages: guestMsgCount } =
+        await PricingService.calculateGuestCost(pricingData, countryId, schedules);
 
       guestBreakdown.push({
         type: groupName ? "group" : "individual",
@@ -96,12 +106,12 @@ export const getCartSummaryService = async (userId) => {
         guestName: guest.name,
         mobile: guest.mobile,
         totalMessages: guestMsgCount,
-        totalPrice: Number(guestPrice.toFixed(2)),
+        totalPrice: Number(totalPrice.toFixed(2)),
       });
 
       totalGuestCount++;
       totalMessages += guestMsgCount;
-      totalGuestPrice += guestPrice;
+      totalGuestPrice += totalPrice;
     };
 
     for (const group of guestData.groups || []) {
@@ -109,7 +119,6 @@ export const getCartSummaryService = async (userId) => {
         await processGuest(g, group.schedules, group.group_name);
       }
     }
-
     for (const g of guestData.individuals?.guests || []) {
       await processGuest(g, g.schedules);
     }
@@ -117,33 +126,20 @@ export const getCartSummaryService = async (userId) => {
     const subtotal = themePrice + totalGuestPrice;
     const grandTotal = subtotal;
 
-    userTotal.totalGuestCount += totalGuestCount;
-    userTotal.totalMessages += totalMessages;
-    userTotal.totalGuestPrice += totalGuestPrice;
-    userTotal.totalThemePrice += themePrice;
-    userTotal.grandTotal += grandTotal;
-
-    cartSummaries.push({
-      cart_id: cart.id,
-      user_id: cart.user_id,
+    return {
       theme_summary: {
         id: theme?.id,
         name: theme?.name,
         themeStatus,
-        themePrice: Number(themePrice.toFixed(2)),
+        themePrice,
       },
       guest_summary: {
         totalGuestCount,
         totalMessages,
-        totalGuestPrice: Number(totalGuestPrice.toFixed(2)),
+        totalGuestPrice,
         breakdown: guestBreakdown,
       },
-      total_summary: {
-        subtotal: Number(subtotal.toFixed(2)),
-        grandTotal: Number(grandTotal.toFixed(2)),
-      },
-    });
-  }
-
-  return { cartSummaries, userTotal };
+      total_summary: { subtotal, grandTotal },
+    };
+  },
 };

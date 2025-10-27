@@ -1,5 +1,4 @@
 import { ApolloServer, gql } from "apollo-server";
-import {  DataTypes } from "sequelize";
 import { sequelize } from "./models/index.js";
 import db from "./models/index.js";
 
