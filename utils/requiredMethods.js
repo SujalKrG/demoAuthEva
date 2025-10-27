@@ -73,3 +73,18 @@ export const sanitizeFileName = (filename) => {
   return filename.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
 };
 
+
+export const normalizeCountryCode = (code) => {
+  if (!code) return null;
+  const digits = String(code).replace(/\D/g, "").replace(/^0+/, "");
+  return digits ? `+${digits}` : null;
+};
+
+
+/** Pick price: final_price if >0 else base_price */
+export const pickPrice = (entry) => {
+  if (!entry) return 0;
+  const finalPrice = Number(entry.final_price || 0);
+  const basePrice = Number(entry.base_price || 0);
+  return finalPrice > 0 ? finalPrice : basePrice;
+};

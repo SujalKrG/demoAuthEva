@@ -5,15 +5,9 @@ import {
   createTheme,
   updateTheme,
   updateStatus,
-  // generateAIThemeImage,
-  // generateThemeAI,
-  // rephraseTheme,
-  // deleteTheme,
   getAllTheme,
-  // getThemeBySlug,
   countryCode,
 } from "../controllers/themeController.js";
-// import { upload } from "../utils/requiredMethods.js";
 
 import multer from "multer";
 
@@ -30,13 +24,9 @@ router.patch(
   upload.fields([{ name: "preview_image" }, { name: "preview_video" }]),
   updateTheme
 );
-// router.delete("/theme/delete/:id", deleteTheme);
+
 router.get("/theme/get", getAllTheme);
 router.get("/country/get", countryCode);
 router.patch("/theme/update-status/:id", updateStatus);
-// router.post("/theme/generate-ai", generateThemeAI);
-// router.post("/theme/rephrase", rephraseTheme);
-
-// router.post("/theme/generate-ai-image", generateAIThemeImage);
 
 export default router;

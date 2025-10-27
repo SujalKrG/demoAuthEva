@@ -17,12 +17,10 @@ import authorizeDynamic from "../middlewares/dynamicAuthorizeMiddleware.js";
 
 const router = express.Router();
 router.use(authorizeDynamic());
+
 router.get("/get-profile",getProfile);
 
-
 router.post("/admin/store", addAdmin);
-// router.get("/admin/get", getAllAdmins);
-// router.get("/admin/show/:id", getAdminById);
 router.get("/admin-role-permission/get", getAdminWithRoleAndPermissionsById);
 router.patch("/admin/update/:id",upload.none(), updateAdminWithRoles);
 router.patch("/admin/update-status/:id", updateAdminStatusController);
