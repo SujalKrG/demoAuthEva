@@ -31,19 +31,14 @@ export default {
           "topup",
           "invitation",
           "refund",
-          "admin_adjustment"
+          "admin_adjustment",
+          "promotional"
         ),
         allowNull: false,
       },
       reference_id: {
         type: Sequelize.BIGINT,
         allowNull: true,
-        references: {
-          model: "invitation_schedules", // This references the invitation_payments table
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
       },
       balance_after: {
         type: Sequelize.DECIMAL(8, 2),
@@ -52,6 +47,10 @@ export default {
       },
       remarks: {
         type: Sequelize.STRING(255),
+        allowNull: true,
+      },
+      created_by: {
+        type: Sequelize.BIGINT,
         allowNull: true,
       },
       status: {

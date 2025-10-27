@@ -2,11 +2,12 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
+import morgan from "morgan";
 
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
 import { sequelize, remoteSequelize } from "./models/index.js";
-import { errorHandler}  from "./middlewares/errorHandler.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ requiredEnvVars.forEach((envVar) => {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(morgan("dev"));
 app.use(express.json({ limit: "1mb" })); // Prevents huge payload
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
