@@ -13,13 +13,16 @@ const defaultPermissions = [
   { method: "get", router: "/api/v1/theme-category/get" },
   { method: "get", router: "/api/v1/admin-activity-log/get" },
   { method: "get", router: "/api/v1/admin-activity-log/:module/:id" },
-  {method: "get", router: "/api/v1/cart-summary/get"}
+  { method: "get", router: "/api/v1/cart-summary/get" },
 ];
 
 export default function authorizeDynamic() {
   return async (req, res, next) => {
     try {
       const admin = req.admin;
+      if (req.path.startsWith("/webhook")) {
+        return next();
+      }
       if (!admin?.id) {
         return res
           .status(401)
