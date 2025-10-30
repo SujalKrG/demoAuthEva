@@ -3,15 +3,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
-import bodyParser from "body-parser";
 
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
 import { sequelize, remoteSequelize } from "./models/index.js";
-import { errorHandler}  from "./middlewares/errorHandler.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 import { testS3Connection } from "./utils/s3Test.js";
 import { testRedisConnection } from "./utils/redisTest.js";
-
+import webhookRouter from "./routes/webhookRouter.js";
 
 dotenv.config();
 
@@ -25,9 +24,13 @@ requiredEnvVars.forEach((envVar) => {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.use((req, res, next) => {
+  console.log(`➡️  ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 app.use(morgan("dev"));
-app.use(express.json({ limit: "1mb" })); // Prevents huge payload
+// app.use(express.json({ limit: "1mb" })); // Prevents huge payload
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 app.disable("x-powered-by");
@@ -46,23 +49,29 @@ app.use(
   })
 );
 
-const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin))
-        return callback(null, true);
-      else return callback(new Error("Not allowed by CORS"));
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error(`❌ CORS blocked origin: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
     },
-
-    methods: ["GET", "PUT", "PATCH", "POST", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
-
-
 app.use(
   express.json({
+    limit: "1mb",
     verify: (req, res, buf) => {
       req.rawBody = buf;
     },
@@ -71,6 +80,8 @@ app.use(
 
 app.use("/api/v1/", authRouter);
 app.use("/api/v1/", adminRouter);
+app.use("/api/v1", webhookRouter);
+
 // app.use("/api/v1/", adminRouter);
 // console.log("DB1 config:", sequelize.config);
 // console.log("DB2 config:", remoteSequelize.config);

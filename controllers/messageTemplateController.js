@@ -1,52 +1,51 @@
-import db from "../models/index.js";
-const { MessageTemplate, MessageChannel } = db;
+import { MessageTemplateService } from "../services/messageTemplateService.js";
 
-// 🟩 Create a new Message Template
 export const createMessageTemplate = async (req, res) => {
   try {
-    const data = req.body;
-
-    const newTemplate = await MessageTemplate.create(data);
-    return res.status(201).json({
-      success: true,
-      message: "Message template created successfully",
-      data: newTemplate,
-    });
+    const newTemplate = await MessageTemplateService.createTemplate(req);
+    return res.status(201).json({ success: true, data: newTemplate });
   } catch (error) {
-    console.error("Error creating message template:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Failed to create message template",
-      error: error.message,
+      message: error.message || "Failed to create message template",
     });
   }
 };
 
-// 🟦 Get all Message Templates
 export const getAllMessageTemplates = async (req, res) => {
   try {
-    const templates = await MessageTemplate.findAll({
-      include: [
-        {
-          model: MessageChannel,
-          as: "channel",
-          attributes: ["id", "name", "code"], // optional
-        },
-      ],
-      order: [["created_at", "DESC"]],
+    const result = await MessageTemplateService.getAllTemplates(req.query);
+    return res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to fetch message templates",
     });
+  }
+};
+
+export const changeTemplateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const updatedTemplate = await MessageTemplateService.changeStatus(
+      id,
+      status
+    );
 
     return res.status(200).json({
       success: true,
-      count: templates.length,
-      data: templates,
+      message: "Template status updated successfully",
+      data: {
+        id: updatedTemplate.id,
+        status: updatedTemplate.status,
+      },
     });
   } catch (error) {
-    console.error("Error fetching templates:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Failed to fetch message templates",
-      error: error.message,
+      message: error.message || "Failed to change template status",
     });
   }
 };

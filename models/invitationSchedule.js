@@ -135,5 +135,21 @@ export default (sequelize, DataTypes) => {
       deletedAt: "deleted_at",
     }
   );
+
+  InvitationSchedule.associate = (models) => {
+    InvitationSchedule.belongsTo(models.WalletTransaction, {
+      foreignKey: "wallet_transaction_id",
+      as: "walletTransaction",
+    });
+    InvitationSchedule.belongsTo(models.Event, {
+      foreignKey: "event_id",
+      as: "event",
+    });
+    InvitationSchedule.belongsTo(models.UserTheme, {
+      foreignKey: "user_theme_id",
+      as: "userTheme",
+    });
+  };
+
   return InvitationSchedule;
 };

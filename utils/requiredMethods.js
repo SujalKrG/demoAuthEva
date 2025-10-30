@@ -88,3 +88,9 @@ export const pickPrice = (entry) => {
   const basePrice = Number(entry.base_price || 0);
   return finalPrice > 0 ? finalPrice : basePrice;
 };
+
+
+export const toUpperCaseSafe = (value) => {
+  if (typeof value !== "string") return value;
+  return value.toUpperCase();
+};

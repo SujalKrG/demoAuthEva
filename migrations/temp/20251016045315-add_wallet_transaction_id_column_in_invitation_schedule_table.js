@@ -3,6 +3,10 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
+    await queryInterface.removeColumn(
+      "invitation_schedules",
+      "wallet_transaction_id"
+    );
     await queryInterface.addColumn(
       "invitation_schedules",
       "wallet_transaction_id",
@@ -21,6 +25,15 @@ export default {
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.addColumn(
+      "invitation_schedules",
+      "wallet_transaction_id",
+      {
+        type: Sequelize.BIGINT,
+        allowNull: true,
+      }
+    );
+
     await queryInterface.removeColumn(
       "invitation_schedules",
       "wallet_transaction_id"
