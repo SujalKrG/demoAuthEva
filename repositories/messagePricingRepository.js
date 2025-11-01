@@ -11,3 +11,16 @@ export const getUniqueMessagePricingRepo = async (channel_id, country_id) => {
     },
   });
 };
+export const getAllMessagePricingRepo = async () => {
+  return await db.MessagePricing.findAll({
+    include: [
+      {
+        model: db.MessageChannel,
+        as: "messageChannel",
+        attributes: ["id", "name"],
+      },
+     
+    ],
+  });
+};
+

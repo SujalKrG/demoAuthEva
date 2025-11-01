@@ -177,3 +177,4 @@
 2025-10-24 16:55:30 error: Cart summary calculation error: Include unexpected. Element has to be either a Model, an Association or an object.
 2025-10-24 16:55:58 error: Cart summary calculation error: Include unexpected. Element has to be either a Model, an Association or an object.
 2025-10-24 16:58:34 error: Cart summary calculation error: Unknown column 'type' in 'SELECT'
+2025-10-30 15:18:14 error: [Sequelize Error] MessageChannel is associated to MessagePricing using an alias. You've included an alias (channel), but it does not match the alias(es) defined in your association (messageChannel).

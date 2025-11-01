@@ -53,6 +53,7 @@ export const MessageTemplateService = {
       placeholders,
       sender_id,
       template_code,
+      template_format,
       status,
     } = req.body;
 
@@ -131,6 +132,7 @@ export const MessageTemplateService = {
           media_url,
           media_id,
           template_code,
+          template_format,
           media_uploaded_at,
           status: status || 1,
         },

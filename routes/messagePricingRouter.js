@@ -1,7 +1,7 @@
 import express from "express";
 import {
   createMessagePricing,
-  // getAllMessagePricing,
+  getAllMessagePricing,
 } from "../controllers/messagePricingController.js";
 // import messagePricing from "../models/messagePricing.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
@@ -14,6 +14,6 @@ router.post(
   validateRequest(createMessagePricingSchema),
   createMessagePricing
 );
-// router.get("/message-pricing/get", getAllMessagePricing);
+router.get("/message-pricing/get", getAllMessagePricing);
 
 export default router;

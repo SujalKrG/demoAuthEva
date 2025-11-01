@@ -1,6 +1,7 @@
 import {
   createMessagePricingRepo,
   getUniqueMessagePricingRepo,
+  getAllMessagePricingRepo
 } from "../repositories/messagePricingRepository.js";
 import AppError from "../utils/AppError.js";
 import handelSequelizeError from "../utils/handelSequelizeError.js";
@@ -31,4 +32,9 @@ export const createMessagePricingService = async (data) => {
   });
 
   return messagePricing;
+};
+
+
+export const getAllMessagePricingService = async () => {
+  return await getAllMessagePricingRepo();
 };
