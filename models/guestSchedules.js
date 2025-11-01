@@ -34,6 +34,10 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: false,
       },
+      invitation_from: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+      },
       group_name: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -56,12 +60,6 @@ export default (sequelize, DataTypes) => {
       foreignKey: "invitation_schedule_id",
       as: "invitationSchedule",
     });
-
-    // Each guest can have multiple message schedules
-    // GuestSchedule.hasMany(models.MessageSchedule, {
-    //   foreignKey: "guest_schedule_id",
-    //   as: "messageSchedules",
-    // });
   };
 
   return GuestSchedule;

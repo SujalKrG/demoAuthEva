@@ -78,6 +78,10 @@ jobs:
             export JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}"
             export SUPERADMIN_EMAIL="${{ secrets.SUPERADMIN_EMAIL }}"
             export SUPERADMIN_PASSWORD="${{ secrets.SUPERADMIN_PASSWORD }}"
+            export WABA_PHONE_NUMBER_ID="${{ secrets.WABA_PHONE_NUMBER_ID }}"
+            export WABA_ACCESS_TOKEN="${{ secrets.WABA_ACCESS_TOKEN }}"
+            export WABA_VERIFY_TOKEN="${{ secrets.WABA_VERIFY_TOKEN }}"
+            export WABA_APP_SECRET="${{ secrets.WABA_APP_SECRET }}"
 
             export NODE_ENV="${{ secrets.NODE_ENV }}"
             export FRONTEND_URL="${{ secrets.FRONTEND_URL }}"            

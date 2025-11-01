@@ -9,6 +9,10 @@ export default (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
       },
+      uuid: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       user_id: {
         type: DataTypes.BIGINT,
         allowNull: false,
@@ -44,6 +48,10 @@ export default (sequelize, DataTypes) => {
       },
       file_url: {
         type: DataTypes.STRING,
+        allowNull: true,
+      },
+      file_type: {
+        type: DataTypes.STRING(20),
         allowNull: true,
       },
     },

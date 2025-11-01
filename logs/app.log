@@ -189,3 +189,7 @@
 2025-10-29 17:54:56 info: ✅ Template "Muuuuuuuuu" created successfully
 2025-10-29 17:59:05 info: ✅ Template "Bbbpooppoop" created successfully
 2025-10-29 18:08:53 info: ✅ Template "weddingTheme" created successfully
+2025-10-30 15:18:14 error: [Sequelize Error] MessageChannel is associated to MessagePricing using an alias. You've included an alias (channel), but it does not match the alias(es) defined in your association (messageChannel).
+2025-10-30 18:24:16 info: ✅ Template "hgghgh" created successfully
+2025-10-30 18:28:59 info: ✅ Template "Meowwwdddd" created successfully
+2025-10-30 18:31:22 info: ✅ Template "sadfggadsvfd" created successfully
