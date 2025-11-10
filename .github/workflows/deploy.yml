@@ -96,4 +96,4 @@ jobs:
             docker-compose -f docker-compose.prod.yml up -d
 
             # ✅ Run DB migrations inside API container
-            docker-compose -f docker-compose.prod.yml exec -T npx sequelize-cli db:migrate
+            docker-compose -f docker-compose.prod.yml exec -T api npx sequelize-cli db:migrate
