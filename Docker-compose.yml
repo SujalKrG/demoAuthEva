@@ -1,0 +1,120 @@
+version: "3.8"
+
+services:
+  api:
+    image: 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
+    container_name: Evatril-invitation-adminpanel-api
+    restart: always
+    ports:
+      - "8080:8080"
+
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB2_CONNECTION: ${DB2_CONNECTION}
+      DB2_HOST: ${DB2_HOST}
+      DB2_PORT: ${DB2_PORT}
+      DB2_DATABASE: ${DB2_DATABASE}
+      DB2_USERNAME: ${DB2_USERNAME}
+      DB2_PASSWORD: ${DB2_PASSWORD}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  worker1:
+    image: 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
+    container_name: Evatril-invitation-adminpanel-api-image-worker
+    restart: always
+    environment:
+      NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB2_CONNECTION: ${DB2_CONNECTION}
+      DB2_HOST: ${DB2_HOST}
+      DB2_PORT: ${DB2_PORT}
+      DB2_DATABASE: ${DB2_DATABASE}
+      DB2_USERNAME: ${DB2_USERNAME}
+      DB2_PASSWORD: ${DB2_PASSWORD}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  worker2:
+    image: 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
+    container_name: Evatril-invitation-adminpanel-api-video-worker
+    restart: always
+    environment:
+      NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB2_CONNECTION: ${DB2_CONNECTION}
+      DB2_HOST: ${DB2_HOST}
+      DB2_PORT: ${DB2_PORT}
+      DB2_DATABASE: ${DB2_DATABASE}
+      DB2_USERNAME: ${DB2_USERNAME}
+      DB2_PASSWORD: ${DB2_PASSWORD}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  redis:
+    image: redis:7-alpine
+    container_name: Evatril-invitation-adminpanel-api-redis
+    restart: always
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  app-network:
+    driver: bridge

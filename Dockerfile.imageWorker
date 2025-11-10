@@ -1,0 +1,17 @@
+# ===========================
+# Dockerfile.worker1 (LOCAL)
+# ===========================
+
+FROM node:20-alpine AS base
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+ENV NODE_ENV=development
+
+# Start worker1 script
+CMD ["node", "./jobs/workers/imageUploadWorker.js"]
