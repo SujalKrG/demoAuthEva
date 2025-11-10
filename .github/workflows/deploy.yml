@@ -26,20 +26,20 @@ jobs:
 
       - name: Build and Push API Image
         run: |
-          docker build -t Evatril-invitation-adminpanel-api -f Dockerfile.api .
-          docker tag Evatril-invitation-adminpanel-api:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
+          docker build -t evatril-invitation-adminpanel-api -f Dockerfile.api .
+          docker tag evatril-invitation-adminpanel-api:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
           docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
 
       - name: Build and Push Worker1 Image
         run: |
-          docker build -t Evatril-invitation-adminpanel-api-image-worker -f Dockerfile.imageWorker .
-          docker tag Evatril-invitation-adminpanel-api-image-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
+          docker build -t evatril-invitation-adminpanel-api-image-worker -f Dockerfile.imageWorker .
+          docker tag evatril-invitation-adminpanel-api-image-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
           docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
 
       - name: Build and Push Worker2 UserTheme
         run: |
-          docker build -t Evatril-invitation-adminpanel-api-video-worker -f Dockerfile.videoWorker .
-          docker tag Evatril-invitation-adminpanel-api-video-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
+          docker build -t evatril-invitation-adminpanel-api-video-worker -f Dockerfile.videoWorker .
+          docker tag evatril-invitation-adminpanel-api-video-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
           docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
 
       - name: Deploy on EC2
