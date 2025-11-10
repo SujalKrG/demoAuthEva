@@ -92,8 +92,8 @@ jobs:
             EOL
 
             # Pull latest images & restart containers
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d
 
             # ✅ Run DB migrations inside API container
-            docker-compose -f docker-compose.prod.yml exec -T api npx sequelize-cli db:migrate
+            docker-compose -f docker-compose.yml exec -T api npx sequelize-cli db:migrate
