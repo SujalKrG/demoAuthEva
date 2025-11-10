@@ -105,8 +105,8 @@ jobs:
             EOL
 
             # Pull latest images & restart containers
-            docker-compose -f demoAuthEva/Docker-compose.yml pull
-            docker-compose -f demoAuthEva/Docker-compose.yml up -d
+            docker-compose -f Docker-compose.yml pull
+            docker-compose -f Docker-compose.yml up -d
 
             # ✅ Run DB migrations inside API container
-            docker-compose -f demoAuthEva/Docker-compose.yml exec -T api npx sequelize-cli db:migrate
+            docker-compose -f Docker-compose.yml exec -T api npx sequelize-cli db:migrate
