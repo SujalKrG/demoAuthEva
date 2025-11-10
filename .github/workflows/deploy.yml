@@ -49,6 +49,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            mkdir -p ~/myapp
             cd ~/myapp
 
             # Generate .env file on EC2 from GitHub Secrets
