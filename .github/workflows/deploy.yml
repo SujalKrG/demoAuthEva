@@ -108,7 +108,8 @@ jobs:
             if ! command -v aws &> /dev/null; then
               echo "☁️ Installing required packages..."
               sudo apt update
-              sudo apt install -y unzip curl
+              sudo DEBIAN_FRONTEND=noninteractive apt install -y unzip curl
+
   
               echo "☁️ AWS CLI install kar rahe hain..."
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
