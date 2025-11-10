@@ -3,7 +3,7 @@ version: "3.8"
 services:
   api:
     image: 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
-    container_name: Evatril-invitation-adminpanel-api
+    container_name: evatril-invitation-adminpanel-api
     restart: always
     ports:
       - "8080:8080"
@@ -43,7 +43,7 @@ services:
 
   worker1:
     image: 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
-    container_name: Evatril-invitation-adminpanel-api-image-worker
+    container_name: evatril-invitation-adminpanel-api-image-worker
     restart: always
     environment:
       NODE_ENV: production
@@ -74,7 +74,7 @@ services:
 
   worker2:
     image: 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
-    container_name: Evatril-invitation-adminpanel-api-video-worker
+    container_name: evatril-invitation-adminpanel-api-video-worker
     restart: always
     environment:
       NODE_ENV: production
@@ -105,7 +105,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: Evatril-invitation-adminpanel-api-redis
+    container_name: evatril-invitation-adminpanel-api-redis
     restart: always
     networks:
       - app-network
