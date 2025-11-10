@@ -35,7 +35,7 @@ jobs:
           docker tag evatril-invitation-adminpanel-api-image-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
           docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
 
-      - name: Build and Push Worker2 UserTheme
+      - name: Build and Push Worker2 video worker
         run: |
           docker build -t evatril-invitation-adminpanel-api-video-worker -f Dockerfile.videoWorker .
           docker tag evatril-invitation-adminpanel-api-video-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
