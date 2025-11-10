@@ -1,21 +1,18 @@
 import { getAllEventsService } from "../services/eventService.js";
 import handleSequelizeError from "../utils/handelSequelizeError.js";
+import { logger } from "../utils/logger.js";
 
-export const getAllEvents = async (req, res) => {
+export const getAllEvents = async (req, res, next) => {
   try {
     const result = await getAllEventsService(req.query);
     res.status(200).json({ success: true, ...result });
   } catch (error) {
-    const handled = handleSequelizeError(error, res);
-    if (handled) return handled;
-
-    res.status(500).json({
-      success: false,
-      message: "Unexpected server error",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "Internal Server Error"
-          : error.message,
+    logger.error(`[event][getAll] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
     });
+    // console.error(error);
+    next(error);
   }
 };

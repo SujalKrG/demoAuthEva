@@ -21,7 +21,7 @@ const authenticate = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "Invalid or expired token" });
     }
-    console.log( "decoded info:---------------------------------",decoded);
+    // console.log( "decoded info:---------------------------------",decoded);
     // Fetch admin along with roles & permissions in one query
     const admin = await db.Admin.findByPk(decoded.id, {
       attributes: ["id","name", "emp_id", "email", "status", "remember_token"],
@@ -48,14 +48,6 @@ const authenticate = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "Admin not found" });
 
-    // if (admin.remember_token && admin.remember_token !== token) {
-    //   return res
-    //     .status(401)
-    //     .json({
-    //       success: false,
-    //       message: "Token mismatch. Please login again.",
-    //     });
-    // }
 
     if (!admin.status)
       return res

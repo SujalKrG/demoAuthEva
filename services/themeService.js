@@ -22,6 +22,7 @@ import {
   normalizeDecimal
 } from "../utils/requiredMethods.js";
 import { remoteSequelize, Sequelize } from "../models/index.js";
+import { deleteFileFromS3 } from "../middlewares/uploadS3.js";
 
 import { Op } from "sequelize";
 

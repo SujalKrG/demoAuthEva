@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+import compression from "compression";
 
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/index.js";
@@ -11,6 +12,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import { testS3Connection } from "./utils/s3Test.js";
 import { testRedisConnection } from "./utils/redisTest.js";
 import webhookRouter from "./routes/webhookRouter.js";
+import { searchLimiter } from "./middlewares/rateLimiterMiddleware.js";
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ requiredEnvVars.forEach((envVar) => {
 });
 
 const app = express();
+app.use(compression());
 const PORT = process.env.PORT || 5000;
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}`);
@@ -82,21 +85,11 @@ app.use("/api/v1/", authRouter);
 app.use("/api/v1/", adminRouter);
 app.use("/api/v1", webhookRouter);
 
-// app.use("/api/v1/", adminRouter);
-// console.log("DB1 config:", sequelize.config);
-// console.log("DB2 config:", remoteSequelize.config);
 
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || err.status || 500;
-  const message = err.message || "Internal Server Error";
 
-  console.error(`🔥 ${req.method} ${req.originalUrl} → ${message}`);
 
-  res.status(statusCode).json({
-    success: false,
-    message,
-  });
-});
+
+
 app.use(errorHandler);
 
 //db test

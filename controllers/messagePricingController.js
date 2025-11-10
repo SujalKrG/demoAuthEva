@@ -3,7 +3,8 @@ import {
   getAllMessagePricingService,
 } from "../services/messagePricingService.js";
 import handleSequelizeError from "../utils/handelSequelizeError.js";
-export const createMessagePricing = async (req, res) => {
+import { logger } from "../utils/logger.js";
+export const createMessagePricing = async (req, res, next) => {
   try {
     const result = await createMessagePricingService(req.body);
     return res.status(201).json({
@@ -12,10 +13,15 @@ export const createMessagePricing = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    if (error.name?.startsWith("Sequelize")) {
-      throw handleSequelizeError(error);
-    }
-    throw error;
+    logger.error(`[message pricing][create] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
+    
+   
   }
 };
 
@@ -28,9 +34,12 @@ export const getAllMessagePricing = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    if (error.name?.startsWith("Sequelize")) {
-      throw handleSequelizeError(error);
-    }
-    throw error;
+    logger.error(`[message pricing][getAll] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
   }
 };

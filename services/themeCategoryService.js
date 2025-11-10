@@ -12,7 +12,7 @@ export const createThemeCategoryService = async (data) => {
     throw new Error("Name and type are required");
   }
   const newCategory = await createThemeCategoryRepo({
-    name: capitalizeSentence(data.name),
+    name: capitalizeSentenc(data.name),
     slug: slug(data.name),
     type: data.type,
     status: data.status ?? true,

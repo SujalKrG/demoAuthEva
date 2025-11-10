@@ -17,6 +17,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: false,
       },
+      code:{
+        type:DataTypes.STRING(50),
+        allowNull:true
+      },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -59,6 +63,10 @@ export default (sequelize, DataTypes) => {
     GuestSchedule.belongsTo(models.InvitationSchedule, {
       foreignKey: "invitation_schedule_id",
       as: "invitationSchedule",
+    });
+     GuestSchedule.hasMany(models.MessageSchedule, {
+      foreignKey: "guest_schedule_id",
+      as: "messages",
     });
   };
 

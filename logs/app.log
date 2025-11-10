@@ -1,195 +1,29 @@
-2025-10-09 18:24:02 error: [Theme][create] Theme type not found
-2025-10-11 17:15:53 error: [message channel][create] Channel code already exists.
-2025-10-11 17:22:54 error: [createAdmin] Email already exists
-2025-10-11 17:23:04 error: [createAdmin] Email already exists
-2025-10-11 17:23:48 error: [createAdmin] Email already exists u can't be created
-2025-10-11 17:24:01 error: [createAdmin] Email already exists u can't be created
-2025-10-11 17:24:12 error: [createAdmin] Email already exists u can't be created
-2025-10-11 17:24:26 error: [createAdmin] Email already exists
-2025-10-11 17:27:49 error: [message channel][create] Channel code already exists.
-2025-10-13 10:16:31 error: [Sequelize Error] connect ETIMEDOUT
-2025-10-13 12:22:52 error: [Theme][create] Cannot read properties of undefined (reading 'id')
-2025-10-13 12:22:52 error: [Theme][create] DB error
-2025-10-13 12:22:52 error: [Theme][update] Cannot read properties of undefined (reading 'id')
-2025-10-13 12:22:52 error: [Theme][update status] Cannot destructure property 'id' of 'req.params' as it is undefined.
-2025-10-13 16:05:00 error: [updateAdminController] DB error
-2025-10-13 16:05:00 error: [updateAdminStatusController] Status is required
-2025-10-13 16:05:00 error: [updateAdminStatusController] DB error
-2025-10-13 16:27:54 error: [updateAdminController] DB error
-2025-10-13 16:27:54 error: [updateAdminStatusController] Status is required
-2025-10-13 16:27:54 error: [updateAdminStatusController] DB error
-2025-10-13 16:28:31 error: [updateAdminController] DB error
-2025-10-13 16:28:31 error: [updateAdminStatusController] Status is required
-2025-10-13 16:28:31 error: [updateAdminStatusController] DB error
-2025-10-16 12:17:01 error: [message channel][create] Channel code already exists.
-2025-10-16 18:35:14 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
-2025-10-16 18:35:39 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
-2025-10-16 18:47:19 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
-2025-10-17 10:49:32 error: [Theme][update] Incorrect integer value: '' for column 'theme_type_id' at row 1
-2025-10-17 10:52:17 error: [Theme][update] Theme not found
-2025-10-17 10:53:59 error: [Theme][update] Incorrect integer value: '' for column 'theme_type_id' at row 1
-2025-10-17 11:11:15 error: [Theme][update] Incorrect integer value: '' for column 'theme_type_id' at row 1
-2025-10-17 11:18:19 error: [Theme][getAll] connect ETIMEDOUT
-2025-10-17 16:33:48 error: Cart price calculation failed
-2025-10-17 16:34:13 error: Cart price calculation failed
-2025-10-17 16:35:22 error: Cart price calculation failed
-2025-10-17 16:35:37 error: Cart price calculation failed
-2025-10-18 11:14:03 error: Cart summary calculation error: UserTheme is not defined
-2025-10-18 11:14:26 error: Cart summary calculation error: Cart not found
-2025-10-18 11:14:56 error: Cart summary calculation error: Cart not found
-2025-10-18 11:14:59 error: Cart summary calculation error: Cart not found
-2025-10-18 11:15:14 error: Cart summary calculation error: Cannot destructure property 'guest_with_schedules' of 'cart' as it is null.
-2025-10-18 11:16:48 error: Cart summary calculation error: UserTheme is associated to Cart using an alias. You must use the 'as' keyword to specify the alias within your include statement.
-2025-10-18 11:18:04 error: Cart summary calculation error: "[object Object]" is not valid JSON
-2025-10-18 11:19:26 error: Cart summary calculation error: Unknown column 'MessagePricing.channel_type' in 'where clause'
-2025-10-18 11:20:06 error: Cart summary calculation error: Unknown column 'MessagePricing.country_code' in 'where clause'
-2025-10-18 11:36:33 error: Cart summary calculation error: No carts found
-2025-10-18 14:49:07 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
-2025-10-18 14:49:21 error: [Sequelize Error] Cannot add or update a child row: a foreign key constraint fails (`mydb`.`message_pricings`, CONSTRAINT `message_pricings_ibfk_1` FOREIGN KEY (`channel_id`) REFERENCES `message_channels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
-2025-10-22 17:28:25 error: [updateAdminController] DB error
-2025-10-22 17:28:25 error: [updateAdminStatusController] Status is required
-2025-10-22 17:28:25 error: [updateAdminStatusController] DB error
-2025-10-22 17:29:29 error: [updateAdminController] DB error
-2025-10-22 17:29:29 error: [updateAdminStatusController] Status is required
-2025-10-22 17:29:29 error: [updateAdminStatusController] DB error
-2025-10-22 17:31:24 error: [updateAdminController] DB error
-2025-10-22 17:31:24 error: [updateAdminStatusController] Status is required
-2025-10-22 17:31:24 error: [updateAdminStatusController] DB error
-2025-10-22 17:34:26 error: [updateAdminController] DB error
-2025-10-22 17:34:26 error: [updateAdminStatusController] Status is required
-2025-10-22 17:34:26 error: [updateAdminStatusController] DB error
-2025-10-22 17:35:47 error: [updateAdminController] DB error
-2025-10-22 17:35:47 error: [updateAdminStatusController] Status is required
-2025-10-22 17:35:47 error: [updateAdminStatusController] DB error
-2025-10-22 17:41:43 error: [updateAdminController] DB error
-2025-10-22 17:41:43 error: [updateAdminStatusController] Status is required
-2025-10-22 17:41:43 error: [updateAdminStatusController] DB error
-2025-10-22 17:45:00 error: [updateAdminController] DB error
-2025-10-22 17:45:00 error: [updateAdminStatusController] Status is required
-2025-10-22 17:45:00 error: [updateAdminStatusController] DB error
-2025-10-22 17:45:01 error: [Theme][create] DB Error
-2025-10-22 17:45:01 error: [Theme][update] DB Error
-2025-10-22 17:45:01 error: [country code(theme controller)][getAll] DB Error
-2025-10-22 17:45:01 error: [Theme][update status] DB Error
-2025-10-22 17:45:01 error: [Theme][getAll] DB Error
-2025-10-22 17:47:24 error: [Theme][create] DB Error
-2025-10-22 17:47:24 error: [Theme][update] DB Error
-2025-10-22 17:47:24 error: [country code(theme controller)][getAll] DB Error
-2025-10-22 17:47:24 error: [Theme][update status] DB Error
-2025-10-22 17:47:24 error: [Theme][getAll] DB Error
-2025-10-22 17:47:25 error: [updateAdminController] DB error
-2025-10-22 17:47:25 error: [updateAdminStatusController] Status is required
-2025-10-22 17:47:25 error: [updateAdminStatusController] DB error
-2025-10-22 17:49:53 error: [Theme][create] DB Error
-2025-10-22 17:49:53 error: [Theme][update] DB Error
-2025-10-22 17:49:53 error: [Theme][update status] DB Error
-2025-10-22 17:49:53 error: [Theme][getAll] DB Error
-2025-10-22 17:49:53 error: [country code(theme controller)][getAll] DB Error
-2025-10-22 17:49:54 error: [updateAdminController] DB error
-2025-10-22 17:49:54 error: [updateAdminStatusController] Status is required
-2025-10-22 17:49:54 error: [updateAdminStatusController] DB error
-2025-10-22 17:50:52 error: [Theme][create] DB Error
-2025-10-22 17:50:52 error: [Theme][update] DB Error
-2025-10-22 17:50:52 error: [Theme][update status] DB Error
-2025-10-22 17:50:52 error: [Theme][getAll] DB Error
-2025-10-22 17:50:52 error: [country code(theme controller)][getAll] DB Error
-2025-10-22 17:50:52 error: [updateAdminController] DB error
-2025-10-22 17:50:52 error: [updateAdminStatusController] Status is required
-2025-10-22 17:50:52 error: [updateAdminStatusController] DB error
-2025-10-22 17:52:34 error: [updateAdminController] DB error
-2025-10-22 17:52:34 error: [updateAdminStatusController] Status is required
-2025-10-22 17:52:34 error: [updateAdminStatusController] DB error
-2025-10-22 17:52:55 error: [updateAdminController] DB error
-2025-10-22 17:52:55 error: [updateAdminStatusController] Status is required
-2025-10-22 17:52:55 error: [updateAdminStatusController] DB error
-2025-10-22 17:53:19 error: [updateAdminController] DB error
-2025-10-22 17:53:19 error: [updateAdminStatusController] Status is required
-2025-10-22 17:53:19 error: [updateAdminStatusController] DB error
-2025-10-22 17:55:19 error: [updateAdminController] DB error
-2025-10-22 17:55:19 error: [updateAdminStatusController] Status is required
-2025-10-22 17:55:19 error: [updateAdminStatusController] DB error
-2025-10-22 17:59:31 error: [updateAdminController] DB error
-2025-10-22 17:59:31 error: [updateAdminStatusController] Status is required
-2025-10-22 17:59:31 error: [updateAdminStatusController] DB error
-2025-10-22 18:04:54 error: [updateAdminController] DB error
-2025-10-22 18:04:54 error: [updateAdminStatusController] Status is required
-2025-10-22 18:04:54 error: [updateAdminStatusController] DB error
-2025-10-22 18:08:45 error: [updateAdminController] DB error
-2025-10-22 18:08:45 error: [updateAdminStatusController] Status is required
-2025-10-22 18:08:45 error: [updateAdminStatusController] DB error
-2025-10-22 18:13:53 error: [updateAdminController] DB error
-2025-10-22 18:13:53 error: [updateAdminStatusController] Status is required
-2025-10-22 18:13:53 error: [updateAdminStatusController] DB error
-2025-10-22 18:14:16 error: [updateAdminController] DB error
-2025-10-22 18:14:16 error: [updateAdminStatusController] Status is required
-2025-10-22 18:14:16 error: [updateAdminStatusController] DB error
-2025-10-22 18:15:21 error: [updateAdminController] DB error
-2025-10-22 18:15:21 error: [updateAdminStatusController] Status is required
-2025-10-22 18:15:21 error: [updateAdminStatusController] DB error
-2025-10-22 18:15:33 error: [updateAdminController] DB error
-2025-10-22 18:15:33 error: [updateAdminStatusController] Status is required
-2025-10-22 18:15:33 error: [updateAdminStatusController] DB error
-2025-10-22 18:16:49 error: [updateAdminController] DB error
-2025-10-22 18:16:49 error: [updateAdminStatusController] Status is required
-2025-10-22 18:16:49 error: [updateAdminStatusController] DB error
-2025-10-22 18:18:01 error: [updateAdminController] DB error
-2025-10-22 18:18:01 error: [updateAdminStatusController] Status is required
-2025-10-22 18:18:01 error: [updateAdminStatusController] DB error
-2025-10-22 18:22:33 error: [updateAdminController] DB error
-2025-10-22 18:22:33 error: [updateAdminStatusController] Status is required
-2025-10-22 18:22:33 error: [updateAdminStatusController] DB error
-2025-10-22 18:23:01 error: [updateAdminController] DB error
-2025-10-22 18:23:01 error: [updateAdminStatusController] Status is required
-2025-10-22 18:23:01 error: [updateAdminStatusController] DB error
-2025-10-22 18:27:44 error: [updateAdminController] DB error
-2025-10-22 18:27:44 error: [updateAdminStatusController] Status is required
-2025-10-22 18:27:44 error: [updateAdminStatusController] DB error
-2025-10-22 18:29:07 error: [updateAdminController] DB error
-2025-10-22 18:29:07 error: [updateAdminStatusController] Status is required
-2025-10-22 18:29:07 error: [updateAdminStatusController] DB error
-2025-10-22 18:30:16 error: [updateAdminController] DB error
-2025-10-22 18:30:17 error: [updateAdminStatusController] Status is required
-2025-10-22 18:30:17 error: [updateAdminStatusController] DB error
-2025-10-22 18:31:24 error: [updateAdminController] DB error
-2025-10-22 18:31:24 error: [updateAdminStatusController] Status is required
-2025-10-22 18:31:24 error: [updateAdminStatusController] DB error
-2025-10-22 18:39:21 error: [updateAdminController] DB error
-2025-10-22 18:39:21 error: [updateAdminStatusController] Status is required
-2025-10-22 18:39:21 error: [updateAdminStatusController] DB error
-2025-10-22 18:40:41 error: [updateAdminController] DB error
-2025-10-22 18:40:41 error: [updateAdminStatusController] Status is required
-2025-10-22 18:40:41 error: [updateAdminStatusController] DB error
-2025-10-22 18:40:58 error: [updateAdminController] DB error
-2025-10-22 18:40:58 error: [updateAdminStatusController] Status is required
-2025-10-22 18:40:58 error: [updateAdminStatusController] DB error
-2025-10-22 18:42:13 error: [updateAdminController] DB error
-2025-10-22 18:42:13 error: [updateAdminStatusController] Status is required
-2025-10-22 18:42:13 error: [updateAdminStatusController] DB error
-2025-10-22 18:42:35 error: [updateAdminController] DB error
-2025-10-22 18:42:35 error: [updateAdminStatusController] Status is required
-2025-10-22 18:42:35 error: [updateAdminStatusController] DB error
-2025-10-22 18:43:35 error: [updateAdminController] DB error
-2025-10-22 18:43:35 error: [updateAdminStatusController] Status is required
-2025-10-22 18:43:35 error: [updateAdminStatusController] DB error
-2025-10-24 13:13:41 error: Cart summary calculation error: No carts found
-2025-10-24 13:40:06 error: Cart summary calculation error: Unknown column 'user_theme->theme.file_url' in 'field list'
-2025-10-24 16:16:37 error: Cart summary calculation error: Include unexpected. Element has to be either a Model, an Association or an object.
-2025-10-24 16:55:30 error: Cart summary calculation error: Include unexpected. Element has to be either a Model, an Association or an object.
-2025-10-24 16:55:58 error: Cart summary calculation error: Include unexpected. Element has to be either a Model, an Association or an object.
-2025-10-24 16:58:34 error: Cart summary calculation error: Unknown column 'type' in 'SELECT'
-2025-10-29 15:56:55 info: ✅ Template "wedding_invite_wa12" created successfully
-2025-10-29 16:02:45 info: ✅ Template "Alok Chu" created successfully
-2025-10-29 16:08:01 info: ✅ Template "wedding_invite_wa12" created successfully
-2025-10-29 17:36:04 info: ✅ Template "Baby Oil" created successfully
-2025-10-29 17:37:14 info: ✅ Template "Babyyyyyyy" created successfully
-2025-10-29 17:44:22 info: ✅ Template "Meowww Div" created successfully
-2025-10-29 17:45:54 info: ✅ Template "Meo divvvvv" created successfully
-2025-10-29 17:49:33 info: ✅ Template "bbb" created successfully
-2025-10-29 17:51:44 info: ✅ Template "John Doeppppp" created successfully
-2025-10-29 17:54:56 info: ✅ Template "Muuuuuuuuu" created successfully
-2025-10-29 17:59:05 info: ✅ Template "Bbbpooppoop" created successfully
-2025-10-29 18:08:53 info: ✅ Template "weddingTheme" created successfully
-2025-10-30 15:18:14 error: [Sequelize Error] MessageChannel is associated to MessagePricing using an alias. You've included an alias (channel), but it does not match the alias(es) defined in your association (messageChannel).
-2025-10-30 18:24:16 info: ✅ Template "hgghgh" created successfully
-2025-10-30 18:28:59 info: ✅ Template "Meowwwdddd" created successfully
-2025-10-30 18:31:22 info: ✅ Template "sadfggadsvfd" created successfully
+2025-11-10 12:01:51 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:01:51 [ERROR]: Error: next is not defined {"path":"/api/v1/admin-role-permission/get","method":"GET","code":null,"table":null}
+2025-11-10 12:02:59 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:02:59 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:02:59 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET","code":null,"table":null}
+2025-11-10 12:04:23 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:04:23 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:04:23 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET","code":null,"table":null}
+2025-11-10 12:12:25 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:12:25 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:12:25 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET","code":null,"table":null}
+2025-11-10 12:31:43 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:31:43 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:31:43 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET"}
+2025-11-10 12:31:56 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:31:56 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:31:56 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET"}
+2025-11-10 12:32:31 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:32:31 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:32:31 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET"}
+2025-11-10 12:32:41 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:32:41 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)","errors":[]}
+2025-11-10 12:32:41 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET"}
+2025-11-10 12:36:12 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:36:12 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:36:12 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET"}
+2025-11-10 12:38:47 [ERROR]: [getAdminWithRoleAndPermissionsById] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError"}
+2025-11-10 12:38:47 [ERROR]: [Sequelize Error] Unknown column 'Admin.emp_i' in 'field list' {"name":"SequelizeDatabaseError","stack":"Error\n    at Query.run (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\mysql\\query.js:52:25)\n    at C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\sequelize.js:315:28\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async MySQLQueryInterface.select (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\dialects\\abstract\\query-interface.js:407:12)\n    at async Admin.findAll (C:\\Users\\alokk\\OneDrive\\Desktop\\New folder\\demoAuthEva\\node_modules\\sequelize\\lib\\model.js:1140:21)\n    at async Object.getAdminWithRoleAndPermissions (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/services/adminService.js:42:20)\n    at async getAdminWithRoleAndPermissionsById (file:///C:/Users/alokk/OneDrive/Desktop/New%20folder/demoAuthEva/controllers/adminController.js:27:18)"}
+2025-11-10 12:38:47 [ERROR]: Error: Internal Server Error {"path":"/api/v1/admin-role-permission/get","method":"GET"}

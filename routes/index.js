@@ -21,6 +21,7 @@ import cartSummary from "./cartRouter.js"
 import messageTemplateRouter from "./messageTemplateRouter.js";
 import webhookRouter from "./webhookRouter.js";
 import userThemeRouter from "./userThemeRouter.js";
+import userScheduleRouter from "./userSchedulesRouter.js"
 
 
 
@@ -52,5 +53,6 @@ router.use("/", cartSummary)
 router.use("/", messageTemplateRouter)
 router.use("/", webhookRouter)
 router.use("/", userThemeRouter)
+router.use("/", userScheduleRouter)
 
 export default router;

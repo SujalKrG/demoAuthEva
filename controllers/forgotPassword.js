@@ -25,7 +25,7 @@ const sendOTPEmail = async (email, otp) => {
 /**
  * 1. Request OTP
  */
-export const requestPasswordOTP = async (req, res) => {
+export const requestPasswordOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
