@@ -22,7 +22,7 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
+          aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
 
       - name: Build and Push API Image
         run: |
@@ -104,6 +104,9 @@ jobs:
             PORT=${{ secrets.PORT }}
             NODE_ENV=development
             EOL
+
+            # ✅ Login to ECR inside EC2 before pulling images
+            aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
 
             # Pull latest images & restart containers
             sudo docker-compose -f Docker-compose.yml pull
