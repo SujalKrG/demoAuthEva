@@ -4,8 +4,9 @@ import {
   changePasswordService,
   getProfileService,
 } from "../services/authService.js";
+import { logger } from "../utils/logger.js";
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const result = await loginService(req.body);
     res.status(200).json({
@@ -15,7 +16,13 @@ export const login = async (req, res) => {
       admin: result.admin,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    logger.error(`[login] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
   }
 };
 
@@ -31,7 +38,7 @@ export const logout = async (req, res) => {
   }
 };
 
-export const changePassword = async (req, res) => {
+export const changePassword = async (req, res, next) => {
   try {
     if (!req.admin?.id)
       return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -44,22 +51,32 @@ export const changePassword = async (req, res) => {
 
     res.status(200).json({ success: true, message });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    logger.error(`[changePassword] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
   }
 };
 
 export const getProfile = async (req, res) => {
   try {
     if (!req.admin?.id) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized" });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const adminProfile = await getProfileService(req.admin.id);
 
     res.status(200).json({ success: true, admin: adminProfile });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    logger.error(`[getProfile] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
   }
 };

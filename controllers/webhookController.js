@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import dotenv from "dotenv";
+import { stat } from "fs";
 dotenv.config();
 
 export const getVerificationEndPoint = (req, res) => {
@@ -60,6 +61,8 @@ export const handleWebhookEvent = async (req, res) => {
           if (value?.statuses) {
             value.statuses.forEach((status) => {
               console.log("📬 Message status update:", status.status);
+              console.log(status);
+              
             });
           }
 

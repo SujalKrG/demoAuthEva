@@ -1,4 +1,4 @@
-import { logger } from "../utils/logger.js";
+import { logger } from "./logger.js";
 import AppError from "./AppError.js";
 
 const handleSequelizeError = (error, res) => {

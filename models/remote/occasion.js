@@ -20,9 +20,20 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      
       category: {
         type: DataTypes.TINYINT,
+        allowNull: true,
+      },
+      event_profile_theme: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      user_preview_theme: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      title_suffix: {
+        type: DataTypes.STRING,
         allowNull: true,
       },
       status: {

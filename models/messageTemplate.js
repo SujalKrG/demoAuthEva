@@ -28,6 +28,11 @@ export default (sequelize, DataTypes) => {
         allowNull: false,
         comment: "Language code of the template",
       },
+      media_type:{
+        type:DataTypes.STRING(20),
+        allowNull:true
+
+      },
       category: {
         type: DataTypes.STRING(50),
         allowNull: true,

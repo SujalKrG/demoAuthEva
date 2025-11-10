@@ -47,6 +47,7 @@ export const MessageTemplateService = {
       name,
       channel_id,
       language_code,
+      media_type,
       category,
       template_type,
       components,
@@ -124,6 +125,7 @@ export const MessageTemplateService = {
           name,
           channel_id,
           language_code,
+          media_type,
           category: toUpperCaseSafe(category) || null,
           template_type: template_type || null,
           components: parsedComponents,
@@ -203,5 +205,12 @@ export const MessageTemplateService = {
       pages: Math.ceil(templates.count / limit),
       data: templates.rows,
     };
+  },
+  async getTemplateById(id) {
+    const template = await db.MessageTemplate.findByPk(id, {
+      attributes: ["id","name"],
+    });
+    if (!template) throw new AppError("Template not found", 404);
+    return template;
   },
 };

@@ -1,5 +1,4 @@
 import { Sequelize } from "sequelize";
-
 import { logger } from "../utils/logger.js";
 import logActivity from "../utils/logActivity.js";
 import {
@@ -9,7 +8,7 @@ import {
   getAllThemeCategoriesService,
 } from "../services/themeCategoryService.js";
 
-export const createThemeCategory = async (req, res) => {
+export const createThemeCategory = async (req, res, next) => {
   try {
     const newCategory = await createThemeCategoryService(req.body);
     logActivity(
@@ -33,22 +32,17 @@ export const createThemeCategory = async (req, res) => {
       data: newCategory,
     });
   } catch (error) {
-    const handled = handleSequelizeError(error, res);
-    if (handled) return handled;
-    logger.error(`[ThemeCategory][Create] ${error.message}`, {
+    logger.error(`[ThemeCategory][create] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
-export const updateThemeCategory = async (req, res) => {
+export const updateThemeCategory = async (req, res, next) => {
   try {
     const updatedCategory = await updateThemeCategoryService(
       req.params.id,
@@ -77,18 +71,15 @@ export const updateThemeCategory = async (req, res) => {
   } catch (error) {
     logger.error(`[ThemeCategory][update] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
-export const deleteThemeCategory = async (req, res) => {
+export const deleteThemeCategory = async (req, res, next) => {
   try {
     const deletedCategory = await deleteThemeCategoryService(req.params.id);
     logActivity(
@@ -120,18 +111,15 @@ export const deleteThemeCategory = async (req, res) => {
   } catch (error) {
     logger.error(`[ThemeCategory][delete] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
-export const getAllThemeCategories = async (req, res) => {
+export const getAllThemeCategories = async (req, res, next) => {
   try {
     const themeCategories = await getAllThemeCategoriesService(Sequelize);
     return res.status(200).json({
@@ -142,13 +130,10 @@ export const getAllThemeCategories = async (req, res) => {
   } catch (error) {
     logger.error(`[ThemeCategory][getAll] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };

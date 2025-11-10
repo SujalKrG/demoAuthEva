@@ -1,9 +1,8 @@
 import { createMessageChannelService } from "../services/messageChannelService.js";
 import { logger } from "../utils/logger.js";
 import db from "../models/index.js";
-import AppError from "../utils/AppError.js";
 import { Op } from "sequelize";
-export const createMessageChannel = async (req, res) => {
+export const createMessageChannel = async (req, res, next) => {
   try {
     const result = await createMessageChannelService(req.body);
 
@@ -15,14 +14,11 @@ export const createMessageChannel = async (req, res) => {
   } catch (error) {
     logger.error(`[message channel][create] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
     console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    next(error);
   }
 };
 export const getAllMessageChannels = async (req, res, next) => {
@@ -87,7 +83,12 @@ export const getAllMessageChannels = async (req, res, next) => {
       data: channels,
     });
   } catch (error) {
-    console.error("❌ Error fetching message channels:", error);
-    return next(new AppError("Failed to fetch message channels.", 500));
+    logger.error(`[message channel][getAll] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
   }
 };

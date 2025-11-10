@@ -1,0 +1,10 @@
+export const MESSAGE_STATUS = {
+  PENDING: 1,
+  QUEUED: 2,
+  SENDING: 3,
+  SENT: 4,
+  FAILED: 5,
+  DELIVERED: 6,
+  READ: 7,
+  CANCELLED: 8
+};

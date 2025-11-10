@@ -38,6 +38,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
+      occasion_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
       occasion_data: {
         type: DataTypes.JSON,
         allowNull: true,

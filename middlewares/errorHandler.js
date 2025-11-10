@@ -3,30 +3,27 @@ import AppError from "../utils/AppError.js";
 import handleSequelizeError from "../utils/handelSequelizeError.js";
 
 export const errorHandler = (err, req, res, next) => {
+  // Normalize error
   if (!(err instanceof Error)) {
-    err = new AppError("Unknown error occurred", 500);
+    err = new AppError("Unknown error occurred", 500, false);
   }
 
+  // Sequelize specific error handling
   if (err.name?.startsWith("Sequelize")) {
     err = handleSequelizeError(err);
   }
-  const statusCode = err.statusCode || 500;
-  const isOperational = err.isOperational || false;
 
-  logger.error(`Error: ${err.message}`, {
-    type: "APPLICATION_ERROR",
-    stack: err.stack,
-    code: err.code,
-    sql: err.sql,
-    table: err.table,
+  const statusCode = err.statusCode || 500;
+
+  // 🔥 Always log the real error for developers
+  logger.error(`${err.name || "Error"}: ${err.message}`, {
     path: req.originalUrl,
     method: req.method,
-    body: req.body,
   });
 
-  const response = {
+  // 🧱 Always send safe response to frontend
+  res.status(statusCode).json({
     success: false,
-    message: isOperational ? err.message : "Internal Server Error",
-  };
-  res.status(statusCode).json(response);
+    message: "Internal Server Error",
+  });
 };

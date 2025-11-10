@@ -16,6 +16,11 @@ class OccasionResource {
       id: occasion.category,
       name: OCCASIONS_CATEGORY[occasion.category] || "Unknown Category",
     };
+    this.event_profile_theme = occasion.event_profile_theme;
+    this.user_preview_theme = occasion.user_preview_theme;
+    this.title_suffix = occasion.title_suffix;
+    this.status = occasion.status;
+    this.invitation_status = occasion.invitation_status;
   }
 
   static collection(occasions) {

@@ -10,12 +10,10 @@ import {
   updateThemeService,
 } from "../services/themeService.js";
 
-import { slug } from "../utils/requiredMethods.js";
-
 const storage = multer.memoryStorage();
 export const upload = multer({ storage });
 
-export const updateTheme = async (req, res) => {
+export const updateTheme = async (req, res, next) => {
   try {
     const theme = await updateThemeService(req.params.id, req.body, req.files);
     await logActivity({
@@ -43,16 +41,13 @@ export const updateTheme = async (req, res) => {
       message: "Theme updated successfully",
     });
   } catch (error) {
-   logger.error(`[Theme][update] ${error.message}`, {
+    logger.error(`[Theme][update] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
@@ -102,7 +97,7 @@ export const countryCode = async (req, res) => {
     const country = await countryCodeService();
     return res.status(200).json(country);
   } catch (error) {
-     logger.error(`[country code(theme controller)][getAll] ${error.message}`, {
+    logger.error(`[country code(theme controller)][getAll] ${error.message}`, {
       name: error.name,
       stack: error.stack,
       body: req.body,
@@ -136,7 +131,7 @@ export const updateStatus = async (req, res) => {
       data: { id: theme.id, status: theme.status },
     });
   } catch (error) {
-     logger.error(`[Theme][update status] ${error.message}`, {
+    logger.error(`[Theme][update status] ${error.message}`, {
       name: error.name,
       stack: error.stack,
       body: req.body,
@@ -157,7 +152,7 @@ export const getAllTheme = async (req, res) => {
       ...data,
     });
   } catch (error) {
-     logger.error(`[Theme][getAll] ${error.message}`, {
+    logger.error(`[Theme][getAll] ${error.message}`, {
       name: error.name,
       stack: error.stack,
       body: req.body,
@@ -169,4 +164,3 @@ export const getAllTheme = async (req, res) => {
     });
   }
 };
-

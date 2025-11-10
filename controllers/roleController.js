@@ -6,7 +6,7 @@ import {
 } from "../services/roleService.js";
 import {logger} from "../utils/logger.js";
 
-export const createRole = async (req, res) => {
+export const createRole = async (req, res, next) => {
   try {
     const role = await createRoleService(req.body);
     res.status(201).json({
@@ -17,14 +17,12 @@ export const createRole = async (req, res) => {
   } catch (error) {
     logger.error(`[role][create] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
+    
   }
 };
 
@@ -35,19 +33,17 @@ export const getAllRoles = async (req, res) => {
   } catch (error) {
     logger.error(`[role][getAll] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
+    
   }
 };
 
 
-export const updateRole = async (req, res) => {
+export const updateRole = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await updateRoleWithPermissionsService(id, req.body);
@@ -68,13 +64,11 @@ export const updateRole = async (req, res) => {
   } catch (error) {
     logger.error(`[role][update] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
+    
   }
 };

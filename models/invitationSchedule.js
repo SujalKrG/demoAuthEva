@@ -9,6 +9,10 @@ export default (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
       },
+      schedule_no: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
 
       // --- Relations ---
       user_id: {
@@ -148,6 +152,10 @@ export default (sequelize, DataTypes) => {
     InvitationSchedule.belongsTo(models.UserTheme, {
       foreignKey: "user_theme_id",
       as: "userTheme",
+    });
+    InvitationSchedule.belongsTo(models.InvitationPayment, {
+      foreignKey: "payment_id",
+      as: "payment",
     });
   };
 
