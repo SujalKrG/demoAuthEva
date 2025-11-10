@@ -119,11 +119,11 @@ jobs:
             fi
 
             # ✅ Login to ECR inside EC2 before pulling images
-            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
+            sudo aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
 
             # Pull latest images & restart containers
-            sudo docker-compose -f Docker-compose.yml pull
-            sudo docker-compose -f Docker-compose.yml up -d
+            sudo -E docker-compose -f Docker-compose.yml pull
+            sudo -E docker-compose -f Docker-compose.yml up -d
 
             # ✅ Run DB migrations inside API container
             sudo docker-compose -f Docker-compose.yml exec -T api npx sequelize-cli db:migrate
