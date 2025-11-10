@@ -52,6 +52,13 @@ jobs:
             mkdir -p ~/myapp
             cd ~/myapp
 
+             # ✅ Pull latest project code from GitHub
+             if [ -d .git ]; then
+               git pull origin main
+             else
+               git clone -b main https://github.com/${{ github.repository }} .
+             fi
+
             # Generate .env file on EC2 from GitHub Secrets
             cat > .env <<EOL
             DB_HOST=${{ secrets.DB_HOST }}
