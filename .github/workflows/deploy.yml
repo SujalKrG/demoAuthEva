@@ -104,6 +104,15 @@ jobs:
             NODE_ENV=development
             EOL
 
+            # ✅ Install AWS CLI if not installed
+            if ! command -v aws &> /dev/null; then
+              echo "☁️ AWS CLI install kar rahe hain..."
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install
+              rm -rf awscliv2.zip aws
+            fi
+
             # ✅ Login to ECR inside EC2 before pulling images
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
 
