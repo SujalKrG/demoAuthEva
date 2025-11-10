@@ -26,14 +26,9 @@ services:
       DB2_PASSWORD: ${DB2_PASSWORD}
       AWS_BUCKET: ${AWS_BUCKET}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-
-    deploy:                # ← yeh section memory limit ke liye add karo
-      resources:
-        limits:
-          memory: 1024M 
-          
     depends_on:
       - redis
+    mem_limit: 1024m   
     networks:
       - app-network
     healthcheck:
@@ -67,15 +62,10 @@ services:
       DB2_USERNAME: ${DB2_USERNAME}
       DB2_PASSWORD: ${DB2_PASSWORD}
       AWS_BUCKET: ${AWS_BUCKET}
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-
-    deploy:
-    resources:
-      limits:
-        memory: 512M
-        
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}  
     depends_on:
       - redis
+    mem_limit: 512m 
     networks:
       - app-network
     logging:
@@ -105,14 +95,9 @@ services:
       DB2_PASSWORD: ${DB2_PASSWORD}
       AWS_BUCKET: ${AWS_BUCKET}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-      
-    deploy:
-    resources:
-      limits:
-        memory: 512M
-        
     depends_on:
       - redis
+    mem_limit: 512m 
     networks:
       - app-network
     logging:
