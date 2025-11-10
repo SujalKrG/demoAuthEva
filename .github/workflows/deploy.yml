@@ -21,9 +21,8 @@ jobs:
           aws-region: ap-south-1
 
       - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
-
+        uses: aws-actions/amazon-ecr-login@v2
+        
       - name: Build and Push API Image
         run: |
           docker build -t evatril-invitation-adminpanel-api -f Dockerfile.api .
@@ -106,7 +105,7 @@ jobs:
             EOL
 
             # ✅ Login to ECR inside EC2 before pulling images
-            aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
+            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
 
             # Pull latest images & restart containers
             sudo docker-compose -f Docker-compose.yml pull
