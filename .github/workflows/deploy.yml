@@ -1,129 +1,27 @@
-name: Deploy to EC2
-
+name: Deploy to Hostinger
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_API }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_API }}
-          aws-region: ap-south-1
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-        
-      - name: Build and Push API Image
+      - name: Copy files to Hostinger
         run: |
-          docker build -t evatril-invitation-adminpanel-api -f Dockerfile.api .
-          docker tag evatril-invitation-adminpanel-api:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
-          docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api:latest
+          scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/home/${{ secrets.SSH_USER }}/project
 
-      - name: Build and Push Worker1 Image
+      - name: SSH and deploy
         run: |
-          docker build -t evatril-invitation-adminpanel-api-image-worker -f Dockerfile.imageWorker .
-          docker tag evatril-invitation-adminpanel-api-image-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
-          docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_image_worker:latest
-
-      - name: Build and Push Worker2 video worker
-        run: |
-          docker build -t evatril-invitation-adminpanel-api-video-worker -f Dockerfile.videoWorker .
-          docker tag evatril-invitation-adminpanel-api-video-worker:latest 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
-          docker push 024910004081.dkr.ecr.ap-south-1.amazonaws.com/evatril_invitation_adminpanel_api_video_worker:latest
-
-      - name: Deploy on EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e  # stop on error
-
-            # ✅ Create or clean app directory
-            if [ -d "~/myapp/.git" ]; then
-              echo "🌀 Existing repo found — pulling latest changes"
-              cd ~/myapp
-              git reset --hard
-              git clean -fd
-              git pull origin main
-            else
-              echo "📦 Cloning fresh repo"
-              rm -rf ~/myapp
-              git clone -b main https://github.com/${{ github.repository }} ~/myapp
-              cd ~/myapp
-            fi
-
-            # Generate .env file on EC2 from GitHub Secrets
-            cat > .env <<EOL
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            DB_NAME=${{ secrets.DB_NAME }}
-
-            DB2_CONNECTION=${{ secrets.DB2_CONNECTION }}
-            DB2_HOST=${{ secrets.DB2_HOST }}
-            DB2_PORT=${{ secrets.DB2_PORT }}
-            DB2_DATABASE=${{ secrets.DB2_DATABASE }}
-            DB2_USERNAME=${{ secrets.DB2_USERNAME }}
-            DB2_PASSWORD=${{ secrets.DB2_PASSWORD }}
-            
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_BUCKET=${{ secrets.AWS_BUCKET }}
-            AWS_REGION=${{ secrets.AWS_REGION }}
-            AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }}
-            AWS_URL=${{ secrets.AWS_URL }}
-            AWS_USE_PATH_STYLE_ENDPOINT=${{ secrets.AWS_USE_PATH_STYLE_ENDPOINT }}
-            
-            WABA_PHONE_NUMBER_ID=${{ secrets.WABA_PHONE_NUMBER_ID }}
-            WABA_ACCESS_TOKEN=${{ secrets.WABA_ACCESS_TOKEN }}
-            WABA_APP_SECRET=${{ secrets.WABA_APP_SECRET }}
-
-            REDIS_HOST=${{ secrets.REDIS_HOST }}
-            REDIS_PORT=${{ secrets.REDIS_PORT }}
-            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-            
-            
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-
-            PORT=${{ secrets.PORT }}
-            NODE_ENV=development
-            EOL
-
-            # ✅ Install AWS CLI if not installed
-            if ! command -v aws &> /dev/null; then
-              echo "☁️ Installing required packages..."
-              sudo apt update
-              sudo DEBIAN_FRONTEND=noninteractive apt install -y unzip curl
-
-  
-              echo "☁️ AWS CLI install kar rahe hain..."
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install
-              rm -rf awscliv2.zip aws
-            fi
-
-            # ✅ Login to ECR inside EC2 before pulling images
-            sudo aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 024910004081.dkr.ecr.ap-south-1.amazonaws.com
-
-            # Pull latest images & restart containers
-            sudo -E docker-compose -f docker-compose.yml pull
-            sudo -E docker-compose -f docker-compose.yml up -d
-
-            # ✅ Run DB migrations inside API container
-            sudo docker-compose -f docker-compose.yml exec -T api npx sequelize-cli db:migrate
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }} << 'EOF'
+            cd /home/${{ secrets.SSH_USER }}/project
+            docker compose down
+            docker compose up -d --build
+          EOF
