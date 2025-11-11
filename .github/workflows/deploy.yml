@@ -6,29 +6,24 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # ✅ Step 1: Checkout repo
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # ✅ Step 2: Setup SSH key (modern alternative)
       - name: Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # ✅ Step 3: Copy files to Hostinger server
-      - name: Copy project files to Hostinger
+      - name: Copy files to Hostinger
         run: |
-          scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/home/${{ secrets.SSH_USER }}/project
+          scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/root/project
 
-      # ✅ Step 4: SSH into Hostinger and deploy containers
-      - name: Deploy on Hostinger via SSH
+      - name: Deploy containers on Hostinger
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER }}/project
+            cd /root/project
             docker compose down
             docker compose up -d --build
           EOF
+
 
