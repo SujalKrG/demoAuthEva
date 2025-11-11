@@ -13,7 +13,6 @@ COPY package*.json ./
 RUN npm ci
 
 # Copy full source
-COPY ./routes /usr/src/app/routes
 COPY . .
 
 # Environment
