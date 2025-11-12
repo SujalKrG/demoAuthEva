@@ -3,89 +3,101 @@ import bcrypt from "bcryptjs";
 
 export default {
   async up(queryInterface, Sequelize) {
-    // 1️⃣ Insert Roles
+    const now = new Date();
+
+    // === 1️⃣ Insert Roles (safe reference data)
     const roles = [
       {
         name: "Super Admin",
         code: "SUPER_ADMIN",
-        created_at: new Date(),
-        updated_at: new Date(),
+        created_at: now,
+        updated_at: now,
       },
     ];
     await queryInterface.bulkInsert("roles", roles, {});
 
-    // 3️⃣ Insert Admins (with all required fields)
-    const passwordHash = await bcrypt.hash("dummy123", 10); // hashed password
-    const admins = [
-      {
-        name: "Alok",
-        email: "kumaraloka7205@gmail.com",
-        phone: "8018375795",
-        password: passwordHash,
-        emp_id: "EMP001",
-        status: true,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ];
-    await queryInterface.bulkInsert("admins", admins, {});
+    // === 2️⃣ Create Admin (from .env)
+    const adminEmail = process.env.SUPERADMIN_EMAIL;
+    const adminPassword = process.env.SUPERADMIN_PASSWORD;
+    const adminName = "Alok"
 
-    // 4️⃣ Get inserted roles, permissions, admins IDs
-    const insertedRoles = await queryInterface.sequelize.query(
-      `SELECT id, code FROM roles;`
-    );
-    const insertedPermissions = await queryInterface.sequelize.query(
-      `SELECT id, name FROM permissions;`
-    );
-    const insertedAdmins = await queryInterface.sequelize.query(
-      `SELECT id, name FROM admins;`
-    );
+    if (!adminEmail || !adminPassword) {
+      console.warn(
+        "⚠️  SUPER_ADMIN_EMAIL or SUPER_ADMIN_PASSWORD not set in .env — skipping admin creation."
+      );
+    } else {
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
 
-    const rolesMap = insertedRoles[0].reduce((acc, r) => {
-      acc[r.code] = r.id;
-      return acc;
-    }, {});
-    const permsMap = insertedPermissions[0].reduce((acc, p) => {
-      acc[p.name] = p.id;
-      return acc;
-    }, {});
-    const adminsMap = insertedAdmins[0].reduce((acc, a) => {
-      acc[a.name] = a.id;
-      return acc;
-    }, {});
+      // Check if admin already exists
+      const existingAdmins = await queryInterface.sequelize.query(
+        `SELECT id FROM admins WHERE email = :email LIMIT 1`,
+        {
+          replacements: { email: adminEmail },
+          type: Sequelize.QueryTypes.SELECT,
+        }
+      );
 
-    // 5️⃣ Assign Permissions to Roles (pivot table)
+      let adminId;
+      if (existingAdmins.length === 0) {
+        // Insert new admin
+        await queryInterface.bulkInsert("admins", [
+          {
+            name: adminName,
+            email: adminEmail,
+            phone: "8018375795",
+            password: passwordHash,
+            emp_id: "EMP001",
+            status: true,
+            created_at: now,
+            updated_at: now,
+          },
+        ]);
 
-    // 6️⃣ Assign Roles to Admins (pivot table)
-    const adminRoles = [
-      {
-        admin_id: adminsMap["Alok"],
-        role_id: rolesMap["SUPER_ADMIN"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ];
-    await queryInterface.bulkInsert("admin_roles", adminRoles, {});
+        const insertedAdmins = await queryInterface.sequelize.query(
+          `SELECT id FROM admins WHERE email = :email`,
+          {
+            replacements: { email: adminEmail },
+            type: Sequelize.QueryTypes.SELECT,
+          }
+        );
+        adminId = insertedAdmins[0]?.id;
+      } else {
+        adminId = existingAdmins[0].id;
+      }
 
+      // === 3️⃣ Assign Role to Admin (pivot)
+      const rolesData = await queryInterface.sequelize.query(
+        `SELECT id FROM roles WHERE code = 'SUPER_ADMIN' LIMIT 1`
+      );
+      const roleId = rolesData[0]?.[0]?.id;
+
+      if (roleId && adminId) {
+        const existing = await queryInterface.sequelize.query(
+          `SELECT id FROM admin_roles WHERE admin_id = :adminId AND role_id = :roleId`,
+          {
+            replacements: { adminId, roleId },
+            type: Sequelize.QueryTypes.SELECT,
+          }
+        );
+
+        if (existing.length === 0) {
+          await queryInterface.bulkInsert("admin_roles", [
+            {
+              admin_id: adminId,
+              role_id: roleId,
+              created_at: now,
+              updated_at: now,
+            },
+          ]);
+        }
+      }
+    }
+
+    // === 4️⃣ Guest Groups
     const guestGroups = [
-      {
-        user_id: null,
-        name: "Friends",
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        user_id: null,
-        name: "Family",
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        user_id: null,
-        name: "Colleagues",
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
+      { user_id: null, name: "Friends", created_at: now, updated_at: now },
+      { user_id: null, name: "Family", created_at: now, updated_at: now },
+      { user_id: null, name: "Colleagues", created_at: now, updated_at: now },
     ];
     await queryInterface.bulkInsert("guest_groups", guestGroups, {});
   },
