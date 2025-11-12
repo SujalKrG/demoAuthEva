@@ -11,49 +11,18 @@ export default {
         created_at: new Date(),
         updated_at: new Date(),
       },
-      {
-        name: "Editor",
-        code: "EDITOR",
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        name: "Viewer",
-        code: "VIEWER",
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
     ];
     await queryInterface.bulkInsert("roles", roles, {});
-
-    // 2️⃣ Insert Permissions
-    const permissions = [
-      { name: "create_post", created_at: new Date(), updated_at: new Date() },
-      { name: "edit_post", created_at: new Date(), updated_at: new Date() },
-      { name: "delete_post", created_at: new Date(), updated_at: new Date() },
-      { name: "view_post", created_at: new Date(), updated_at: new Date() },
-    ];
-    await queryInterface.bulkInsert("permissions", permissions, {});
 
     // 3️⃣ Insert Admins (with all required fields)
     const passwordHash = await bcrypt.hash("dummy123", 10); // hashed password
     const admins = [
       {
-        name: "Alice",
-        email: "alice@test.com",
-        phone: "1234567890",
+        name: "Alok",
+        email: "kumaraloka7205@gmail.com",
+        phone: "8018375795",
         password: passwordHash,
         emp_id: "EMP001",
-        status: true,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        name: "Bob",
-        email: "bob@test.com",
-        phone: "0987654321",
-        password: passwordHash,
-        emp_id: "EMP002",
         status: true,
         created_at: new Date(),
         updated_at: new Date(),
@@ -86,65 +55,12 @@ export default {
     }, {});
 
     // 5️⃣ Assign Permissions to Roles (pivot table)
-    const RolePermissions = [
-      {
-        role_id: rolesMap["SUPER_ADMIN"],
-        permission_id: permsMap["create_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        role_id: rolesMap["SUPER_ADMIN"],
-        permission_id: permsMap["edit_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        role_id: rolesMap["SUPER_ADMIN"],
-        permission_id: permsMap["delete_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        role_id: rolesMap["SUPER_ADMIN"],
-        permission_id: permsMap["view_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-
-      {
-        role_id: rolesMap["EDITOR"],
-        permission_id: permsMap["edit_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        role_id: rolesMap["EDITOR"],
-        permission_id: permsMap["view_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-
-      {
-        role_id: rolesMap["VIEWER"],
-        permission_id: permsMap["view_post"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ];
-    await queryInterface.bulkInsert("role_permissions", RolePermissions, {});
 
     // 6️⃣ Assign Roles to Admins (pivot table)
     const adminRoles = [
       {
-        admin_id: adminsMap["Alice"],
+        admin_id: adminsMap["Alok"],
         role_id: rolesMap["SUPER_ADMIN"],
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        admin_id: adminsMap["Bob"],
-        role_id: rolesMap["EDITOR"],
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -176,9 +92,7 @@ export default {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete("admin_roles", null, {});
-    await queryInterface.bulkDelete("role_permissions", null, {});
     await queryInterface.bulkDelete("admins", null, {});
-    await queryInterface.bulkDelete("permissions", null, {});
     await queryInterface.bulkDelete("roles", null, {});
     await queryInterface.bulkDelete("guest_groups", null, {});
   },
