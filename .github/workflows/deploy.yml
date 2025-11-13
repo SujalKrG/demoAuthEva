@@ -17,6 +17,7 @@ jobs:
       - name: Copy files to Hostinger
         run: |
           scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/root/project
+          
       - name: Deploy containers on Hostinger
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }} << 'EOF'
