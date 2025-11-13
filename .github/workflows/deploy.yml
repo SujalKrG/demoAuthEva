@@ -21,7 +21,7 @@ jobs:
 
       - name: Fast File Sync to Hostinger (Only Changed Files)
         run: |
-          rsync -azP \
+          rsync -azP -e "ssh -o StrictHostKeyChecking=no -p 22" \
             --delete \
             --exclude '.git/' \
             --exclude '.github/' \
