@@ -5,49 +5,31 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted   # 👈 yahan badla hai (ubuntu-latest se self-hosted)
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH Key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Install rsync
-        run: sudo apt-get update && sudo apt-get install -y rsync
-
-      - name: Print GitHub runner public IP
+      - name: Sync Files (Fast & Safe)
         run: |
-          curl -s https://api.ipify.org
-
-      - name: Fast File Sync to Hostinger (Only Changed Files)
-        run: |
-          rsync -azP -e "ssh -o StrictHostKeyChecking=no -p 22" \
-            --delete \
+          echo "⚡ Syncing project files..."
+          rsync -azP --delete \
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude 'node_modules/' \
             --exclude 'logs/' \
             --exclude '.env' \
-            ./ ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/root/project
+            ./ /root/project/
 
-      - name: Deploy Docker Containers on Hostinger
+      - name: Deploy Docker Containers
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }} << 'EOF'
-            cd /root/project
+          cd /root/project
+          echo "✅ Pulling latest Docker images..."
+          docker compose pull || true
 
-            echo "✅ Pulling latest Docker images..."
-            docker compose pull || true
+          echo "♻️ Rebuilding and restarting containers..."
+          docker compose up -d --build
 
-            echo "♻️ Rebuilding and restarting containers..."
-            docker compose up -d --build
-
-            echo "🧹 Cleaning up unused data..."
-            docker system prune -f
-          EOF
-
-
-
+          echo "🧹 Cleaning up unused data..."
+          docker system prune -f
