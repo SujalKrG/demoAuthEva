@@ -4,26 +4,46 @@ on:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Setup SSH key
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy files to Hostinger
-        run: |
-          scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/root/project
+      - name: Install rsync
+        run: sudo apt-get update && sudo apt-get install -y rsync
 
-      - name: Deploy containers on Hostinger
+      - name: Fast File Sync to Hostinger (Only Changed Files)
+        run: |
+          rsync -azP \
+            --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude 'logs/' \
+            --exclude '.env' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }}:/root/project
+
+      - name: Deploy Docker Containers on Hostinger
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.HOSTINGER_IP }} << 'EOF'
             cd /root/project
-            docker compose down
+
+            echo "✅ Pulling latest Docker images..."
+            docker compose pull || true
+
+            echo "♻️ Rebuilding and restarting containers..."
             docker compose up -d --build
+
+            echo "🧹 Cleaning up unused data..."
+            docker system prune -f
           EOF
+
 
 
