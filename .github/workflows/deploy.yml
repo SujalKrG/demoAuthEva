@@ -19,6 +19,10 @@ jobs:
       - name: Install rsync
         run: sudo apt-get update && sudo apt-get install -y rsync
 
+      - name: Print GitHub runner public IP
+        run: |
+          curl -s https://api.ipify.org
+
       - name: Fast File Sync to Hostinger (Only Changed Files)
         run: |
           rsync -azP -e "ssh -o StrictHostKeyChecking=no -p 22" \
