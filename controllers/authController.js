@@ -1,10 +1,10 @@
 import {
   loginService,
   logoutService,
-  changePasswordService,
   getProfileService,
 } from "../services/authService.js";
 import { logger } from "../utils/logger.js";
+
 
 export const login = async (req, res, next) => {
   try {
@@ -12,8 +12,8 @@ export const login = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      accessToken: result.accessToken,
-      admin: result.admin,
+      accessToken: result.token,
+      must_change_password: Boolean(result.admin.reset_password_otp_expire),
     });
   } catch (error) {
     logger.error(`[login] ${error.message}`, {
@@ -35,29 +35,6 @@ export const logout = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Logout failed", error: error.message });
-  }
-};
-
-export const changePassword = async (req, res, next) => {
-  try {
-    if (!req.admin?.id)
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-
-    const message = await changePasswordService({
-      adminId: req.admin.id,
-      currentPassword: req.body.currentPassword,
-      newPassword: req.body.newPassword,
-    });
-
-    res.status(200).json({ success: true, message });
-  } catch (error) {
-    logger.error(`[changePassword] ${error.message}`, {
-      name: error.name,
-      // stack: error.stack,
-      body: req.body,
-    });
-    // console.error(error);
-    next(error);
   }
 };
 

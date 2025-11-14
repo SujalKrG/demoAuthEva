@@ -21,9 +21,11 @@ export const errorHandler = (err, req, res, next) => {
     method: req.method,
   });
 
+  const isOperational = err.isOperational || false;
+
   // 🧱 Always send safe response to frontend
   res.status(statusCode).json({
     success: false,
-    message: "Internal Server Error",
+    message: isOperational ? err.message : "Internal Server Error",
   });
 };

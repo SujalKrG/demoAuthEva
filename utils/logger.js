@@ -1,23 +1,26 @@
 import winston from "winston";
 import path from "path";
 import fs from "fs";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const logDir = "logs";
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
 
-const logFormat = winston.format.printf(({ timestamp, level, message, ...meta }) => {
-  // 🧹 Filter meta: keep only strings, numbers, booleans
-  const safeMeta = {};
-  for (const [key, value] of Object.entries(meta)) {
-    if (["string", "number", "boolean"].includes(typeof value)) {
-      safeMeta[key] = value;
+const logFormat = winston.format.printf(
+  ({ timestamp, level, message, ...meta }) => {
+    // 🧹 Filter meta: keep only strings, numbers, booleans
+    const safeMeta = {};
+    for (const [key, value] of Object.entries(meta)) {
+      if (["string", "number", "boolean"].includes(typeof value)) {
+        safeMeta[key] = value;
+      }
     }
-  }
 
-  return `${timestamp} [${level.toUpperCase()}]: ${message}${
-    Object.keys(safeMeta).length ? " " + JSON.stringify(safeMeta) : ""
-  }`;
-});
+    return `${timestamp} [${level.toUpperCase()}]: ${message}${
+      Object.keys(safeMeta).length ? " " + JSON.stringify(safeMeta) : ""
+    }`;
+  }
+);
 
 export const logger = winston.createLogger({
   level: "info",
@@ -26,10 +29,17 @@ export const logger = winston.createLogger({
     logFormat
   ),
   transports: [
-    new winston.transports.File({ filename: path.join(logDir, "app.log") }),
-    new winston.transports.File({
-      filename: path.join(logDir, "error.log"),
+    new DailyRotateFile({
+      filename: path.join(logDir, "app-%DATE%.log"),
+      datePattern: "YYYY-MM-DD",
+      maxSize: "20m",
+      maxFiles: "30d",
+    }),
+    new DailyRotateFile({
+      filename: path.join(logDir, "error-%DATE%.log"),
+      datePattern: "YYYY-MM-DD",
       level: "error",
+      maxSize: "20m",
     }),
   ],
 });

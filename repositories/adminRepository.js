@@ -73,7 +73,7 @@ export const AdminRepository = {
         "id",
         "name",
         "email",
-        "emp_i",
+        "emp_id",
         "status",
         "city",
         "address",

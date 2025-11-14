@@ -1,15 +1,11 @@
 import jwt from "jsonwebtoken";
 import db from "../models/index.js";
+import AppError from "../utils/AppError.js";
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Authorization header missing or malformed",
-        });
+      throw new AppError("Invalid authorization header", 401);
     }
 
     const token = authHeader.split(" ")[1];
@@ -17,14 +13,12 @@ const authenticate = async (req, res, next) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid or expired token" });
+      throw new AppError("Invalid token", 401);
     }
     // console.log( "decoded info:---------------------------------",decoded);
     // Fetch admin along with roles & permissions in one query
     const admin = await db.Admin.findByPk(decoded.id, {
-      attributes: ["id","name", "emp_id", "email", "status", "remember_token"],
+      attributes: ["id", "name", "emp_id", "email","password", "status", "remember_token"],
       include: [
         {
           model: db.Role,
@@ -43,19 +37,13 @@ const authenticate = async (req, res, next) => {
       ],
     });
 
-    if (!admin)
-      return res
-        .status(401)
-        .json({ success: false, message: "Admin not found" });
-
+    if (!admin) throw new AppError("admin not found", 401);
 
     if (!admin.status)
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Your account is inactive. Please contact support.",
-        });
+      throw new AppError("Account is inactive, contact super admin", 401);
+
+    if (admin.remember_token !== token)
+      throw new AppError("session expired, please login again.", 401);
 
     // Precompute permission set for faster authorization
     const permissionSet = new Set();
@@ -64,20 +52,13 @@ const authenticate = async (req, res, next) => {
     );
     // console.log("--------------------------------------------");
     // console.log({ ...admin.get(), permissionsSet: permissionSet} );
-    
-    
-    req.admin = { ...admin.get(), permissionsSet: permissionSet };
+
+    req.admin = admin;
+    req.admin.permissionsSet = permissionSet;
 
     next();
   } catch (err) {
-    console.error("[authenticate] error:", err);
-    return res
-      .status(401)
-      .json({
-        success: false,
-        message: "Authentication failed",
-        error: err.message,
-      });
+    next(err);
   }
 };
 

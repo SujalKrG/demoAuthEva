@@ -14,17 +14,18 @@ const OccasionModel = OccasionModelFactory(
   remoteSequelize,
   Sequelize.DataTypes
 );
-import { imageUploadQueue, videoUploadQueue } from "../jobs/queues.js";
+import db from "../models/index.js";
 import {
   slug,
   capitalizeSentence,
   sanitizeFileName,
-  normalizeDecimal
+  normalizeDecimal,
 } from "../utils/requiredMethods.js";
 import { remoteSequelize, Sequelize } from "../models/index.js";
-import { deleteFileFromS3 } from "../middlewares/uploadS3.js";
+import { deleteFileFromS3, uploadFileToS3 } from "../middlewares/uploadS3.js";
 
 import { Op } from "sequelize";
+import { IdempotencyParameterMismatch } from "@aws-sdk/client-s3";
 
 export const countryCodeService = async () => countryCodeRepo();
 
@@ -101,7 +102,7 @@ export const getAllThemeService = async (query) => {
       id: t.category_id,
       name: t.themeCategory ? t.themeCategory.name : null,
     },
-    theme_type:{
+    theme_type: {
       id: t.theme_type_id,
       name: t.themeType ? t.themeType.name : null,
     },
@@ -149,11 +150,11 @@ export const createThemeService = async (data, files) => {
   if (!themeType) {
     throw new Error("Theme type not found");
   }
-
   const occasions = await findOccasionById(occasion_id);
   if (!occasions) {
     throw new Error("Occasion not found");
   }
+
   const theme = await createThemeRepo({
     occasion_id,
     category_id,
@@ -170,53 +171,33 @@ export const createThemeService = async (data, files) => {
     preview_video: null,
   });
   if (files?.preview_image?.[0]) {
-    try {
-      const img = files.preview_image[0];
-      await imageUploadQueue.add(
-        "uploadImage",
-        {
-          themeId: theme.id,
-          file: img.buffer.toString("base64"),
-          filename: sanitizeFileName(img.originalname),
-          mimetype: img.mimetype,
-        },
-        {
-          attempts: 5,
-          backoff: { type: "exponential", delay: 5000 },
-          removeOnComplete: true,
-          removeOnFail: 200,
-        }
-      );
-      console.log(`[createTheme] Image job queued: themeId=${theme.id}`);
-    } catch (err) {
-      console.error("[createTheme] Failed to enqueue image job:", err);
-    }
+    const file = files.preview_image[0];
+    const imageUrl = await uploadFileToS3(
+      file.buffer,
+      "images",
+      sanitizeFileName(file.originalname),
+      file.mimetype
+    );
+    await db.Theme.update(
+      { preview_image: imageUrl },
+      { where: { id: theme.id } }
+    );
   } else {
     console.log("[createTheme] No preview_image provided");
   }
 
   if (themeCategory.type === "video" && files?.preview_video?.[0]) {
-    try {
-      const vid = files.preview_video[0];
-      await videoUploadQueue.add(
-        "uploadVideo",
-        {
-          themeId: theme.id,
-          file: vid.buffer.toString("base64"),
-          filename: sanitizeFileName(vid.originalname),
-          mimetype: vid.mimetype,
-        },
-        {
-          attempts: 5,
-          backoff: { type: "exponential", delay: 10000 },
-          removeOnComplete: true,
-          removeOnFail: 200,
-        }
-      );
-      console.log(`[createTheme] Video job queued: themeId=${theme.id}`);
-    } catch (err) {
-      console.error("[createTheme] Failed to enqueue video job:", err);
-    }
+    const file = files.preview_video[0];
+    const videoUrl = await uploadFileToS3(
+      file.buffer,
+      "videos",
+      sanitizeFileName(file.originalname),
+      file.mimetype
+    );
+    await db.Theme.update(
+      { preview_video: videoUrl },
+      { where: { id: theme.id } }
+    );
   } else {
     console.log(
       "[createTheme] No preview_video provided or category not video"
@@ -267,21 +248,16 @@ export const updateThemeService = async (id, body, files) => {
         await deleteFileFromS3(theme.preview_image);
       }
 
-      const img = files.preview_image[0];
-      await imageUploadQueue.add(
-        "uploadImage",
-        {
-          themeId: theme.id,
-          file: img.buffer.toString("base64"),
-          filename: sanitizeFileName(img.originalname),
-          mimetype: img.mimetype,
-        },
-        {
-          attempts: 5,
-          backoff: { type: "exponential", delay: 5000 },
-          removeOnComplete: true,
-          removeOnFail: 200,
-        }
+      const file = files.preview_image[0];
+      const imageUrl = await uploadFileToS3(
+        file.buffer,
+        "images",
+        sanitizeFileName(file.originalname),
+        file.mimetype
+      );
+      await db.Theme.update(
+        { preview_image: imageUrl },
+        { where: { id: theme.id } }
       );
 
       console.log(`[updateTheme] New image job queued: themeId=${theme.id}`);
@@ -298,21 +274,16 @@ export const updateThemeService = async (id, body, files) => {
         await deleteFileFromS3(theme.preview_video);
       }
 
-      const vid = files.preview_video[0];
-      await videoUploadQueue.add(
-        "uploadVideo",
-        {
-          themeId: theme.id,
-          file: vid.buffer.toString("base64"),
-          filename: sanitizeFileName(vid.originalname),
-          mimetype: vid.mimetype,
-        },
-        {
-          attempts: 5,
-          backoff: { type: "exponential", delay: 10000 },
-          removeOnComplete: true,
-          removeOnFail: 200,
-        }
+      const file = files.preview_video[0];
+      const videoUrl = await uploadFileToS3(
+        file.buffer,
+        "videos",
+        sanitizeFileName(file.originalname),
+        file.mimetype
+      );
+      await db.Theme.update(
+        { preview_video: videoUrl },
+        { where: { id: theme.id } }
       );
 
       console.log(`[updateTheme] New video job queued: themeId=${theme.id}`);

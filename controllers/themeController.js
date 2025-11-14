@@ -51,7 +51,7 @@ export const updateTheme = async (req, res, next) => {
   }
 };
 
-export const createTheme = async (req, res) => {
+export const createTheme = async (req, res, next) => {
   try {
     const theme = await createThemeService(req.body, req.files);
     await logActivity({
@@ -81,36 +81,30 @@ export const createTheme = async (req, res) => {
   } catch (error) {
     logger.error(`[Theme][create] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
-export const countryCode = async (req, res) => {
+export const countryCode = async (req, res, next) => {
   try {
     const country = await countryCodeService();
     return res.status(200).json(country);
   } catch (error) {
     logger.error(`[country code(theme controller)][getAll] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
-export const updateStatus = async (req, res) => {
+export const updateStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -133,18 +127,15 @@ export const updateStatus = async (req, res) => {
   } catch (error) {
     logger.error(`[Theme][update status] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };
 
-export const getAllTheme = async (req, res) => {
+export const getAllTheme = async (req, res, next) => {
   try {
     const data = await getAllThemeService(req.query);
     return res.status(200).json({
@@ -154,13 +145,10 @@ export const getAllTheme = async (req, res) => {
   } catch (error) {
     logger.error(`[Theme][getAll] ${error.message}`, {
       name: error.name,
-      stack: error.stack,
+      // stack: error.stack,
       body: req.body,
     });
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    // console.error(error);
+    next(error);
   }
 };

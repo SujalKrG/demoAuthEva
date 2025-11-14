@@ -1,4 +1,7 @@
 node_modules
 .env
 .vscode
+
+logs/
 test.js
+replace.txt

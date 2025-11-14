@@ -1,5 +1,5 @@
 import { getUserThemeService } from "../services/userThemeService.js";
-import AppError from "../utils/AppError.js";
+import { logger } from "../utils/logger.js";
 
 export const getUserThemes = async (req, res, next) => {
   try {
@@ -12,7 +12,12 @@ export const getUserThemes = async (req, res, next) => {
       data: result.data,
     });
   } catch (error) {
-    console.error("Error fetching user themes:", error);
-    next(error instanceof AppError ? error : new AppError("Failed to fetch user themes", 500));
+    logger.error(`[user theme][getAll] ${error.message}`, {
+      name: error.name,
+      // stack: error.stack,
+      body: req.body,
+    });
+    // console.error(error);
+    next(error);
   }
 };

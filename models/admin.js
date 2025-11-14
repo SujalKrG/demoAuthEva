@@ -1,4 +1,5 @@
 "use strict";
+import bcrypt from "bcryptjs";
 export default (sequelize, DataTypes) => {
   const Admin = sequelize.define(
     "Admin",
@@ -104,6 +105,14 @@ export default (sequelize, DataTypes) => {
 
     return Array.from(permissionMap.values());
   };
+  Admin.prototype.validatePassword = async function (password) {
+    return await bcrypt.compare(password, this.password);
+  }
+  Admin.prototype.updatePassword = async function (newPassword) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    this.password = hashedPassword;
+    await this.save();
+  }
 
   return Admin;
 };

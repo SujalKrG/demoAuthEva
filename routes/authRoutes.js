@@ -1,24 +1,24 @@
 import express from "express";
-import { login, logout ,changePassword} from "../controllers/authController.js";
-import { requestPasswordOTP,resetPasswordWithOTP } from "../controllers/forgotPassword.js";
+import { login, logout } from "../controllers/authController.js";
+import {
+  changePassword,
+  //   resetPasswordWithOTP,
+} from "../controllers/changePassword.js";
+import authenticate from "../middlewares/authMiddleware.js";
+import {resetAdminPasswordBySA} from "../controllers/SApasswordChange.js";
 
 const router = express.Router();
 
-
 router.post("/login", login);
-// router.get("/protected", authenticate, (req, res) => {
-//   res.json({ message: "This is a protected route", admin: req.admin });
-// });
+router.post("/change-password", authenticate, changePassword);
+router.post(
+  "/reset-admin-password/:adminId",
+  authenticate, // must be logged in as super admin
+  resetAdminPasswordBySA
+);
 
-// router.get("/dashboard", authenticate, authorize([2]), (req, res) => {
-//   res.json({ message: "This is an admin-only route", admin: req.admin });
-// });
-
-router.post("/request-password-otp", requestPasswordOTP);
-router.post("/reset-password", resetPasswordWithOTP);
-
-
-// router.post("/change-password",authenticate,authorize(["SUPER_ADMIN"]),  changePassword);
+// router.post("/request-password-otp", requestPasswordOTP);
+// router.post("/reset-password", resetPasswordWithOTP);
 
 router.post("/logout", logout);
 

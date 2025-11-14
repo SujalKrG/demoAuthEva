@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import db from "../models/index.js";
+const { Admin } = db;
 import {
   findAdminByEmail,
   findAdminById,
@@ -8,87 +10,58 @@ import {
 } from "../repositories/authRepository.js";
 // import logActivity from "../utils/logActivity.js";
 import { generateToken } from "../utils/requiredMethods.js";
-
+import AppError from "../utils/AppError.js";
 
 export const loginService = async ({ email, password }) => {
-  if (!email || !password) throw new Error("Email and password are required");
+  if (!email || !password)
+    throw new AppError("Email and password are required");
 
   const admin = await findAdminByEmail(email);
-  if (!admin) throw new Error("Invalid email or password");
+  if (!admin) throw new AppError("Invalid email or password");
   if (!admin.status)
     throw new Error("Account is inactive, contact super admin");
 
   const isMatch = await bcrypt.compare(password, admin.password);
-  if (!isMatch) throw new Error("Invalid email or password");
-
+  if (!isMatch) throw new AppError("incorrect password", 401);
+  if (admin.reset_password_otp_expire) {
+    if (new Date() > new Date(admin.reset_password_otp_expire)) {
+      throw new AppError(
+        "Temporary password expired. Contact your super admin.",
+        401
+      );
+    }
+  }
   const roles = admin.roles.map((r) => r.code);
   const permissions = admin.roles.flatMap((r) =>
     r.permissions.map((p) => p.name)
   );
-
-  const accessToken = generateToken({
-    id: admin.id,
-    email: admin.email,
-    roles,
-    // permissions,
+  const tokenData = { id: admin.id, email: admin.email, roles };
+  const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
+    expiresIn: "24h",
   });
-  // admin.remember_token = accessToken;
-  // await saveAdmin(admin);
 
-  // await logActivity({
-  //   created_by: admin.id,
-  //   action: "LOGIN",
-  //   module: "Admin",
-  //   details: {},
-  // });
-  return { admin, accessToken };
+  // Store token so logout can invalidate it
+  admin.remember_token = token;
+  await admin.save();
+
+  return { admin, token };
 };
 
 export const logoutService = async (token) => {
-  if (!token) return "Logout successful (no token)";
-
-  let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.decode(token);
+    if (!decoded?.id) return "Logout successful";
+
+    const admin = await Admin.findByPk(decoded.id);
+    if (!admin) return "Logout successful";
+
+    admin.remember_token = null;
+    await admin.save();
   } catch (err) {
-    if (err.name === "TokenExpiredError") decoded = jwt.decode(token);
-    else return "Logout successful (invalid token)";
+    // Ignore logout errors
   }
 
-  if (!decoded?.id) return "Logout successful (no user id)";
-
-  // const admin = await findAdminById(decoded.id);
-  // if (admin && admin.remember_token === token) {
-  //   admin.remember_token = null;
-  //   await saveAdmin(admin);
-  // }
-
   return "Logout successful";
-};
-
-export const changePasswordService = async ({
-  adminId,
-  currentPassword,
-  newPassword,
-}) => {
-  if (!currentPassword || !newPassword)
-    throw new Error("Current and new passwords are required");
-  if (currentPassword === newPassword)
-    throw new Error("New password must be different from current password");
-  if (newPassword.length < 6)
-    throw new Error("New password must be at least 6 characters long");
-
-  const admin = await findAdminById(adminId);
-  if (!admin) throw new Error("Admin not found");
-
-  const isMatch = await bcrypt.compare(currentPassword, admin.password);
-  if (!isMatch) throw new Error("Current password is incorrect");
-
-  const hashed = await bcrypt.hash(newPassword, 10);
-  admin.password = hashed;
-  await saveAdmin(admin);
-
-  return "Password changed successfully";
 };
 
 export const getProfileService = async (adminId) => {
